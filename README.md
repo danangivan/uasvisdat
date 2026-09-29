@@ -1,0 +1,132 @@
+# Eksplorasi Disparitas Spasial Partisipasi Ekonomi dan Pengambilan Keputusan Perempuan di 514 Kabupaten/Kota Indonesia Melalui Visualisasi Analitik
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://uasvisdat-gender-disparity-514.streamlit.app/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![HTML5 / CSS3 / JS](https://img.shields.io/badge/Stack-HTML5%20%7C%20CSS3%20%7C%20JS%20%7C%20JSON-orange.svg)](https://developer.mozilla.org/)
+[![BPS Data](https://img.shields.io/badge/Data%20Source-BPS%20RI%202024-green.svg)](https://www.bps.go.id)
+
+Repositori ini memuat kode sumber, data terolah (format CSV dan JSON), serta dokumentasi lengkap aplikasi visualisasi analitik interaktif yang dikembangkan untuk **Ujian Akhir Semester (UAS) Genap TA. 2025/2026** pada mata kuliah **Visualisasi Data dan Informasi**, Program Studi Komputasi Statistik, **Politeknik Statistika STIS**.
+
+* **Dosen Pengampu:** Siti Mariyah, Ph.D. & Farid Ridho, M.T.
+* **Tautan Aplikasi Publik (Vercel):** `https://[nama-proyek-anda].vercel.app/` *(atau tautan Streamlit)*
+* **Tautan Repositori GitHub:** `https://github.com/[username]/uasvisdat-gender-disparity`
+
+---
+
+## 🌟 Ringkasan Proyek
+
+Proyek ini menyajikan dasbor visualisasi analitik interaktif berbasis web untuk mengeksplorasi secara mendalam **disparitas spasial antara partisipasi ekonomi dan pengambilan keputusan perempuan di 514 kabupaten/kota dan 38 provinsi di Indonesia** menggunakan 8 indikator resmi Badan Pusat Statistik (BPS) tahun 2024.
+
+Proyek ini tersedia dalam **dua arsitektur modern**:
+1. **Frontend Web Statis (HTML5, CSS3, JavaScript, JSON, Leaflet.js, Plotly.js):** Siap di-deploy langsung ke **Vercel**, Netlify, atau GitHub Pages dalam hitungan detik tanpa perlu konfigurasi backend server.
+2. **Aplikasi Berbasis Python Streamlit (`app.py`):** Siap di-deploy ke **Streamlit Community Cloud** atau Hugging Face Spaces.
+
+### Pemenuhan Ketentuan Soal UAS (3 dari 6 Topik Visualisasi):
+1. **Visualisasi Data Berdimensi Tinggi (Multivariat):** Reduksi dimensi *Principal Component Analysis* (PCA) biplot, *Parallel Coordinates Plot* (*interactive brushing*), *Hierarchically Clustered Correlation Heatmap*, dan *Radar Chart* multidimensi.
+2. **Visualisasi Data Geospasial:** *Proportional Symbol Map* (bubble map 514 Kab/Kota), *Choropleth Map* 34/38 Provinsi (*colorblind-safe* Viridis), dan *Peta Autokorelasi Spasial LISA* (*Local Indicators of Spatial Association*) dengan verifikasi statistik Global Moran's I ($p = 0{,}001$).
+3. **Visualisasi Data Berhierarki:** *Interactive Treemap* dan *Sunburst Chart* 4 level (Nasional ➔ Pulau ➔ Provinsi ➔ Kab/Kota) dengan *dual visual encoding* (ukuran kotak vs warna) dan navigasi *breadcrumb drill-down*.
+
+---
+
+## 🏗️ Struktur Berkas Proyek
+
+```text
+uasvisdat/
+├── index.html                 # Halaman utama aplikasi web (Vercel deployment entrypoint)
+├── vercel.json                # Konfigurasi deployment Vercel (clean URLs & caching)
+├── css/
+│   └── style.css              # Tata letak responsif, modern dashboard styling, colorblind themes
+├── js/
+│   ├── app.js                 # Logika pengontrol aplikasi, state filter global, dan tabel data
+│   └── charts.js              # Implementasi visualisasi Plotly.js dan peta Leaflet.js
+├── data/
+│   ├── kabkota_514.json       # Dataset 514 Kabupaten/Kota lengkap (JSON)
+│   ├── provinsi_38.json       # Dataset 38 Provinsi (JSON)
+│   ├── nasional.json          # Ringkasan statistik nasional & nilai Moran's I (JSON)
+│   ├── pca_meta.json          # Koordinat vektor loading PCA dan variansi terjelaskan (JSON)
+│   ├── correlation_matrix.json# Matriks korelasi terklaster hierarkis (JSON)
+│   ├── provinsi.geojson       # Batas poligon GeoJSON provinsi Indonesia
+│   ├── clean_kabkota_514.csv  # Versi tabular CSV 514 Kab/Kota
+│   └── clean_provinsi_38.csv  # Versi tabular CSV 38 Provinsi
+├── app.py                     # Entry point alternatif untuk Streamlit Community Cloud
+├── requirements.txt           # Dependensi Python untuk versi Streamlit
+├── build_master_dataset.py    # Skrip pipeline pembersihan data mentah & kalkulasi spasial
+├── export_json.py             # Skrip konversi data ke format JSON frontend
+├── README.md                  # Dokumentasi proyek
+└── makalah/
+    ├── makalah_ieee.docx      # Naskah makalah format resmi IEEE dua kolom (Word)
+    ├── makalah_ieee.pdf       # Naskah makalah format IEEE siap kumpul (PDF)
+    ├── makalah_ieee.md        # Naskah sumber Markdown akademik
+    └── *.png                  # Gambar grafik publikasi beresolusi tinggi (300 DPI)
+```
+
+---
+
+## ⚡ Panduan Deploy ke Vercel (Gratis & Sekejap)
+
+Aplikasi web statis (`index.html`, `css/`, `js/`, `data/`) sangat optimal untuk di-deploy ke Vercel:
+
+### Cara 1: Menggunakan GitHub (Paling Direkomendasikan)
+1. Buat repositori baru di [GitHub](https://github.com/) (contoh: `uasvisdat-gender-disparity`).
+2. Masukkan dan *push* seluruh isi folder proyek ke GitHub:
+   ```bash
+   git init
+   git add .
+   git commit -m "Deploy UAS Visdat Gender Disparity ke Vercel"
+   git branch -M main
+   git remote add origin https://github.com/[username-anda]/uasvisdat-gender-disparity.git
+   git push -u origin main
+   ```
+3. Buka dashboard [Vercel](https://vercel.com/) dan masuk menggunakan akun GitHub Anda.
+4. Klik **"Add New..."** ➔ **"Project"**.
+5. Pilih repositori `uasvisdat-gender-disparity` yang baru di-push.
+6. Pada bagian *Build & Development Settings*, biarkan default (*Framework Preset: Other*, tidak butuh build command karena murni statis HTML/CSS/JS/JSON).
+7. Klik **"Deploy"**. Dalam hitungan detik, aplikasi Anda sudah tayang secara publik dengan domain:
+   `https://[nama-proyek-anda].vercel.app`
+
+### Cara 2: Menggunakan Vercel CLI
+Jika Anda memiliki Node.js dan Vercel CLI:
+```bash
+npm install -g vercel
+vercel login
+vercel --prod
+```
+
+---
+
+## 💻 Panduan Menjalankan Secara Lokal
+
+### Menjalankan Versi Web Statis (HTML/CSS/JS/JSON):
+Cukup jalankan server lokal sederhana agar berkas JSON dapat dibaca browser melalui protokol HTTP:
+```bash
+# Menggunakan Python:
+python -m http.server 3000
+
+# Atau menggunakan Node.js:
+npx serve
+```
+Buka browser pada alamat `http://localhost:3000`.
+
+### Menjalankan Versi Streamlit:
+```bash
+streamlit run app.py
+```
+Buka browser pada alamat `http://localhost:8501`.
+
+---
+
+## 📑 Temuan Empiris Kunci (*Key Insights*)
+
+1. **Autokorelasi Spasial Signifikan ($p = 0{,}0010$):** Indeks Moran Global membuktikan bahwa partisipasi ekonomi ($I = 0{,}4503$) dan pengambilan keputusan perempuan ($I = 0{,}3544$) tidak tersebar acak di Indonesia, melainkan mengelompok kuat secara geografis.
+2. **Hotspot Sulawesi Utara:** Menjadi klaster *High-High* terkuat secara nasional, didorong oleh tingginya keterwakilan legislatif (> 40%) dan tenaga profesional (> 55%).
+3. **Paradoks Partisipasi Kerja Timur Indonesia (*Sticky Floor*):** Daerah pedalaman Papua dan Nusa Tenggara mencatatkan TPAK perempuan sangat tinggi (> 80%), namun sumbangan pendapatan riil mereka tetap rendah akibat dominasi sektor pertanian tradisional subsisten.
+4. **Keunggulan Perkotaan (*Urban Advantage*):** Kota secara konsisten mengungguli kabupaten pada akses jabatan profesional (52.4% vs 42.1%) dan pengeluaran riil per kapita.
+
+---
+
+## 📄 Makalah Ilmiah Format IEEE
+Naskah makalah telah disusun sesuai format IEEE dua kolom (6–8 halaman):
+* [makalah_ieee.docx](file:///d:/uasvisdat/makalah/makalah_ieee.docx)
+* [makalah_ieee.pdf](file:///d:/uasvisdat/makalah/makalah_ieee.pdf)
+* [makalah_ieee.md](file:///d:/uasvisdat/makalah/makalah_ieee.md)

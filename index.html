@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disparitas Gender 514 Kab/Kota Indonesia — Visualisasi Analitik</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png">
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="app-container">
+  
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png" alt="Logo STIS">
+      <div class="sidebar-title">
+        <h2>Politeknik Statistika STIS</h2>
+        <p>Visualisasi Data & Informasi (2026)</p>
+      </div>
+    </div>
+
+    <div class="sidebar-content">
+      <div class="filter-group">
+        <label><i class="fa-solid fa-filter"></i> Filter Pulau / Region</label>
+        <select id="filter-pulau"></select>
+      </div>
+
+      <div class="filter-group">
+        <label><i class="fa-solid fa-map-location-dot"></i> Filter Provinsi</label>
+        <select id="filter-provinsi"></select>
+      </div>
+
+      <div class="filter-group">
+        <label><i class="fa-solid fa-city"></i> Tipe Wilayah</label>
+        <div class="radio-pills">
+          <label><input type="radio" name="filter-tipe" value="Semua" checked><span>Semua</span></label>
+          <label><input type="radio" name="filter-tipe" value="Kabupaten"><span>Kab</span></label>
+          <label><input type="radio" name="filter-tipe" value="Kota"><span>Kota</span></label>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label><i class="fa-solid fa-shapes"></i> Kuadran Tipologi</label>
+        <select id="filter-kuadran">
+          <option value="Semua Kuadran">Semua Kuadran</option>
+          <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">Kuadran I (Maju Seimbang)</option>
+          <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">Kuadran II (Representasi Kuat)</option>
+          <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">Kuadran III (Tertinggal Ganda)</option>
+          <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">Kuadran IV (Kerja Tanpa Kuasa)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label><i class="fa-solid fa-palette"></i> Palet Warna (Colorblind-Safe)</label>
+        <select id="filter-palette">
+          <option value="Viridis" selected>Viridis (Perseptual Seragam)</option>
+          <option value="Cividis">Cividis (Optimasi Buta Warna)</option>
+          <option value="Plasma">Plasma (Kontras Tinggi)</option>
+          <option value="Turbo">Turbo (Spektrum Luas)</option>
+        </select>
+      </div>
+
+      <div class="sidebar-stats">
+        <div><strong>Wilayah Terpilih:</strong> <span id="stat-total-kab">514 dari 514</span></div>
+        <div><strong>Provinsi:</strong> <span id="stat-total-prov">38 dari 38</span></div>
+        <div><strong>Sumber Data:</strong> BPS (2024)</div>
+      </div>
+
+      <button id="btn-reset-filters" class="btn-reset">
+        <i class="fa-solid fa-arrows-rotate"></i> Reset Filter Global
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="main-content">
+    
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="header-meta">
+        <div class="header-title">
+          <h1>Eksplorasi Disparitas Spasial Partisipasi Ekonomi & Pengambilan Keputusan Perempuan di Indonesia</h1>
+          <p>Visualisasi Analitik Komprehensif Berbasis 514 Kabupaten/Kota & 38 Provinsi (Data Resmi BPS 2024)</p>
+        </div>
+        <div class="badges-row">
+          <span class="badge badge-primary"><i class="fa-solid fa-award"></i> UAS Visdat 2026</span>
+          <span class="badge badge-success"><i class="fa-solid fa-globe"></i> Vercel Ready</span>
+          <span class="badge badge-dark"><i class="fa-solid fa-database"></i> BPS RI 2024</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tabs Navigation -->
+    <nav class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-overview"><i class="fa-solid fa-chart-line"></i> Ringkasan & Storytelling</button>
+      <button class="tab-btn" data-tab="tab-geospatial"><i class="fa-solid fa-map"></i> Analisis Geospasial</button>
+      <button class="tab-btn" data-tab="tab-multivariate"><i class="fa-solid fa-project-diagram"></i> Dimensi Tinggi (Multivariat)</button>
+      <button class="tab-btn" data-tab="tab-hierarchical"><i class="fa-solid fa-sitemap"></i> Analisis Berhierarki</button>
+      <button class="tab-btn" data-tab="tab-data"><i class="fa-solid fa-table"></i> Eksplorasi Data</button>
+      <button class="tab-btn" data-tab="tab-method"><i class="fa-solid fa-book-open"></i> Metodologi & AI</button>
+    </nav>
+
+    <!-- ================= TAB 1: OVERVIEW & STORYTELLING ================= -->
+    <section id="tab-overview" class="tab-pane active">
+      <!-- KPI Grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label"><i class="fa-solid fa-landmark"></i> Parlemen Perempuan</span>
+          <span class="kpi-value" id="kpi-parlemen">16.42%</span>
+          <span class="kpi-delta neg" id="delta-parlemen">-13.6% vs Kuota 30%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label"><i class="fa-solid fa-user-tie"></i> Tenaga Profesional</span>
+          <span class="kpi-value" id="kpi-profesional">46.85%</span>
+          <span class="kpi-delta neu">Mendekati Paritas 50%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label"><i class="fa-solid fa-hand-holding-dollar"></i> Sumbangan Pendapatan</span>
+          <span class="kpi-value" id="kpi-pendapatan">34.18%</span>
+          <span class="kpi-delta neg">-15.8% vs Paritas</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label"><i class="fa-solid fa-briefcase"></i> TPAK Perempuan</span>
+          <span class="kpi-value" id="kpi-tpak">57.42%</span>
+          <span class="kpi-delta pos">Partisipasi Kerja Aktif</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label"><i class="fa-solid fa-globe"></i> Autokorelasi Moran's I</span>
+          <span class="kpi-value">0.354 | 0.450</span>
+          <span class="kpi-delta pos">p = 0.001 (Signifikan)</span>
+        </div>
+      </div>
+
+      <!-- Quadrant Chart Card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-crosshairs"></i> Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan</div>
+            <div class="card-caption">Memetakan 514 kabupaten/kota terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
+          </div>
+        </div>
+        <div id="quadrant-chart" class="chart-box"></div>
+      </div>
+
+      <!-- Storytelling Narrative Cards -->
+      <div class="story-grid">
+        <div class="story-card green">
+          <h4><i class="fa-solid fa-fire"></i> 1. Hotspot Sulawesi Utara vs Defisit Parlemen</h4>
+          <p>Sulawesi Utara membentuk klaster <em>High-High Hotspot</em> terkuat nasional dengan keterwakilan DPRD perempuan &gt; 40% dan tenaga profesional &gt; 55% berkat kultur egaliter Minahasa. Sebaliknya, lebih dari 85% kabupaten/kota di Indonesia masih gagal mencapai kuota afirmasi 30%.</p>
+        </div>
+        <div class="story-card amber">
+          <h4><i class="fa-solid fa-person-digging"></i> 2. Paradoks Kerja Wilayah Timur (Sticky Floor)</h4>
+          <p>Daerah pedalaman Papua dan NTT mencatatkan TPAK perempuan sangat tinggi (70% - 95%), namun sumbangan pendapatan riil mereka tertekan rendah. Beban kerja fisik perempuan di sektor pertanian tradisional belum terkonversi menjadi kemandirian ekonomi formal.</p>
+        </div>
+        <div class="story-card purple">
+          <h4><i class="fa-solid fa-building-flag"></i> 3. Keunggulan Perkotaan (Urban Advantage)</h4>
+          <p>Entitas Kota secara konsisten mengungguli Kabupaten pada proporsi Tenaga Profesional (52.4% vs 42.1%) dan pengeluaran riil per kapita, ditopang oleh akses pendidikan tinggi dan terbukanya sektor jasa modern.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 2: GEOSPATIAL ================= -->
+    <section id="tab-geospatial" class="tab-pane">
+      <div class="subtabs-nav">
+        <button class="subtab-btn active" data-subtab="geo-subtab-proportional"><i class="fa-solid fa-circle-dot"></i> Peta Simbol Proporsional (514 Kab/Kota)</button>
+        <button class="subtab-btn" data-subtab="geo-subtab-choropleth"><i class="fa-solid fa-map-location"></i> Peta Choropleth Provinsi (34/38 Prov)</button>
+        <button class="subtab-btn" data-subtab="geo-subtab-lisa"><i class="fa-solid fa-network-wired"></i> Peta Klaster Spasial LISA (Moran's I)</button>
+      </div>
+
+      <!-- Subtab 1: Proportional Symbol -->
+      <div id="geo-subtab-proportional" class="subtab-content active">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-map-pin"></i> Peta Simbol Proporsional 514 Kabupaten/Kota</div>
+              <div class="card-caption">Ukuran lingkaran mengkodekan intensitas volume, sedangkan warna mengkodekan performa indikator.</div>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <select id="geo-size-var" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+                <option value="pengeluaran" selected>Ukuran: Pengeluaran Riil (Ribu Rp)</option>
+                <option value="tpak">Ukuran: TPAK Perempuan (%)</option>
+                <option value="pendapatan">Ukuran: Sumbangan Pendapatan (%)</option>
+                <option value="profesional">Ukuran: Tenaga Profesional (%)</option>
+              </select>
+              <select id="geo-color-var" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+                <option value="skor_keputusan" selected>Warna: Skor Keputusan (0-100)</option>
+                <option value="skor_ekonomi">Warna: Skor Ekonomi (0-100)</option>
+                <option value="parlemen">Warna: Parlemen Perempuan (%)</option>
+                <option value="ikpp_komposit">Warna: IKPP Komposit (0-100)</option>
+              </select>
+            </div>
+          </div>
+          <div id="leaflet-map"></div>
+        </div>
+      </div>
+
+      <!-- Subtab 2: Choropleth -->
+      <div id="geo-subtab-choropleth" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-layer-group"></i> Peta Choropleth Rasio Tingkat Provinsi</div>
+              <div class="card-caption">Pewarnaan tematik poligon provinsi menggunakan palet warna ramah buta warna (*colorblind-safe*).</div>
+            </div>
+            <div>
+              <select id="choropleth-var" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+                <option value="parlemen" selected>Indikator: Parlemen Perempuan (%)</option>
+                <option value="profesional">Indikator: Tenaga Profesional (%)</option>
+                <option value="pendapatan">Indikator: Sumbangan Pendapatan (%)</option>
+                <option value="tpak">Indikator: TPAK Perempuan (%)</option>
+                <option value="pengeluaran">Indikator: Pengeluaran per Kapita</option>
+                <option value="ahh">Indikator: Angka Harapan Hidup (AHH)</option>
+              </select>
+            </div>
+          </div>
+          <div id="choropleth-map"></div>
+        </div>
+      </div>
+
+      <!-- Subtab 3: LISA Clusters -->
+      <div id="geo-subtab-lisa" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-chart-pie"></i> Peta Klaster Spasial LISA (Local Moran's I, p &lt; 0.05)</div>
+              <div class="card-caption">Mendeteksi aglomerasi Hotspot (High-High), Coldspot (Low-Low), dan Pencilan Spasial (High-Low / Low-High).</div>
+            </div>
+            <div>
+              <select id="lisa-cluster-var" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+                <option value="lisa_cluster_keputusan" selected>Klaster Pengambilan Keputusan</option>
+                <option value="lisa_cluster_ekonomi">Klaster Partisipasi Ekonomi</option>
+              </select>
+            </div>
+          </div>
+          <div id="lisa-map"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 3: MULTIVARIATE ================= -->
+    <section id="tab-multivariate" class="tab-pane">
+      <div class="subtabs-nav">
+        <button class="subtab-btn active" data-subtab="multi-subtab-pca"><i class="fa-solid fa-compass"></i> PCA Biplot (Reduksi Dimensi)</button>
+        <button class="subtab-btn" data-subtab="multi-subtab-parcoords"><i class="fa-solid fa-bars-staggered"></i> Parallel Coordinates (Brushing)</button>
+        <button class="subtab-btn" data-subtab="multi-subtab-heatmap"><i class="fa-solid fa-border-all"></i> Clustered Correlation Heatmap</button>
+        <button class="subtab-btn" data-subtab="multi-subtab-radar"><i class="fa-solid fa-spider"></i> Radar Profile Chart</button>
+      </div>
+
+      <!-- PCA Biplot -->
+      <div id="multi-subtab-pca" class="subtab-content active">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-vector-square"></i> PCA Biplot: Proyeksi 8 Indikator BPS ke 2 Dimensi Laten</div>
+              <div class="card-caption">Menerangkan 66.9% total variansi data. Panah merah merepresentasikan vektor loading dari masing-masing peubah.</div>
+            </div>
+            <div>
+              <select id="pca-color-by" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+                <option value="pulau" selected>Warna: Wilayah Pulau</option>
+                <option value="tipe">Warna: Tipe (Kab vs Kota)</option>
+                <option value="kuadran">Warna: Kuadran Tipologi</option>
+              </select>
+            </div>
+          </div>
+          <div id="pca-biplot-chart" class="chart-box"></div>
+        </div>
+      </div>
+
+      <!-- Parallel Coordinates -->
+      <div id="multi-subtab-parcoords" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-sliders"></i> Diagram Koordinat Paralel (Parallel Coordinates)</div>
+              <div class="card-caption">Klik dan seret (brushing) rentang pada sumbu vertikal mana pun untuk menyaring kabupaten/kota secara dinamis.</div>
+            </div>
+          </div>
+          <div id="parallel-coords-chart" class="chart-box"></div>
+        </div>
+      </div>
+
+      <!-- Clustered Heatmap -->
+      <div id="multi-subtab-heatmap" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-temperature-half"></i> Clustered Heatmap: Matriks Korelasi Hierarkis</div>
+              <div class="card-caption">Peubah disusun kembali berdasarkan pohon klaster untuk menonjolkan struktur korelasi alami.</div>
+            </div>
+          </div>
+          <div id="heatmap-chart" class="chart-box"></div>
+        </div>
+      </div>
+
+      <!-- Radar Chart -->
+      <div id="multi-subtab-radar" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-circle-notch"></i> Radar Chart: Perbandingan Profil Multidimensi Antar Wilayah</div>
+              <div class="card-caption">Perbandingan rata-rata terstandarisasi (0-100) 8 indikator gender antar kepulauan besar di Indonesia.</div>
+            </div>
+          </div>
+          <div id="radar-chart" class="chart-box"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 4: HIERARCHICAL ================= -->
+    <section id="tab-hierarchical" class="tab-pane">
+      <div class="subtabs-nav">
+        <button class="subtab-btn active" data-subtab="hier-subtab-treemap"><i class="fa-solid fa-tree"></i> Treemap Interaktif</button>
+        <button class="subtab-btn" data-subtab="hier-subtab-sunburst"><i class="fa-solid fa-sun"></i> Sunburst Chart</button>
+        <button class="subtab-btn" data-subtab="hier-subtab-summary"><i class="fa-solid fa-list-check"></i> Rangkuman Hierarki per Pulau</button>
+      </div>
+
+      <!-- Dual Encoding Controls -->
+      <div style="display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;">
+        <div>
+          <label style="font-size: 11px; font-weight: 600; color: #475569;">Variabel Ukuran Kotak / Irisan:</label>
+          <select id="hier-size-var" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+            <option value="pengeluaran" selected>Pengeluaran Riil (Ribu Rp)</option>
+            <option value="pendapatan">Sumbangan Pendapatan (%)</option>
+            <option value="tpak">TPAK Perempuan (%)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 11px; font-weight: 600; color: #475569;">Variabel Warna Kotak / Irisan:</label>
+          <select id="hier-color-var" style="padding: 6px 10px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 12px;">
+            <option value="parlemen" selected>Keterlibatan di Parlemen (%)</option>
+            <option value="profesional">Tenaga Profesional (%)</option>
+            <option value="skor_keputusan">Skor Keputusan (0-100)</option>
+            <option value="ikpp_komposit">IKPP Komposit (0-100)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Treemap -->
+      <div id="hier-subtab-treemap" class="subtab-content active">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-diagram-project"></i> Interactive Treemap (Nasional ➔ Pulau ➔ Provinsi ➔ Kab/Kota)</div>
+              <div class="card-caption">Klik pada kotak untuk melakukan drill-down dan zoom pada hierarki wilayah yang diinginkan.</div>
+            </div>
+          </div>
+          <div id="treemap-chart" class="chart-box"></div>
+        </div>
+      </div>
+
+      <!-- Sunburst -->
+      <div id="hier-subtab-sunburst" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><i class="fa-solid fa-bullseye"></i> Interactive Sunburst Chart (Radial Multi-level Hierarki)</div>
+              <div class="card-caption">Klik pada cincin lingkaran untuk memperbesar hierarki provinsi atau kabupaten/kota.</div>
+            </div>
+          </div>
+          <div id="sunburst-chart" class="chart-box"></div>
+        </div>
+      </div>
+
+      <!-- Hierarchical Summary Table -->
+      <div id="hier-subtab-summary" class="subtab-content">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="fa-solid fa-table-list"></i> Rangkuman Rata-rata Peubah Menurut Wilayah Kepulauan</div>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Wilayah Pulau</th>
+                  <th>Jumlah Daerah</th>
+                  <th>Parlemen (%)</th>
+                  <th>Pendapatan (%)</th>
+                  <th>Profesional (%)</th>
+                  <th>TPAK (%)</th>
+                  <th>Pengeluaran</th>
+                  <th>Skor Keputusan</th>
+                  <th>Skor Ekonomi</th>
+                  <th>IKPP Komposit</th>
+                </tr>
+              </thead>
+              <tbody id="hier-summary-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 5: DATA EXPLORER ================= -->
+    <section id="tab-data" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><i class="fa-solid fa-database"></i> Pangkalan Data 514 Kabupaten/Kota Indonesia (BPS 2024)</div>
+            <div class="card-caption">Gunakan pencarian nama daerah atau klik pada tajuk kolom untuk mengurutkan data secara fleksibel.</div>
+          </div>
+          <button id="btn-download-csv" class="btn-download">
+            <i class="fa-solid fa-file-arrow-down"></i> Unduh Data CSV Terfilter
+          </button>
+        </div>
+
+        <div class="table-controls">
+          <input type="text" id="table-search" class="search-input" placeholder="🔍 Cari nama kabupaten, kota, atau provinsi...">
+          <div id="table-info" style="font-size: 12px; color: #64748b;"></div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th onclick="handleSort('kode_wilayah')">Kode</th>
+                <th onclick="handleSort('nama_resmi')">Nama Daerah</th>
+                <th onclick="handleSort('tipe')">Tipe</th>
+                <th onclick="handleSort('provinsi')">Provinsi</th>
+                <th onclick="handleSort('pulau')">Pulau</th>
+                <th onclick="handleSort('parlemen')">Parlemen</th>
+                <th onclick="handleSort('pendapatan')">Pendapatan</th>
+                <th onclick="handleSort('profesional')">Profesional</th>
+                <th onclick="handleSort('tpak')">TPAK</th>
+                <th onclick="handleSort('pengeluaran')">Pengeluaran</th>
+                <th onclick="handleSort('skor_keputusan')">Keputusan</th>
+                <th onclick="handleSort('skor_ekonomi')">Ekonomi</th>
+                <th onclick="handleSort('ikpp_komposit')">IKPP</th>
+                <th onclick="handleSort('kuadran')">Kuadran</th>
+              </tr>
+            </thead>
+            <tbody id="data-table-body"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination">
+          <div>Gunakan tombol navigasi untuk berpindah halaman amatan</div>
+          <div id="pagination-buttons" class="pagination-btns"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= TAB 6: METHODOLOGY & AI ================= -->
+    <section id="tab-method" class="tab-pane">
+      <div class="method-box">
+        <h3><i class="fa-solid fa-book-bookmark"></i> 1. Sumber Data Resmi BPS (Tahun 2024)</h3>
+        <p>Seluruh indikator dalam proyek visualisasi ini bersumber secara sah dari publikasi resmi Badan Pusat Statistik (BPS) Republik Indonesia tahun 2024:</p>
+        <ul>
+          <li><strong>Keterlibatan Perempuan di Parlemen (%):</strong> BPS RI, Statistik Politik dan Keamanan 2024.</li>
+          <li><strong>Sumbangan Pendapatan Perempuan (%):</strong> BPS RI, Indeks Pemberdayaan Gender (IDG) 2024.</li>
+          <li><strong>Perempuan sebagai Tenaga Profesional (%):</strong> BPS RI, Indeks Pemberdayaan Gender (IDG) 2024.</li>
+          <li><strong>Tingkat Partisipasi Angkatan Kerja (TPAK) Perempuan (%):</strong> BPS RI, Survei Angkatan Kerja Nasional (Sakernas) 2024.</li>
+          <li><strong>Pengeluaran per Kapita Disesuaikan, AHH, RLS, HLS:</strong> BPS RI, Indeks Pembangunan Gender (IPG) dan IPM 2024.</li>
+          <li><strong>Atribusi Wajib:</strong> Sumber: BPS (Badan Pusat Statistik Republik Indonesia).</li>
+        </ul>
+      </div>
+
+      <div class="method-box">
+        <h3><i class="fa-solid fa-gears"></i> 2. Pra-pemrosesan Data & Penanganan Nilai Hilang</h3>
+        <ul>
+          <li><strong>Rekonsiliasi Wilayah:</strong> Sinkronisasi struktur administratif pasca-pemekaran 4 DOB Papua dan pemisahan Kaltara dari Kaltim hingga mencakup persis 514 kabupaten/kota dan 38 provinsi.</li>
+          <li><strong>Penanganan Missing Values:</strong> 14 kabupaten di pedalaman Papua diimputasi menggunakan <em>K-Nearest Neighbors</em> (KNN, k=5, distance-weighted) pada matriks fitur terstandarisasi. Seluruh indikator politik, pendapatan, dan profesionalitas tetap menggunakan data observasi riil 100%.</li>
+          <li><strong>Normalisasi Min-Max:</strong> Pembentukan Skor Ekonomi, Skor Keputusan, dan Indeks Komposit Pemberdayaan Perempuan (IKPP) berskala 0–100.</li>
+        </ul>
+      </div>
+
+      <div class="method-box">
+        <h3><i class="fa-solid fa-eye"></i> 3. Justifikasi Desain & Visual Encoding</h3>
+        <ul>
+          <li><strong>Posisi Spasial:</strong> Dimanfaatkan pada scatter plot dan peta koordinat geografis sebagai saluran perseptual dengan akurasi tertinggi (Cleveland & McGill, 1984).</li>
+          <li><strong>Pewarnaan (Colorblind-Safe):</strong> Menggunakan skala warna perseptual seragam (<em>Viridis, Cividis, Plasma</em>) yang menjamin aksesibilitas bagi penderita buta warna (protanopia, deuteranopia).</li>
+          <li><strong>Ukuran Simbol:</strong> Mengkodekan besaran absolut taraf hidup (pengeluaran riil per kapita) dengan batas radius proporsional untuk mencegah oklusi visual.</li>
+        </ul>
+      </div>
+
+      <div class="method-box">
+        <h3><i class="fa-solid fa-shield-halved"></i> 4. Deklarasi Integritas Akademik & Penggunaan AI</h3>
+        <p>Sesuai dengan ketentuan Petunjuk Nomor 7 Soal UAS Visualisasi Data dan Informasi TA. 2025/2026:</p>
+        <ul>
+          <li><strong>Alat Bantu AI yang Digunakan:</strong> Large Language Model (Google DeepMind Antigravity) digunakan sebatas alat bantu asistensi pemrograman (<em>pair programming</em>), penulisan skrip otomasi ekstraksi data, dan perancangan tata letak antarmuka web.</li>
+          <li><strong>Orisinalitas & Verifikasi:</strong> Konseptualisasi penelitian, seleksi indikator BPS, justifikasi visual encoding, validasi statistik autokorelasi spasial, serta perumusan naskah analisis dikerjakan dan dipertanggungjawabkan sepenuhnya oleh penyusun.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- Leaflet Map JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Plotly JS CDN -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<!-- Application Scripts -->
+<script src="js/charts.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
