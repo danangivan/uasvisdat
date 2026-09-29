@@ -1,0 +1,55 @@
+{
+  "var_exp_pc1": 37.8,
+  "var_exp_pc2": 17.19,
+  "var_exp_total": 54.98,
+  "loadings": [
+    {
+      "var": "parlemen",
+      "label": "Parlemen (%)",
+      "x": 1.012,
+      "y": -1.119
+    },
+    {
+      "var": "pendapatan",
+      "label": "Pendapatan (%)",
+      "x": -0.867,
+      "y": 2.393
+    },
+    {
+      "var": "pengeluaran",
+      "label": "Pengeluaran Riil (Ribu Rp)",
+      "x": 2.463,
+      "y": 0.417
+    },
+    {
+      "var": "ahh",
+      "label": "AHH (Tahun)",
+      "x": 1.925,
+      "y": 0.6
+    },
+    {
+      "var": "profesional",
+      "label": "Tenaga Profesional (%)",
+      "x": 1.042,
+      "y": -0.416
+    },
+    {
+      "var": "tpak",
+      "label": "TPAK (%)",
+      "x": -1.557,
+      "y": 1.785
+    },
+    {
+      "var": "rls",
+      "label": "RLS (Tahun)",
+      "x": 2.596,
+      "y": 0.743
+    },
+    {
+      "var": "hls",
+      "label": "HLS (Tahun)",
+      "x": 2.338,
+      "y": 0.987
+    }
+  ]
+}
