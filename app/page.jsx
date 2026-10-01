@@ -1046,17 +1046,17 @@ export default function Home() {
         </div>
 
         <div className="sidebar-content">
-          {/* Quick Navigation in Drawer for Mobile */}
-          <div className="sidebar-nav-section mobile-only">
+          {/* Main Navigation in Sidebar (Desktop & Mobile) */}
+          <div className="sidebar-nav-section">
             <label className="sidebar-section-label">
-              <i className="fa-solid fa-compass"></i> Navigasi Halaman
+              <i className="fa-solid fa-compass"></i> Navigasi Modul Analitik
             </label>
             <div className="sidebar-nav-pills">
               {[
-                { id: 'tab-overview', label: 'Ringkasan & Story', icon: 'fa-chart-line' },
+                { id: 'tab-overview', label: 'Ringkasan & Storytelling', icon: 'fa-chart-line' },
                 { id: 'tab-geospatial', label: 'Analisis Geospasial', icon: 'fa-map' },
-                { id: 'tab-multivariate', label: 'Dimensi Tinggi', icon: 'fa-project-diagram' },
-                { id: 'tab-hierarchical', label: 'Analisis Hierarki', icon: 'fa-sitemap' },
+                { id: 'tab-multivariate', label: 'Dimensi Tinggi (Multivariat)', icon: 'fa-project-diagram' },
+                { id: 'tab-hierarchical', label: 'Analisis Berhierarki', icon: 'fa-sitemap' },
                 { id: 'tab-data', label: 'Eksplorasi Data', icon: 'fa-table' },
                 { id: 'tab-method', label: 'Metodologi & AI', icon: 'fa-book-open' }
               ].map(t => (
@@ -1192,29 +1192,6 @@ export default function Home() {
             </div>
           </div>
         </header>
-
-        {/* Tab Navigation */}
-        <nav className="tabs-nav">
-          {[
-            { id: 'tab-overview', label: 'Ringkasan & Storytelling', icon: 'fa-chart-line' },
-            { id: 'tab-geospatial', label: 'Analisis Geospasial', icon: 'fa-map' },
-            { id: 'tab-multivariate', label: 'Dimensi Tinggi (Multivariat)', icon: 'fa-project-diagram' },
-            { id: 'tab-hierarchical', label: 'Analisis Berhierarki', icon: 'fa-sitemap' },
-            { id: 'tab-data', label: 'Eksplorasi Data', icon: 'fa-table' },
-            { id: 'tab-method', label: 'Metodologi & AI', icon: 'fa-book-open' }
-          ].map(t => (
-            <button
-              key={t.id}
-              className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
-              onClick={() => {
-                setActiveTab(t.id);
-                setMobileMenuOpen(false);
-              }}
-            >
-              <i className={`fa-solid ${t.icon}`}></i> {t.label}
-            </button>
-          ))}
-        </nav>
 
         {/* Tab 1: Overview */}
         <section className={`tab-pane ${activeTab === 'tab-overview' ? 'active' : ''}`}>
