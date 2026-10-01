@@ -1017,6 +1017,17 @@ export default function Home() {
 
   const hasActiveFilter = selectedPulau !== 'Semua Pulau' || selectedProv !== 'Semua Provinsi' || selectedTipe !== 'Semua' || selectedKuadran !== 'Semua Kuadran';
 
+  const MODULES = [
+    { id: 'tab-overview', label: 'Ringkasan & Storytelling', desc: 'Tipologi kuadran disparitas ekonomi vs keputusan & narasi analitik', icon: 'fa-chart-line' },
+    { id: 'tab-geospatial', label: 'Analisis Geospasial', desc: 'Peta batas kab/kota poligon SHP, heatmap spasial, choropleth, & LISA cluster', icon: 'fa-map' },
+    { id: 'tab-multivariate', label: 'Dimensi Tinggi (Multivariat)', desc: 'PCA biplot 8 indikator, koordinat paralel, korelasi matriks, & profil radar', icon: 'fa-project-diagram' },
+    { id: 'tab-hierarchical', label: 'Analisis Berhierarki', desc: 'Treemap & sunburst interaktif agregasi pulau hingga kabupaten/kota', icon: 'fa-sitemap' },
+    { id: 'tab-data', label: 'Eksplorasi Data', desc: 'Pangkalan data tabular 514 kabupaten/kota dengan pencarian & ekspor CSV', icon: 'fa-table' },
+    { id: 'tab-method', label: 'Metodologi & AI', desc: 'Sumber data resmi BPS RI 2024, pra-pemrosesan, imputasi, & deklarasi AI', icon: 'fa-book-open' }
+  ];
+
+  const currentModule = MODULES.find(m => m.id === activeTab) || MODULES[0];
+
   return (
     <div className="app-container">
       {/* Mobile Drawer Backdrop */}
@@ -1048,30 +1059,29 @@ export default function Home() {
         <div className="sidebar-content">
           {/* Main Navigation in Sidebar (Desktop & Mobile) */}
           <div className="sidebar-nav-section">
-            <label className="sidebar-section-label">
-              <i className="fa-solid fa-compass"></i> Navigasi Modul Analitik
-            </label>
+            <div className="sidebar-section-label">
+              <i className="fa-solid fa-compass"></i> Menu Navigasi Modul
+            </div>
             <div className="sidebar-nav-pills">
-              {[
-                { id: 'tab-overview', label: 'Ringkasan & Storytelling', icon: 'fa-chart-line' },
-                { id: 'tab-geospatial', label: 'Analisis Geospasial', icon: 'fa-map' },
-                { id: 'tab-multivariate', label: 'Dimensi Tinggi (Multivariat)', icon: 'fa-project-diagram' },
-                { id: 'tab-hierarchical', label: 'Analisis Berhierarki', icon: 'fa-sitemap' },
-                { id: 'tab-data', label: 'Eksplorasi Data', icon: 'fa-table' },
-                { id: 'tab-method', label: 'Metodologi & AI', icon: 'fa-book-open' }
-              ].map(t => (
-                <button
-                  key={t.id}
-                  className={`sidebar-nav-item ${activeTab === t.id ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab(t.id);
-                    setMobileMenuOpen(false);
-                  }}
-                >
-                  <i className={`fa-solid ${t.icon}`}></i>
-                  <span>{t.label}</span>
-                </button>
-              ))}
+              {MODULES.map(t => {
+                const isActive = activeTab === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      setActiveTab(t.id);
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    <span className="nav-icon-box">
+                      <i className={`fa-solid ${t.icon}`}></i>
+                    </span>
+                    <span className="nav-label-text">{t.label}</span>
+                    <i className={`fa-solid fa-chevron-right nav-arrow ${isActive ? 'visible' : ''}`}></i>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -1192,6 +1202,19 @@ export default function Home() {
             </div>
           </div>
         </header>
+
+        {/* Penanda Modul Aktif Terpilih Saja */}
+        <div className="active-module-bar">
+          <div className="active-module-content">
+            <div className="active-module-badge">
+              <i className={`fa-solid ${currentModule.icon}`}></i>
+            </div>
+            <div>
+              <div className="active-module-title">{currentModule.label}</div>
+              <div className="active-module-desc">{currentModule.desc}</div>
+            </div>
+          </div>
+        </div>
 
         {/* Tab 1: Overview */}
         <section className={`tab-pane ${activeTab === 'tab-overview' ? 'active' : ''}`}>
