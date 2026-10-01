@@ -22,9 +22,14 @@ Proyek ini tersedia dalam **dua arsitektur modern**:
 1. **Frontend Web Statis (HTML5, CSS3, JavaScript, JSON, Leaflet.js, Plotly.js):** Siap di-deploy langsung ke **Vercel**, Netlify, atau GitHub Pages dalam hitungan detik tanpa perlu konfigurasi backend server.
 2. **Aplikasi Berbasis Python Streamlit (`app.py`):** Siap di-deploy ke **Streamlit Community Cloud** atau Hugging Face Spaces.
 
-### Pemenuhan Ketentuan Soal UAS (3 dari 6 Topik Visualisasi):
+#### Pemenuhan Ketentuan Soal UAS (3 dari 6 Topik Visualisasi):
 1. **Visualisasi Data Berdimensi Tinggi (Multivariat):** Reduksi dimensi *Principal Component Analysis* (PCA) biplot, *Parallel Coordinates Plot* (*interactive brushing*), *Hierarchically Clustered Correlation Heatmap*, dan *Radar Chart* multidimensi.
-2. **Visualisasi Data Geospasial:** *Proportional Symbol Map* (bubble map 514 Kab/Kota), *Choropleth Map* 34/38 Provinsi (*colorblind-safe* Viridis), dan *Peta Autokorelasi Spasial LISA* (*Local Indicators of Spatial Association*) dengan verifikasi statistik Global Moran's I ($p = 0{,}001$).
+2. **Visualisasi Data Geospasial:**
+   - **Peta Batas & Poligon Tematik Kab/Kota (GeoJSON Shapefile):** Visualisasi poligon batas administratif kab/kota hasil ekstraksi shapefile BIG/BPS (595 KB, EPSG:4326) terintegrasi 8 indikator gender BPS 2024 tanpa membutuhkan API eksternal (*Zero-API / Offline-ready*). Dilengkapi kartu inspeksi detail instan.
+   - **Peta Heatmap Spasial Kab/Kota (Kernel Density):** Permukaan gradien densitas spasial kontinu (*client-side canvas heatmap*) dengan kendali radius, blur, dan *toggle overlay* batas poligon administratif.
+   - **Peta Simbol Proporsional (Bubble Map 514 Kab/Kota):** *Dual visual encoding* (ukuran lingkaran vs warna).
+   - **Peta Choropleth Provinsi (34/38 Provinsi):** Poligon tematik provinsi dengan palet warna ramah buta warna (*Viridis, Cividis, Plasma, Turbo*).
+   - **Peta Klaster Spasial LISA:** *Local Indicators of Spatial Association* (*Hotspot High-High, Coldspot Low-Low, Outlier*) dengan verifikasi statistik Global Moran's I ($p = 0{,}001$).
 3. **Visualisasi Data Berhierarki:** *Interactive Treemap* dan *Sunburst Chart* 4 level (Nasional ➔ Pulau ➔ Provinsi ➔ Kab/Kota) dengan *dual visual encoding* (ukuran kotak vs warna) dan navigasi *breadcrumb drill-down*.
 
 ---
@@ -33,32 +38,29 @@ Proyek ini tersedia dalam **dua arsitektur modern**:
 
 ```text
 uasvisdat/
-├── index.html                 # Halaman utama aplikasi web (Vercel deployment entrypoint)
-├── vercel.json                # Konfigurasi deployment Vercel (clean URLs & caching)
-├── css/
-│   └── style.css              # Tata letak responsif, modern dashboard styling, colorblind themes
-├── js/
-│   ├── app.js                 # Logika pengontrol aplikasi, state filter global, dan tabel data
-│   └── charts.js              # Implementasi visualisasi Plotly.js dan peta Leaflet.js
-├── data/
-│   ├── kabkota_514.json       # Dataset 514 Kabupaten/Kota lengkap (JSON)
-│   ├── provinsi_38.json       # Dataset 38 Provinsi (JSON)
-│   ├── nasional.json          # Ringkasan statistik nasional & nilai Moran's I (JSON)
-│   ├── pca_meta.json          # Koordinat vektor loading PCA dan variansi terjelaskan (JSON)
-│   ├── correlation_matrix.json# Matriks korelasi terklaster hierarkis (JSON)
-│   ├── provinsi.geojson       # Batas poligon GeoJSON provinsi Indonesia
-│   ├── clean_kabkota_514.csv  # Versi tabular CSV 514 Kab/Kota
-│   └── clean_provinsi_38.csv  # Versi tabular CSV 38 Provinsi
-├── app.py                     # Entry point alternatif untuk Streamlit Community Cloud
-├── requirements.txt           # Dependensi Python untuk versi Streamlit
-├── build_master_dataset.py    # Skrip pipeline pembersihan data mentah & kalkulasi spasial
-├── export_json.py             # Skrip konversi data ke format JSON frontend
-├── README.md                  # Dokumentasi proyek
+├── [LapakGIS.com]_BATAS_KABKOTA_AR_EDISI_JULI_2026_.* # Shapefile mentah batas kabupaten/kota
+├── extract_shp_to_geojson.py     # Skrip ekstraksi & penyederhanaan poligon SHP ke GeoJSON terintegrasi BPS
+├── app/                          # Kode sumber Next.js App Router (Dashboard Interaktif)
+│   ├── page.jsx                  # Komponen utama visualisasi analitik & kontrol spasial
+│   ├── layout.jsx                # Layout, metadata, font, dan pemuatan skrip Leaflet/Plotly
+│   └── globals.css               # Tata letak responsif & styling dashboard modern
+├── public/
+│   ├── leaflet-heat.js           # Plugin heatmap Leaflet mandiri (100% lokal, tanpa API eksternal)
+│   └── data/
+│       ├── kabkota_kalimantan.geojson # Poligon batas kab/kota hasil ekstraksi SHP (595 KB, EPSG:4326)
+│       ├── kabkota_514.json      # Dataset 514 Kabupaten/Kota lengkap (JSON)
+│       ├── provinsi_38.json      # Dataset 38 Provinsi (JSON)
+│       ├── nasional.json         # Ringkasan statistik nasional & nilai Moran's I (JSON)
+│       ├── pca_meta.json         # Koordinat vektor loading PCA dan variansi terjelaskan (JSON)
+│       ├── correlation_matrix.json # Matriks korelasi terklaster hierarkis (JSON)
+│       └── provinsi.geojson      # Batas poligon GeoJSON provinsi Indonesia
+├── data/                         # Salinan data terstruktur untuk pengolahan data Python
+├── vercel.json                   # Konfigurasi deployment Vercel
+├── README.md                     # Dokumentasi komprehensif proyek
 └── makalah/
-    ├── makalah_ieee.docx      # Naskah makalah format resmi IEEE dua kolom (Word)
-    ├── makalah_ieee.pdf       # Naskah makalah format IEEE siap kumpul (PDF)
-    ├── makalah_ieee.md        # Naskah sumber Markdown akademik
-    └── *.png                  # Gambar grafik publikasi beresolusi tinggi (300 DPI)
+    ├── makalah_ieee.docx         # Naskah makalah format resmi IEEE dua kolom (Word)
+    ├── makalah_ieee.pdf          # Naskah makalah format IEEE siap kumpul (PDF)
+    └── *.png                     # Gambar grafik publikasi beresolusi tinggi (300 DPI)
 ```
 
 ---

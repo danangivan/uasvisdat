@@ -36,6 +36,10 @@ export default function RootLayout({ children }) {
           strategy="beforeInteractive"
         />
         <Script
+          src="/leaflet-heat.js"
+          strategy="afterInteractive"
+        />
+        <Script
           src="https://cdn.plot.ly/plotly-2.35.2.min.js"
           strategy="beforeInteractive"
         />

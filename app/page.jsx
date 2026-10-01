@@ -10,6 +10,8 @@ export default function Home() {
   const [pcaMeta, setPcaMeta] = useState({});
   const [corrData, setCorrData] = useState({});
   const [geojsonData, setGeojsonData] = useState(null);
+  const [kabkotaGeojson, setKabkotaGeojson] = useState(null);
+  const [selectedKabDetail, setSelectedKabDetail] = useState(null);
 
   // Filters
   const [selectedPulau, setSelectedPulau] = useState('Semua Pulau');
@@ -20,7 +22,7 @@ export default function Home() {
 
   // Tabs
   const [activeTab, setActiveTab] = useState('tab-overview');
-  const [activeGeoSubtab, setActiveGeoSubtab] = useState('geo-subtab-proportional');
+  const [activeGeoSubtab, setActiveGeoSubtab] = useState('geo-subtab-kabkota-boundary');
   const [activeMultiSubtab, setActiveMultiSubtab] = useState('multi-subtab-pca');
   const [activeHierSubtab, setActiveHierSubtab] = useState('hier-subtab-treemap');
 
@@ -28,6 +30,13 @@ export default function Home() {
   const [geoSizeVar, setGeoSizeVar] = useState('pengeluaran');
   const [geoColorVar, setGeoColorVar] = useState('skor_keputusan');
   const [choroplethVar, setChoroplethVar] = useState('parlemen');
+  const [kabkotaChoroplethVar, setKabkotaChoroplethVar] = useState('parlemen');
+  const [heatmapVar, setHeatmapVar] = useState('parlemen');
+  const [heatmapScope, setHeatmapScope] = useState('kalimantan');
+  const [heatmapRadius, setHeatmapRadius] = useState(28);
+  const [heatmapBlur, setHeatmapBlur] = useState(18);
+  const [heatmapShowBoundaries, setHeatmapShowBoundaries] = useState(true);
+  const [heatmapShowPoints, setHeatmapShowPoints] = useState(true);
   const [lisaClusterVar, setLisaClusterVar] = useState('lisa_cluster_keputusan');
   const [pcaColorBy, setPcaColorBy] = useState('pulau');
   const [hierSizeVar, setHierSizeVar] = useState('pengeluaran');
@@ -41,6 +50,8 @@ export default function Home() {
   const rowsPerPage = 15;
 
   // Map references
+  const kabkotaBoundaryMapRef = useRef(null);
+  const heatmapMapRef = useRef(null);
   const leafletMapRef = useRef(null);
   const choroplethMapRef = useRef(null);
   const lisaMapRef = useRef(null);
@@ -49,13 +60,14 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [resKab, resProv, resNas, resPca, resCorr, resGeo] = await Promise.all([
+        const [resKab, resProv, resNas, resPca, resCorr, resGeo, resKabGeo] = await Promise.all([
           fetch('/data/kabkota_514.json').then(r => r.json()),
           fetch('/data/provinsi_38.json').then(r => r.json()),
           fetch('/data/nasional.json').then(r => r.json()),
           fetch('/data/pca_meta.json').then(r => r.json()),
           fetch('/data/correlation_matrix.json').then(r => r.json()),
-          fetch('/data/provinsi.geojson').then(r => r.json()).catch(() => null)
+          fetch('/data/provinsi.geojson').then(r => r.json()).catch(() => null),
+          fetch('/data/kabkota_kalimantan.geojson').then(r => r.json()).catch(() => null)
         ]);
 
         setAllKabkota(resKab);
@@ -64,6 +76,7 @@ export default function Home() {
         setPcaMeta(resPca);
         setCorrData(resCorr);
         setGeojsonData(resGeo);
+        setKabkotaGeojson(resKabGeo);
         setDataLoaded(true);
       } catch (err) {
         console.error("Error loading JSON data:", err);
@@ -125,6 +138,14 @@ export default function Home() {
     geoSizeVar,
     geoColorVar,
     choroplethVar,
+    kabkotaChoroplethVar,
+    heatmapVar,
+    heatmapScope,
+    heatmapRadius,
+    heatmapBlur,
+    heatmapShowBoundaries,
+    heatmapShowPoints,
+    kabkotaGeojson,
     lisaClusterVar,
     pcaColorBy,
     hierSizeVar,
@@ -182,7 +203,11 @@ export default function Home() {
   function renderGeospatialTab() {
     if (!window.L) return;
     setTimeout(() => {
-      if (activeGeoSubtab === 'geo-subtab-proportional') {
+      if (activeGeoSubtab === 'geo-subtab-kabkota-boundary') {
+        renderLeafletKabkotaBoundary();
+      } else if (activeGeoSubtab === 'geo-subtab-heatmap') {
+        renderLeafletHeatmap();
+      } else if (activeGeoSubtab === 'geo-subtab-proportional') {
         renderLeafletProportional();
       } else if (activeGeoSubtab === 'geo-subtab-choropleth') {
         renderLeafletChoropleth();
@@ -190,6 +215,248 @@ export default function Home() {
         renderLeafletLISA();
       }
     }, 150);
+  }
+
+  // 2a. Peta Batas Kabupaten/Kota (Hasil Ekstraksi Shapefile ke GeoJSON - No API)
+  function renderLeafletKabkotaBoundary() {
+    const el = document.getElementById('kabkota-boundary-map');
+    if (!el || !kabkotaGeojson || !window.L) return;
+
+    if (!kabkotaBoundaryMapRef.current) {
+      kabkotaBoundaryMapRef.current = window.L.map('kabkota-boundary-map', {
+        scrollWheelZoom: false,
+        attributionControl: true
+      }).setView([-0.5, 114.5], 6);
+
+      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CartoDB & OpenStreetMap | Batas Poligon SHP LapakGIS (No API Key Required)',
+        maxZoom: 18
+      }).addTo(kabkotaBoundaryMapRef.current);
+    } else {
+      kabkotaBoundaryMapRef.current.eachLayer(layer => {
+        if (layer instanceof window.L.GeoJSON) kabkotaBoundaryMapRef.current.removeLayer(layer);
+      });
+    }
+
+    const palette = PALETTES[selectedPalette] || PALETTES['Viridis'];
+
+    const isCategorical = ['kuadran', 'lisa_cluster_keputusan', 'lisa_cluster_ekonomi'].includes(kabkotaChoroplethVar);
+    let minVal = 0;
+    let maxVal = 100;
+
+    if (!isCategorical) {
+      const vals = kabkotaGeojson.features
+        .map(f => f.properties[kabkotaChoroplethVar])
+        .filter(v => v !== undefined && v !== null && !isNaN(v));
+      if (vals.length > 0) {
+        minVal = Math.min(...vals);
+        maxVal = Math.max(...vals);
+      }
+    }
+
+    function getPolygonColor(props) {
+      const val = props[kabkotaChoroplethVar];
+      if (val === undefined || val === null) return '#cbd5e1';
+
+      if (kabkotaChoroplethVar === 'kuadran') {
+        const str = String(val);
+        if (str.includes('Kuadran I')) return '#16a34a';
+        if (str.includes('Kuadran II')) return '#2563eb';
+        if (str.includes('Kuadran III')) return '#dc2626';
+        if (str.includes('Kuadran IV')) return '#d97706';
+        return '#94a3b8';
+      }
+
+      if (kabkotaChoroplethVar === 'lisa_cluster_keputusan' || kabkotaChoroplethVar === 'lisa_cluster_ekonomi') {
+        const clusters = {
+          'High-High (Hotspot)': '#dc2626',
+          'Low-Low (Coldspot)': '#2563eb',
+          'High-Low (Spatial Outlier)': '#f97316',
+          'Low-High (Spatial Outlier)': '#10b981',
+          'Not Significant': '#cbd5e1'
+        };
+        return clusters[val] || '#cbd5e1';
+      }
+
+      const norm = (val - minVal) / (maxVal - minVal || 1);
+      const idx = Math.min(palette.length - 1, Math.max(0, Math.floor(norm * (palette.length - 1))));
+      return palette[idx];
+    }
+
+    const geoLayer = window.L.geoJson(kabkotaGeojson, {
+      style: (feature) => {
+        const p = feature.properties;
+        const matchesFilter = selectedProv === 'Semua Provinsi' || p.provinsi === selectedProv;
+        return {
+          fillColor: getPolygonColor(p),
+          weight: 1.4,
+          opacity: 1,
+          color: '#ffffff',
+          dashArray: '1',
+          fillOpacity: matchesFilter ? 0.85 : 0.25
+        };
+      },
+      onEachFeature: (feature, layer) => {
+        const p = feature.properties;
+        const val = p[kabkotaChoroplethVar];
+        const displayVal = typeof val === 'number'
+          ? (kabkotaChoroplethVar === 'pengeluaran' ? `Rp${Number(val).toLocaleString('id-ID')}` : `${val.toFixed(2)}%`)
+          : (val || 'N/A');
+
+        layer.bindTooltip(`
+          <div style="font-family: sans-serif; font-size: 12px; line-height: 1.4;">
+            <strong style="color: #0f172a; font-size: 13px;">${p.nama_resmi || p.WADMKK}</strong><br/>
+            <span style="color: #64748b;">${p.provinsi || p.WADMPR} (${p.tipe || 'Kab/Kota'})</span>
+            <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #e2e8f0; font-weight: 600;">
+              ${kabkotaChoroplethVar.toUpperCase()}: <span style="color: #2563eb; font-weight: 800;">${displayVal}</span>
+            </div>
+            <div style="font-size: 11px; color: #059669; font-weight: 600; margin-top: 2px;">
+              ${p.kuadran ? p.kuadran.split('(')[0] : ''}
+            </div>
+          </div>
+        `, { sticky: true });
+
+        layer.on({
+          mouseover: (e) => {
+            const l = e.target;
+            l.setStyle({
+              weight: 3,
+              color: '#0f172a',
+              dashArray: '',
+              fillOpacity: 0.95
+            });
+            l.bringToFront();
+          },
+          mouseout: (e) => {
+            geoLayer.resetStyle(e.target);
+          },
+          click: (e) => {
+            setSelectedKabDetail(p);
+            kabkotaBoundaryMapRef.current.fitBounds(e.target.getBounds(), { padding: [35, 35] });
+          }
+        });
+      }
+    }).addTo(kabkotaBoundaryMapRef.current);
+
+    if (selectedProv !== 'Semua Provinsi') {
+      const provFeatures = kabkotaGeojson.features.filter(f => f.properties.provinsi === selectedProv);
+      if (provFeatures.length > 0) {
+        const tempGroup = window.L.geoJson({ type: 'FeatureCollection', features: provFeatures });
+        kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), { padding: [30, 30] });
+      }
+    } else {
+      kabkotaBoundaryMapRef.current.setView([-0.5, 114.5], 6);
+    }
+
+    kabkotaBoundaryMapRef.current.invalidateSize();
+  }
+
+  // 2b. Peta Heatmap Spasial Kab/Kota (Kernel Density Estimation - Zero API)
+  function renderLeafletHeatmap() {
+    const el = document.getElementById('heatmap-map');
+    if (!el || !window.L) return;
+
+    if (!window.L.heatLayer) {
+      const script = document.createElement('script');
+      script.src = '/leaflet-heat.js';
+      script.onload = () => {
+        if (activeGeoSubtab === 'geo-subtab-heatmap') renderLeafletHeatmap();
+      };
+      document.body.appendChild(script);
+      return;
+    }
+
+    if (!heatmapMapRef.current) {
+      heatmapMapRef.current = window.L.map('heatmap-map', {
+        scrollWheelZoom: false,
+        attributionControl: true
+      }).setView([-0.5, 114.5], 6);
+
+      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; CartoDB & OpenStreetMap | Leaflet.heat Heatmap (Client-side, No API Key Required)',
+        maxZoom: 18
+      }).addTo(heatmapMapRef.current);
+    } else {
+      heatmapMapRef.current.eachLayer(layer => {
+        if (layer instanceof window.L.TileLayer) return;
+        heatmapMapRef.current.removeLayer(layer);
+      });
+    }
+
+    const dataset = heatmapScope === 'kalimantan'
+      ? allKabkota.filter(d => d.pulau === 'Kalimantan')
+      : filteredKabkota;
+
+    const validData = dataset.filter(d => d.lat && d.lon && d[heatmapVar] !== undefined && d[heatmapVar] !== null);
+    if (validData.length === 0) return;
+
+    const minV = Math.min(...validData.map(d => d[heatmapVar]));
+    const maxV = Math.max(...validData.map(d => d[heatmapVar]));
+
+    const heatPoints = validData.map(d => {
+      const norm = (d[heatmapVar] - minV) / (maxV - minV || 1);
+      const intensity = Math.max(0.18, Math.min(1.0, norm));
+      return [d.lat, d.lon, intensity];
+    });
+
+    window.L.heatLayer(heatPoints, {
+      radius: heatmapRadius,
+      blur: heatmapBlur,
+      maxZoom: 12,
+      minOpacity: 0.35,
+      gradient: {
+        0.15: '#3b82f6',
+        0.35: '#06b6d4',
+        0.55: '#10b981',
+        0.75: '#f59e0b',
+        0.95: '#ef4444'
+      }
+    }).addTo(heatmapMapRef.current);
+
+    if (heatmapShowBoundaries && kabkotaGeojson) {
+      window.L.geoJson(kabkotaGeojson, {
+        style: () => ({
+          fillColor: 'transparent',
+          fillOpacity: 0,
+          color: '#334155',
+          weight: 1.3,
+          opacity: 0.7,
+          dashArray: '3'
+        }),
+        onEachFeature: (feature, layer) => {
+          layer.bindTooltip(`<b>${feature.properties.nama_resmi}</b> (${feature.properties.provinsi})`, { sticky: true });
+        }
+      }).addTo(heatmapMapRef.current);
+    }
+
+    if (heatmapShowPoints) {
+      validData.forEach(d => {
+        const marker = window.L.circleMarker([d.lat, d.lon], {
+          radius: 4,
+          color: '#0f172a',
+          fillColor: '#ffffff',
+          weight: 1.2,
+          opacity: 0.9,
+          fillOpacity: 0.85
+        }).addTo(heatmapMapRef.current);
+
+        marker.bindPopup(`
+          <div style="font-family: sans-serif; font-size: 12px;">
+            <b>${d.nama_resmi}</b> (${d.provinsi})<br>
+            <b>${heatmapVar.toUpperCase()}:</b> ${typeof d[heatmapVar] === 'number' ? (heatmapVar === 'pengeluaran' ? 'Rp' + Number(d[heatmapVar]).toLocaleString('id-ID') : d[heatmapVar].toFixed(2) + '%') : d[heatmapVar]}<br>
+            <span style="color: #64748b; font-size: 11px;">Lat: ${d.lat.toFixed(3)}, Lon: ${d.lon.toFixed(3)}</span>
+          </div>
+        `);
+      });
+    }
+
+    if (heatmapScope === 'kalimantan') {
+      heatmapMapRef.current.setView([-0.5, 114.5], 6);
+    } else {
+      heatmapMapRef.current.setView([-2.2, 118.0], 5);
+    }
+
+    heatmapMapRef.current.invalidateSize();
   }
 
   function renderLeafletProportional() {
@@ -860,10 +1127,265 @@ export default function Home() {
         {/* Tab 2: Geospatial */}
         <section className={`tab-pane ${activeTab === 'tab-geospatial' ? 'active' : ''}`}>
           <div className="subtabs-nav">
-            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-proportional' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-proportional')}><i className="fa-solid fa-circle-dot"></i> Peta Simbol Proporsional (514 Kab/Kota)</button>
-            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-choropleth' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-choropleth')}><i className="fa-solid fa-map-location"></i> Peta Choropleth Provinsi (34/38 Prov)</button>
-            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-lisa' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-lisa')}><i className="fa-solid fa-network-wired"></i> Peta Klaster Spasial LISA (Moran&apos;s I)</button>
+            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-kabkota-boundary' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-kabkota-boundary')}>
+              <i className="fa-solid fa-draw-polygon"></i> Peta Batas Kab/Kota (Shapefile GeoJSON)
+            </button>
+            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-heatmap' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-heatmap')}>
+              <i className="fa-solid fa-fire-flame-curved" style={{ color: '#ef4444' }}></i> Peta Heatmap Spasial (No API)
+            </button>
+            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-choropleth' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-choropleth')}>
+              <i className="fa-solid fa-map-location"></i> Peta Choropleth Provinsi (34/38 Prov)
+            </button>
+            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-proportional' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-proportional')}>
+              <i className="fa-solid fa-circle-dot"></i> Peta Simbol Proporsional (514 Kab/Kota)
+            </button>
+            <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-lisa' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-lisa')}>
+              <i className="fa-solid fa-network-wired"></i> Peta Klaster Spasial LISA (Moran&apos;s I)
+            </button>
           </div>
+
+          {/* Subtab 1: Peta Batas Kabupaten/Kota dari Shapefile GeoJSON */}
+          {activeGeoSubtab === 'geo-subtab-kabkota-boundary' && (
+            <div className="card">
+              <div className="card-header">
+                <div>
+                  <div className="card-title">
+                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas & Poligon Tematik Kabupaten/Kota (GeoJSON Shapefile)
+                  </div>
+                  <div className="card-caption">
+                    Batas administrasi poligon resmi hasil ekstraksi shapefile BIG/BPS <code>[LapakGIS]</code> ke GeoJSON teroptimasi (595 KB), terintegrasi 8 indikator gender BPS 2024 tanpa membutuhkan API eksternal.
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span className="badge badge-success">
+                    <i className="fa-solid fa-circle-check"></i> 100% GeoJSON Lokal (No API Key Required)
+                  </span>
+                  <a
+                    href="/data/kabkota_kalimantan.geojson"
+                    download="kabkota_kalimantan.geojson"
+                    className="btn-export"
+                    title="Unduh berkas GeoJSON hasil ekstraksi"
+                  >
+                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON (595 KB)
+                  </a>
+                  <select
+                    value={kabkotaChoroplethVar}
+                    onChange={e => setKabkotaChoroplethVar(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', fontWeight: '600' }}
+                  >
+                    <optgroup label="Indikator Utama Gender BPS">
+                      <option value="parlemen">Parlemen Perempuan (%)</option>
+                      <option value="pendapatan">Sumbangan Pendapatan (%)</option>
+                      <option value="profesional">Tenaga Profesional (%)</option>
+                      <option value="tpak">TPAK Perempuan (%)</option>
+                      <option value="pengeluaran">Pengeluaran Riil (Ribu Rp)</option>
+                      <option value="ahh">Angka Harapan Hidup (AHH)</option>
+                      <option value="rls">Rata-rata Lama Sekolah (RLS)</option>
+                      <option value="hls">Harapan Lama Sekolah (HLS)</option>
+                    </optgroup>
+                    <optgroup label="Indeks & Tipologi Analitik">
+                      <option value="skor_keputusan">Skor Pengambilan Keputusan (0-100)</option>
+                      <option value="skor_ekonomi">Skor Partisipasi Ekonomi (0-100)</option>
+                      <option value="ikpp_komposit">IKPP Komposit Gender (0-100)</option>
+                      <option value="kuadran">Tipologi Kuadran Disparitas</option>
+                      <option value="lisa_cluster_keputusan">Klaster LISA Keputusan</option>
+                      <option value="lisa_cluster_ekonomi">Klaster LISA Ekonomi</option>
+                    </optgroup>
+                  </select>
+                </div>
+              </div>
+
+              <div id="kabkota-boundary-map"></div>
+
+              {/* Detail Panel Saat Wilayah Diklik */}
+              {selectedKabDetail ? (
+                <div className="kab-detail-panel">
+                  <div className="kab-detail-header">
+                    <div>
+                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
+                        <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', marginRight: '6px' }}></i>
+                        {selectedKabDetail.nama_resmi}
+                      </h3>
+                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+                        {selectedKabDetail.provinsi} &bull; Tipe: <strong>{selectedKabDetail.tipe}</strong> &bull; Kode: <code>{selectedKabDetail.kode_wilayah}</code> &bull; Luas: {Number(selectedKabDetail.LUASWH || 0).toLocaleString('id-ID')} km²
+                      </p>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span className="badge badge-primary">{selectedKabDetail.kuadran}</span>
+                      <button
+                        onClick={() => setSelectedKabDetail(null)}
+                        style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}
+                      >
+                        <i className="fa-solid fa-xmark"></i> Tutup Detail
+                      </button>
+                    </div>
+                  </div>
+                  <div className="kab-detail-grid">
+                    <div className="kab-metric-card">
+                      <span className="k-label">Parlemen Perempuan</span>
+                      <span className="k-val">{selectedKabDetail.parlemen}%</span>
+                      <span className="k-sub">{selectedKabDetail.parlemen >= 30 ? 'Memenuhi Kuota 30%' : 'Di bawah Kuota 30%'}</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">Sumbangan Pendapatan</span>
+                      <span className="k-val">{selectedKabDetail.pendapatan}%</span>
+                      <span className="k-sub">Paritas: 50%</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">Tenaga Profesional</span>
+                      <span className="k-val">{selectedKabDetail.profesional}%</span>
+                      <span className="k-sub">Sektor Formal</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">TPAK Perempuan</span>
+                      <span className="k-val">{selectedKabDetail.tpak}%</span>
+                      <span className="k-sub">Partisipasi Kerja</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">Pengeluaran Riil</span>
+                      <span className="k-val">Rp{Number(selectedKabDetail.pengeluaran).toLocaleString('id-ID')}</span>
+                      <span className="k-sub">per kapita/thn</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">IKPP Komposit</span>
+                      <span className="k-val">{selectedKabDetail.ikpp_komposit}</span>
+                      <span className="k-sub">Skor 0-100</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">Skor Keputusan</span>
+                      <span className="k-val">{selectedKabDetail.skor_keputusan}</span>
+                      <span className="k-sub">Politik & Agensi</span>
+                    </div>
+                    <div className="kab-metric-card">
+                      <span className="k-label">Skor Ekonomi</span>
+                      <span className="k-val">{selectedKabDetail.skor_ekonomi}</span>
+                      <span className="k-sub">Kemandirian Finansial</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="fa-solid fa-circle-info" style={{ color: '#2563eb' }}></i>
+                  <span><strong>Tip Eksplorasi:</strong> Arahkan kursor untuk melihat nilai ringkas indikator, atau <em>klik</em> pada salah satu wilayah batas kabupaten/kota untuk membuka kartu inspeksi indikator lengkap &amp; zoom otomatis ke batas wilayah.</span>
+                </div>
+              )}
+
+              <div className="story-grid">
+                <div className="story-card green">
+                  <h4><i className="fa-solid fa-chart-area"></i> Karakteristik Spasial Wilayah Kalimantan</h4>
+                  <p>Ekstraksi shapefile poligon batas 56 kabupaten/kota di Pulau Kalimantan mengungkapkan disparitas tajam antara koridor pesisir timur (Kota Balikpapan, Kota Samarinda, Kota Bontang) dengan wilayah pedalaman (Mahakam Ulu, Kapuas Hulu, Murung Raya). Kota-kota pesisir mencatat pengeluaran riil di atas Rp16 juta dan tenaga profesional &gt; 48%, sementara wilayah pedalaman memiliki keterwakilan parlemen yang sangat fluktuatif.</p>
+                </div>
+                <div className="story-card purple">
+                  <h4><i className="fa-solid fa-code-compare"></i> Keunggulan Ekstraksi GeoJSON Tanpa API</h4>
+                  <p>Dengan mengonversi shapefile mentah 100 MB menjadi GeoJSON teroptimasi (595 KB) berkoordinat EPSG:4326 dengan simplifikasi topologi <code>0.003</code>, visualisasi batas poligon dapat dimuat seketika di peramban (client-side) tanpa memerlukan Google Maps/Mapbox API key, token otentikasi berbayar, maupun ketergantungan server GIS eksternal.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Subtab 2: Peta Heatmap Spasial Kab/Kota */}
+          {activeGeoSubtab === 'geo-subtab-heatmap' && (
+            <div className="card">
+              <div className="card-header">
+                <div>
+                  <div className="card-title">
+                    <i className="fa-solid fa-fire-flame-curved" style={{ color: '#ef4444' }}></i> Peta Heatmap Spasial Kabupaten/Kota (Kernel Density Estimation)
+                  </div>
+                  <div className="card-caption">
+                    Visualisasi intensitas spasial bergradien halus menggunakan algoritma Kernel Density pada peramban (Client-side Canvas Heatmap), tanpa token/API eksternal.
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span className="badge badge-success">
+                    <i className="fa-solid fa-bolt"></i> Client-Side Heatmap (No API Required)
+                  </span>
+                  <select
+                    value={heatmapVar}
+                    onChange={e => setHeatmapVar(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', fontWeight: '600' }}
+                  >
+                    <option value="parlemen">Intensitas: Parlemen Perempuan (%)</option>
+                    <option value="pendapatan">Intensitas: Sumbangan Pendapatan (%)</option>
+                    <option value="pengeluaran">Intensitas: Pengeluaran Riil (Ribu Rp)</option>
+                    <option value="profesional">Intensitas: Tenaga Profesional (%)</option>
+                    <option value="tpak">Intensitas: TPAK Perempuan (%)</option>
+                    <option value="skor_keputusan">Intensitas: Skor Pengambilan Keputusan</option>
+                    <option value="skor_ekonomi">Intensitas: Skor Partisipasi Ekonomi</option>
+                    <option value="ikpp_komposit">Intensitas: IKPP Komposit Gender</option>
+                  </select>
+                  <select
+                    value={heatmapScope}
+                    onChange={e => setHeatmapScope(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px' }}
+                  >
+                    <option value="kalimantan">Cakupan: Pulau Kalimantan (Fokus SHP)</option>
+                    <option value="nasional">Cakupan: Seluruh Indonesia (514 Kab/Kota)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Heatmap Parameter Controls */}
+              <div className="heatmap-toolbar">
+                <div className="heatmap-control-group">
+                  <label htmlFor="radius-slider"><i className="fa-solid fa-circle-notch"></i> Radius Heat ({heatmapRadius}px):</label>
+                  <input
+                    id="radius-slider"
+                    type="range"
+                    min="15"
+                    max="50"
+                    value={heatmapRadius}
+                    onChange={e => setHeatmapRadius(Number(e.target.value))}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </div>
+                <div className="heatmap-control-group">
+                  <label htmlFor="blur-slider"><i className="fa-solid fa-wand-magic-sparkles"></i> Blur ({heatmapBlur}px):</label>
+                  <input
+                    id="blur-slider"
+                    type="range"
+                    min="10"
+                    max="35"
+                    value={heatmapBlur}
+                    onChange={e => setHeatmapBlur(Number(e.target.value))}
+                    style={{ cursor: 'pointer' }}
+                  />
+                </div>
+                <div className="heatmap-control-group" style={{ marginLeft: 'auto' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={heatmapShowBoundaries}
+                      onChange={e => setHeatmapShowBoundaries(e.target.checked)}
+                    />
+                    <span>Overlay Garis Batas Poligon SHP</span>
+                  </label>
+                </div>
+                <div className="heatmap-control-group">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={heatmapShowPoints}
+                      onChange={e => setHeatmapShowPoints(e.target.checked)}
+                    />
+                    <span>Titik Pusat Kab/Kota</span>
+                  </label>
+                </div>
+              </div>
+
+              <div id="heatmap-map"></div>
+
+              <div className="story-grid">
+                <div className="story-card green">
+                  <h4><i className="fa-solid fa-temperature-arrow-up"></i> Interpretasi Hotspot Spasial</h4>
+                  <p>Heatmap spasial menampilkan konsentrasi peubah secara kontinu. Warna merah menunjukkan zona konsentrasi tertinggi (Hotspot), sedangkan warna biru menunjukkan zona intensitas rendah (Coldspot). Pada indikator Parlemen di Kalimantan, zona hotspot terkonsentrasi di Kalimantan Selatan dan Kalimantan Timur bagian pesisir, sedangkan wilayah hulu/pedalaman menunjukkan intensitas dingin yang mengindikasikan defisit keterwakilan politik perempuan.</p>
+                </div>
+                <div className="story-card amber">
+                  <h4><i className="fa-solid fa-layer-group"></i> Sinergi Heatmap &amp; Batas Administrasi</h4>
+                  <p>Dengan mengaktifkan centang <em>&quot;Overlay Garis Batas Poligon SHP&quot;</em>, batas administratif hasil ekstraksi shapefile ditumpangkan secara presisi di atas permukaan heatmap kontinu. Hal ini memudahkan pengambil kebijakan untuk mengidentifikasi batas yurisdiksi kab/kota mana yang berada di pusat hotspot maupun coldspot.</p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {activeGeoSubtab === 'geo-subtab-proportional' && (
             <div className="card">
