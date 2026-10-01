@@ -11,6 +11,8 @@ export default function Home() {
   const [corrData, setCorrData] = useState({});
   const [geojsonData, setGeojsonData] = useState(null);
   const [kabkotaGeojson, setKabkotaGeojson] = useState(null);
+  const [kabkotaKalimantanGeojson, setKabkotaKalimantanGeojson] = useState(null);
+  const [boundaryScope, setBoundaryScope] = useState('nasional');
   const [selectedKabDetail, setSelectedKabDetail] = useState(null);
 
   // Filters
@@ -32,7 +34,7 @@ export default function Home() {
   const [choroplethVar, setChoroplethVar] = useState('parlemen');
   const [kabkotaChoroplethVar, setKabkotaChoroplethVar] = useState('parlemen');
   const [heatmapVar, setHeatmapVar] = useState('parlemen');
-  const [heatmapScope, setHeatmapScope] = useState('kalimantan');
+  const [heatmapScope, setHeatmapScope] = useState('nasional');
   const [heatmapRadius, setHeatmapRadius] = useState(28);
   const [heatmapBlur, setHeatmapBlur] = useState(18);
   const [heatmapShowBoundaries, setHeatmapShowBoundaries] = useState(true);
@@ -60,13 +62,14 @@ export default function Home() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [resKab, resProv, resNas, resPca, resCorr, resGeo, resKabGeo] = await Promise.all([
+        const [resKab, resProv, resNas, resPca, resCorr, resGeo, resKabNat, resKabKal] = await Promise.all([
           fetch('/data/kabkota_514.json').then(r => r.json()),
           fetch('/data/provinsi_38.json').then(r => r.json()),
           fetch('/data/nasional.json').then(r => r.json()),
           fetch('/data/pca_meta.json').then(r => r.json()),
           fetch('/data/correlation_matrix.json').then(r => r.json()),
           fetch('/data/provinsi.geojson').then(r => r.json()).catch(() => null),
+          fetch('/data/kabkota_indonesia.geojson').then(r => r.json()).catch(() => null),
           fetch('/data/kabkota_kalimantan.geojson').then(r => r.json()).catch(() => null)
         ]);
 
@@ -76,7 +79,8 @@ export default function Home() {
         setPcaMeta(resPca);
         setCorrData(resCorr);
         setGeojsonData(resGeo);
-        setKabkotaGeojson(resKabGeo);
+        setKabkotaGeojson(resKabNat || resKabKal);
+        setKabkotaKalimantanGeojson(resKabKal);
         setDataLoaded(true);
       } catch (err) {
         console.error("Error loading JSON data:", err);
@@ -139,6 +143,7 @@ export default function Home() {
     geoColorVar,
     choroplethVar,
     kabkotaChoroplethVar,
+    boundaryScope,
     heatmapVar,
     heatmapScope,
     heatmapRadius,
@@ -146,6 +151,7 @@ export default function Home() {
     heatmapShowBoundaries,
     heatmapShowPoints,
     kabkotaGeojson,
+    kabkotaKalimantanGeojson,
     lisaClusterVar,
     pcaColorBy,
     hierSizeVar,
@@ -217,20 +223,26 @@ export default function Home() {
     }, 150);
   }
 
-  // 2a. Peta Batas Kabupaten/Kota (Hasil Ekstraksi Shapefile ke GeoJSON - No API)
+  const CLEAN_BASEMAP_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+  const CLEAN_BASEMAP_ATTR = '&copy; Esri, HERE, Garmin, &copy; OpenStreetMap | Bebas API Key & Tanpa Watermark';
+
+  // 2a. Peta Batas Kabupaten/Kota (GeoJSON Nasional 514 Kab/Kota & Kalimantan SHP - Zero API)
   function renderLeafletKabkotaBoundary() {
     const el = document.getElementById('kabkota-boundary-map');
-    if (!el || !kabkotaGeojson || !window.L) return;
+    const activeGeo = boundaryScope === 'kalimantan'
+      ? (kabkotaKalimantanGeojson || kabkotaGeojson)
+      : (kabkotaGeojson || kabkotaKalimantanGeojson);
+    if (!el || !activeGeo || !window.L) return;
 
     if (!kabkotaBoundaryMapRef.current) {
       kabkotaBoundaryMapRef.current = window.L.map('kabkota-boundary-map', {
         scrollWheelZoom: false,
         attributionControl: true
-      }).setView([-0.5, 114.5], 6);
+      }).setView([-2.2, 118.0], 5);
 
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CartoDB & OpenStreetMap | Batas Poligon SHP LapakGIS (No API Key Required)',
-        maxZoom: 18
+      window.L.tileLayer(CLEAN_BASEMAP_URL, {
+        attribution: CLEAN_BASEMAP_ATTR,
+        maxZoom: 16
       }).addTo(kabkotaBoundaryMapRef.current);
     } else {
       kabkotaBoundaryMapRef.current.eachLayer(layer => {
@@ -245,7 +257,7 @@ export default function Home() {
     let maxVal = 100;
 
     if (!isCategorical) {
-      const vals = kabkotaGeojson.features
+      const vals = activeGeo.features
         .map(f => f.properties[kabkotaChoroplethVar])
         .filter(v => v !== undefined && v !== null && !isNaN(v));
       if (vals.length > 0) {
@@ -283,17 +295,21 @@ export default function Home() {
       return palette[idx];
     }
 
-    const geoLayer = window.L.geoJson(kabkotaGeojson, {
+    const geoLayer = window.L.geoJson(activeGeo, {
+      filter: (feature) => {
+        if (selectedPulau !== 'Semua Pulau' && feature.properties.pulau !== selectedPulau) return false;
+        return true;
+      },
       style: (feature) => {
         const p = feature.properties;
         const matchesFilter = selectedProv === 'Semua Provinsi' || p.provinsi === selectedProv;
         return {
           fillColor: getPolygonColor(p),
-          weight: 1.4,
+          weight: 1.1,
           opacity: 1,
           color: '#ffffff',
           dashArray: '1',
-          fillOpacity: matchesFilter ? 0.85 : 0.25
+          fillOpacity: matchesFilter ? 0.85 : 0.2
         };
       },
       onEachFeature: (feature, layer) => {
@@ -320,7 +336,7 @@ export default function Home() {
           mouseover: (e) => {
             const l = e.target;
             l.setStyle({
-              weight: 3,
+              weight: 2.8,
               color: '#0f172a',
               dashArray: '',
               fillOpacity: 0.95
@@ -339,13 +355,21 @@ export default function Home() {
     }).addTo(kabkotaBoundaryMapRef.current);
 
     if (selectedProv !== 'Semua Provinsi') {
-      const provFeatures = kabkotaGeojson.features.filter(f => f.properties.provinsi === selectedProv);
+      const provFeatures = activeGeo.features.filter(f => f.properties.provinsi === selectedProv);
       if (provFeatures.length > 0) {
         const tempGroup = window.L.geoJson({ type: 'FeatureCollection', features: provFeatures });
         kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), { padding: [30, 30] });
       }
-    } else {
+    } else if (selectedPulau !== 'Semua Pulau') {
+      const pulauFeatures = activeGeo.features.filter(f => f.properties.pulau === selectedPulau);
+      if (pulauFeatures.length > 0) {
+        const tempGroup = window.L.geoJson({ type: 'FeatureCollection', features: pulauFeatures });
+        kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), { padding: [30, 30] });
+      }
+    } else if (boundaryScope === 'kalimantan') {
       kabkotaBoundaryMapRef.current.setView([-0.5, 114.5], 6);
+    } else {
+      kabkotaBoundaryMapRef.current.setView([-2.2, 118.0], 5);
     }
 
     kabkotaBoundaryMapRef.current.invalidateSize();
@@ -370,11 +394,11 @@ export default function Home() {
       heatmapMapRef.current = window.L.map('heatmap-map', {
         scrollWheelZoom: false,
         attributionControl: true
-      }).setView([-0.5, 114.5], 6);
+      }).setView([-2.2, 118.0], 5);
 
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CartoDB & OpenStreetMap | Leaflet.heat Heatmap (Client-side, No API Key Required)',
-        maxZoom: 18
+      window.L.tileLayer(CLEAN_BASEMAP_URL, {
+        attribution: CLEAN_BASEMAP_ATTR,
+        maxZoom: 16
       }).addTo(heatmapMapRef.current);
     } else {
       heatmapMapRef.current.eachLayer(layer => {
@@ -413,14 +437,23 @@ export default function Home() {
       }
     }).addTo(heatmapMapRef.current);
 
-    if (heatmapShowBoundaries && kabkotaGeojson) {
-      window.L.geoJson(kabkotaGeojson, {
+    const activeGeo = heatmapScope === 'kalimantan'
+      ? (kabkotaKalimantanGeojson || kabkotaGeojson)
+      : kabkotaGeojson;
+
+    if (heatmapShowBoundaries && activeGeo) {
+      window.L.geoJson(activeGeo, {
+        filter: (feature) => {
+          if (heatmapScope === 'kalimantan' && feature.properties.pulau !== 'Kalimantan') return false;
+          if (selectedPulau !== 'Semua Pulau' && feature.properties.pulau !== selectedPulau) return false;
+          return true;
+        },
         style: () => ({
           fillColor: 'transparent',
           fillOpacity: 0,
           color: '#334155',
-          weight: 1.3,
-          opacity: 0.7,
+          weight: 1.1,
+          opacity: 0.65,
           dashArray: '3'
         }),
         onEachFeature: (feature, layer) => {
@@ -432,7 +465,7 @@ export default function Home() {
     if (heatmapShowPoints) {
       validData.forEach(d => {
         const marker = window.L.circleMarker([d.lat, d.lon], {
-          radius: 4,
+          radius: 3.5,
           color: '#0f172a',
           fillColor: '#ffffff',
           weight: 1.2,
@@ -465,9 +498,9 @@ export default function Home() {
 
     if (!leafletMapRef.current) {
       leafletMapRef.current = window.L.map('leaflet-map', { scrollWheelZoom: false }).setView([-2.2, 118.0], 5);
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CartoDB & OpenStreetMap',
-        maxZoom: 18
+      window.L.tileLayer(CLEAN_BASEMAP_URL, {
+        attribution: CLEAN_BASEMAP_ATTR,
+        maxZoom: 16
       }).addTo(leafletMapRef.current);
     } else {
       leafletMapRef.current.eachLayer(layer => {
@@ -526,9 +559,9 @@ export default function Home() {
 
     if (!choroplethMapRef.current) {
       choroplethMapRef.current = window.L.map('choropleth-map', { scrollWheelZoom: false }).setView([-2.2, 118.0], 5);
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CartoDB & OpenStreetMap',
-        maxZoom: 18
+      window.L.tileLayer(CLEAN_BASEMAP_URL, {
+        attribution: CLEAN_BASEMAP_ATTR,
+        maxZoom: 16
       }).addTo(choroplethMapRef.current);
     } else {
       choroplethMapRef.current.eachLayer(layer => {
@@ -582,9 +615,9 @@ export default function Home() {
 
     if (!lisaMapRef.current) {
       lisaMapRef.current = window.L.map('lisa-map', { scrollWheelZoom: false }).setView([-2.2, 118.0], 5);
-      window.L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; CartoDB & OpenStreetMap',
-        maxZoom: 18
+      window.L.tileLayer(CLEAN_BASEMAP_URL, {
+        attribution: CLEAN_BASEMAP_ATTR,
+        maxZoom: 16
       }).addTo(lisaMapRef.current);
     } else {
       lisaMapRef.current.eachLayer(layer => {
@@ -1144,30 +1177,42 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Subtab 1: Peta Batas Kabupaten/Kota dari Shapefile GeoJSON */}
+          {/* Subtab 1: Peta Batas Kabupaten/Kota dari GeoJSON (Nasional 514 Kab/Kota & Kalimantan SHP) */}
           {activeGeoSubtab === 'geo-subtab-kabkota-boundary' && (
             <div className="card">
               <div className="card-header">
                 <div>
                   <div className="card-title">
-                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas & Poligon Tematik Kabupaten/Kota (GeoJSON Shapefile)
+                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas &amp; Poligon Tematik Kabupaten/Kota (GeoJSON BPS 2024)
                   </div>
                   <div className="card-caption">
-                    Batas administrasi poligon resmi hasil ekstraksi shapefile BIG/BPS <code>[LapakGIS]</code> ke GeoJSON teroptimasi (595 KB), terintegrasi 8 indikator gender BPS 2024 tanpa membutuhkan API eksternal.
+                    Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia dan detail shapefile Kalimantan, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark &amp; Tanpa API Key).
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span className="badge badge-success">
-                    <i className="fa-solid fa-circle-check"></i> 100% GeoJSON Lokal (No API Key Required)
+                    <i className="fa-solid fa-shield-halved"></i> 100% Bebas Watermark (No API Required)
                   </span>
-                  <a
-                    href="/data/kabkota_kalimantan.geojson"
-                    download="kabkota_kalimantan.geojson"
-                    className="btn-export"
-                    title="Unduh berkas GeoJSON hasil ekstraksi"
+
+                  {/* Selector Cakupan Wilayah: Nasional vs Kalimantan */}
+                  <select
+                    value={boundaryScope}
+                    onChange={e => setBoundaryScope(e.target.value)}
+                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1.5px solid #2563eb', fontSize: '12px', fontWeight: '700', color: '#1e40af', background: '#eff6ff' }}
                   >
-                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON (595 KB)
+                    <option value="nasional">Cakupan: Seluruh Indonesia (514 Kab/Kota)</option>
+                    <option value="kalimantan">Cakupan: Pulau Kalimantan (Detail SHP LapakGIS)</option>
+                  </select>
+
+                  <a
+                    href={boundaryScope === 'kalimantan' ? '/data/kabkota_kalimantan.geojson' : '/data/kabkota_indonesia.geojson'}
+                    download={boundaryScope === 'kalimantan' ? 'kabkota_kalimantan.geojson' : 'kabkota_indonesia.geojson'}
+                    className="btn-export"
+                    title="Unduh berkas GeoJSON aktif"
+                  >
+                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON ({boundaryScope === 'kalimantan' ? '595 KB' : '0.79 MB'})
                   </a>
+
                   <select
                     value={kabkotaChoroplethVar}
                     onChange={e => setKabkotaChoroplethVar(e.target.value)}
@@ -1266,18 +1311,18 @@ export default function Home() {
               ) : (
                 <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <i className="fa-solid fa-circle-info" style={{ color: '#2563eb' }}></i>
-                  <span><strong>Tip Eksplorasi:</strong> Arahkan kursor untuk melihat nilai ringkas indikator, atau <em>klik</em> pada salah satu wilayah batas kabupaten/kota untuk membuka kartu inspeksi indikator lengkap &amp; zoom otomatis ke batas wilayah.</span>
+                  <span><strong>Tip Eksplorasi:</strong> Gunakan menu <em>&quot;Cakupan&quot;</em> untuk beralih antara <strong>Seluruh Indonesia (514 Kab/Kota)</strong> dan <strong>Pulau Kalimantan (Detail SHP)</strong>. Anda juga dapat menggunakan filter Pulau dan Provinsi di sidebar kiri untuk zoom otomatis ke wilayah target.</span>
                 </div>
               )}
 
               <div className="story-grid">
                 <div className="story-card green">
-                  <h4><i className="fa-solid fa-chart-area"></i> Karakteristik Spasial Wilayah Kalimantan</h4>
-                  <p>Ekstraksi shapefile poligon batas 56 kabupaten/kota di Pulau Kalimantan mengungkapkan disparitas tajam antara koridor pesisir timur (Kota Balikpapan, Kota Samarinda, Kota Bontang) dengan wilayah pedalaman (Mahakam Ulu, Kapuas Hulu, Murung Raya). Kota-kota pesisir mencatat pengeluaran riil di atas Rp16 juta dan tenaga profesional &gt; 48%, sementara wilayah pedalaman memiliki keterwakilan parlemen yang sangat fluktuatif.</p>
+                  <h4><i className="fa-solid fa-earth-asia"></i> Cakupan Spasial 514 Kabupaten/Kota Seluruh Indonesia</h4>
+                  <p>Aplikasi ini memadankan batas poligon digital 514 kabupaten/kota dari 38 provinsi di Indonesia dengan 8 indikator gender BPS 2024. Melalui dasbor ini, disparitas antara wilayah barat (Jawa &amp; Sumatera) dan timur (Nusa Tenggara, Maluku, Papua) dapat diinspeksi secara detail tanpa batasan wilayah tunggal.</p>
                 </div>
                 <div className="story-card purple">
-                  <h4><i className="fa-solid fa-code-compare"></i> Keunggulan Ekstraksi GeoJSON Tanpa API</h4>
-                  <p>Dengan mengonversi shapefile mentah 100 MB menjadi GeoJSON teroptimasi (595 KB) berkoordinat EPSG:4326 dengan simplifikasi topologi <code>0.003</code>, visualisasi batas poligon dapat dimuat seketika di peramban (client-side) tanpa memerlukan Google Maps/Mapbox API key, token otentikasi berbayar, maupun ketergantungan server GIS eksternal.</p>
+                  <h4><i className="fa-solid fa-shield-halved"></i> Solusi Zero-API &amp; Bebas Watermark</h4>
+                  <p>Watermark <em>&quot;API KEY REQUIRED&quot;</em> pada tile basemap CartoDB telah dieliminasi sepenuhnya dengan beralih ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap yang 100% bebas token dan bebas biaya. Poligon GeoJSON disimpan dan dirender secara mandiri di sisi klien (*client-side*).</p>
                 </div>
               </div>
             </div>
