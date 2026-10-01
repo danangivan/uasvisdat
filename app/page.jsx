@@ -1057,12 +1057,15 @@ export default function Home() {
         </div>
 
         <div className="sidebar-content">
-          {/* Navigasi Modul Analitik sebagai Dropdown */}
-          <div className="filter-group module-dropdown-group">
-            <label className="sidebar-section-label">
-              <i className="fa-solid fa-compass"></i> Navigasi Modul Analitik
-            </label>
-            <div className="module-dropdown-wrapper">
+          {/* Navigasi Modul Analitik (Single Dropdown Menu) */}
+          <div className="module-dropdown-card">
+            <div className="module-dropdown-header">
+              <label htmlFor="module-select" className="module-dropdown-label">
+                <i className="fa-solid fa-compass"></i> Navigasi Modul Analitik
+              </label>
+              <span className="badge-active-dot">• Aktif</span>
+            </div>
+            <div className="module-select-container">
               <select
                 id="module-select"
                 className="module-dropdown-select"
@@ -1072,18 +1075,18 @@ export default function Home() {
                   setMobileMenuOpen(false);
                 }}
               >
-                {MODULES.map((m, idx) => (
-                  <option key={m.id} value={m.id}>
-                    {idx + 1}. {m.label}
-                  </option>
-                ))}
+                <option value="tab-overview">📈 1. Ringkasan &amp; Storytelling</option>
+                <option value="tab-geospatial">🗺️ 2. Analisis Geospasial (Peta &amp; Heatmap)</option>
+                <option value="tab-multivariate">🔀 3. Dimensi Tinggi (Multivariat &amp; PCA)</option>
+                <option value="tab-hierarchical">🌳 4. Analisis Berhierarki (Treemap &amp; Sunburst)</option>
+                <option value="tab-data">📊 5. Eksplorasi Data (Pangkalan 514 Kab/Kota)</option>
+                <option value="tab-method">📖 6. Metodologi &amp; Integritas AI</option>
               </select>
-            </div>
-            <div className="module-dropdown-badge">
-              <i className={`fa-solid ${currentModule.icon}`}></i>
-              <span>{currentModule.desc}</span>
+              <i className="fa-solid fa-chevron-down select-arrow-icon"></i>
             </div>
           </div>
+
+          <div className="sidebar-divider"></div>
 
           <div className="sidebar-section-label">
             <i className="fa-solid fa-filter"></i> Parameter &amp; Filter Data
