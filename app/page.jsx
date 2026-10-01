@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [allKabkota, setAllKabkota] = useState([]);
   const [allProvinsi, setAllProvinsi] = useState([]);
   const [nasionalStats, setNasionalStats] = useState({});
@@ -88,6 +89,38 @@ export default function Home() {
     }
     fetchData();
   }, []);
+
+  // Responsive resize handler for Plotly charts and Leaflet maps
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window !== 'undefined' && window.Plotly) {
+        ['quadrant-chart', 'pca-biplot-chart', 'parallel-coords-chart', 'heatmap-chart', 'radar-chart', 'treemap-chart', 'sunburst-chart'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) window.Plotly.Plots.resize(el);
+        });
+      }
+      [kabkotaBoundaryMapRef, heatmapMapRef, leafletMapRef, choroplethMapRef, lisaMapRef].forEach(ref => {
+        if (ref.current && typeof ref.current.invalidateSize === 'function') {
+          ref.current.invalidateSize();
+        }
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // When active tabs change, invalidate map sizes so they render accurately
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      [kabkotaBoundaryMapRef, heatmapMapRef, leafletMapRef, choroplethMapRef, lisaMapRef].forEach(ref => {
+        if (ref.current && typeof ref.current.invalidateSize === 'function') {
+          ref.current.invalidateSize();
+        }
+      });
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [activeTab, activeGeoSubtab, activeMultiSubtab, activeHierSubtab]);
 
   // Filter Data
   const filteredKabkota = allKabkota.filter(d => {
@@ -982,21 +1015,72 @@ export default function Home() {
   const avgProfesional = filteredKabkota.length ? filteredKabkota.reduce((a, b) => a + b.profesional, 0) / filteredKabkota.length : 0;
   const avgTPAK = filteredKabkota.length ? filteredKabkota.reduce((a, b) => a + b.tpak, 0) / filteredKabkota.length : 0;
 
+  const hasActiveFilter = selectedPulau !== 'Semua Pulau' || selectedProv !== 'Semua Provinsi' || selectedTipe !== 'Semua' || selectedKuadran !== 'Semua Kuadran';
+
   return (
     <div className="app-container">
-      {/* Sidebar */}
-      <aside className="sidebar">
+      {/* Mobile Drawer Backdrop */}
+      <div
+        className={`sidebar-backdrop ${mobileMenuOpen ? 'active' : ''}`}
+        onClick={() => setMobileMenuOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Sidebar Drawer */}
+      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png" alt="STIS" />
-          <div className="sidebar-title">
-            <h2>Politeknik Statistika STIS</h2>
-            <p>Visualisasi Data & Informasi (2026)</p>
+          <div className="sidebar-brand">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png" alt="STIS" />
+            <div className="sidebar-title">
+              <h2>Politeknik Statistika STIS</h2>
+              <p>Visualisasi Data &amp; Informasi (2026)</p>
+            </div>
           </div>
+          <button
+            className="sidebar-close-btn"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Tutup Menu Filter"
+          >
+            <i className="fa-solid fa-xmark"></i>
+          </button>
         </div>
 
         <div className="sidebar-content">
+          {/* Quick Navigation in Drawer for Mobile */}
+          <div className="sidebar-nav-section mobile-only">
+            <label className="sidebar-section-label">
+              <i className="fa-solid fa-compass"></i> Navigasi Halaman
+            </label>
+            <div className="sidebar-nav-pills">
+              {[
+                { id: 'tab-overview', label: 'Ringkasan & Story', icon: 'fa-chart-line' },
+                { id: 'tab-geospatial', label: 'Analisis Geospasial', icon: 'fa-map' },
+                { id: 'tab-multivariate', label: 'Dimensi Tinggi', icon: 'fa-project-diagram' },
+                { id: 'tab-hierarchical', label: 'Analisis Hierarki', icon: 'fa-sitemap' },
+                { id: 'tab-data', label: 'Eksplorasi Data', icon: 'fa-table' },
+                { id: 'tab-method', label: 'Metodologi & AI', icon: 'fa-book-open' }
+              ].map(t => (
+                <button
+                  key={t.id}
+                  className={`sidebar-nav-item ${activeTab === t.id ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab(t.id);
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  <i className={`fa-solid ${t.icon}`}></i>
+                  <span>{t.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="sidebar-section-label">
+            <i className="fa-solid fa-filter"></i> Parameter &amp; Filter Data
+          </div>
+
           <div className="filter-group">
-            <label><i className="fa-solid fa-filter"></i> Filter Pulau / Region</label>
+            <label><i className="fa-solid fa-earth-asia"></i> Filter Pulau / Region</label>
             <select value={selectedPulau} onChange={e => { setSelectedPulau(e.target.value); setSelectedProv('Semua Provinsi'); }}>
               <option value="Semua Pulau">Semua Pulau</option>
               {[...new Set(allKabkota.map(d => d.pulau))].map(p => (
@@ -1050,33 +1134,61 @@ export default function Home() {
           <div className="sidebar-stats">
             <div><strong>Wilayah Terpilih:</strong> {filteredKabkota.length} dari 514</div>
             <div><strong>Provinsi:</strong> {new Set(filteredKabkota.map(d => d.provinsi)).size} dari 38</div>
-            <div><strong>Sumber Data:</strong> BPS (2024)</div>
+            <div><strong>Sumber Data:</strong> BPS RI (2024)</div>
           </div>
 
-          <button className="btn-reset" onClick={() => {
-            setSelectedPulau('Semua Pulau');
-            setSelectedProv('Semua Provinsi');
-            setSelectedTipe('Semua');
-            setSelectedKuadran('Semua Kuadran');
-            setSelectedPalette('Viridis');
-          }}>
-            <i className="fa-solid fa-arrows-rotate"></i> Reset Filter Global
-          </button>
+          <div className="sidebar-actions">
+            <button className="btn-apply-drawer mobile-only" onClick={() => setMobileMenuOpen(false)}>
+              <i className="fa-solid fa-check"></i> Terapkan &amp; Tutup
+            </button>
+            <button className="btn-reset" onClick={() => {
+              setSelectedPulau('Semua Pulau');
+              setSelectedProv('Semua Provinsi');
+              setSelectedTipe('Semua');
+              setSelectedKuadran('Semua Kuadran');
+              setSelectedPalette('Viridis');
+            }}>
+              <i className="fa-solid fa-arrows-rotate"></i> Reset Filter Global
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* Main Content */}
       <main className="main-content">
         <header className="top-header">
+          {/* Mobile Bar: Hamburger & Institutional Identity */}
+          <div className="mobile-header-bar">
+            <button
+              className={`hamburger-btn ${mobileMenuOpen ? 'active' : ''}`}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu Filter & Navigasi"
+              aria-expanded={mobileMenuOpen}
+            >
+              <i className={mobileMenuOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
+              <span className="hamburger-text">{mobileMenuOpen ? "Tutup" : "Filter & Menu"}</span>
+              {hasActiveFilter && <span className="active-filter-dot" title="Filter Aktif"></span>}
+            </button>
+            <div className="mobile-institution-badge">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png" alt="STIS" />
+              <span>Polstat STIS</span>
+            </div>
+          </div>
+
           <div className="header-meta">
             <div className="header-title">
-              <h1>Eksplorasi Disparitas Spasial Partisipasi Ekonomi & Pengambilan Keputusan Perempuan di Indonesia</h1>
-              <p>Visualisasi Analitik Komprehensif Berbasis 514 Kabupaten/Kota & 38 Provinsi (Framework Next.js / BPS 2024)</p>
+              <div className="institution-pill">
+                <i className="fa-solid fa-building-columns"></i>
+                <span>Badan Pusat Statistik RI &bull; Politeknik Statistika STIS</span>
+              </div>
+              <h1>Eksplorasi Disparitas Spasial Partisipasi Ekonomi &amp; Pengambilan Keputusan Perempuan di Indonesia</h1>
+              <p>Visualisasi Analitik Komprehensif Berbasis 514 Kabupaten/Kota &amp; 38 Provinsi (Framework Next.js / BPS 2024)</p>
             </div>
             <div className="badges-row">
-              <span className="badge badge-primary"><i className="fa-solid fa-code"></i> Next.js 14</span>
-              <span className="badge badge-success"><i className="fa-solid fa-globe"></i> Vercel Native</span>
-              <span className="badge badge-dark"><i className="fa-solid fa-database"></i> BPS RI 2024</span>
+              <span className="badge badge-bps"><i className="fa-solid fa-landmark"></i> BPS RI 2024</span>
+              <span className="badge badge-primary"><i className="fa-solid fa-shield-halved"></i> Bebas API Key</span>
+              <span className="badge badge-accent"><i className="fa-solid fa-draw-polygon"></i> 514 Kab/Kota SHP</span>
+              <span className="badge badge-success"><i className="fa-solid fa-mobile-screen"></i> Multi-Device</span>
             </div>
           </div>
         </header>
@@ -1094,7 +1206,10 @@ export default function Home() {
             <button
               key={t.id}
               className={`tab-btn ${activeTab === t.id ? 'active' : ''}`}
-              onClick={() => setActiveTab(t.id)}
+              onClick={() => {
+                setActiveTab(t.id);
+                setMobileMenuOpen(false);
+              }}
             >
               <i className={`fa-solid ${t.icon}`}></i> {t.label}
             </button>
