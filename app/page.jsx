@@ -1057,31 +1057,31 @@ export default function Home() {
         </div>
 
         <div className="sidebar-content">
-          {/* Main Navigation in Sidebar (Desktop & Mobile) */}
-          <div className="sidebar-nav-section">
-            <div className="sidebar-section-label">
-              <i className="fa-solid fa-compass"></i> Menu Navigasi Modul
+          {/* Navigasi Modul Analitik sebagai Dropdown */}
+          <div className="filter-group module-dropdown-group">
+            <label className="sidebar-section-label">
+              <i className="fa-solid fa-compass"></i> Navigasi Modul Analitik
+            </label>
+            <div className="module-dropdown-wrapper">
+              <select
+                id="module-select"
+                className="module-dropdown-select"
+                value={activeTab}
+                onChange={e => {
+                  setActiveTab(e.target.value);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                {MODULES.map((m, idx) => (
+                  <option key={m.id} value={m.id}>
+                    {idx + 1}. {m.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="sidebar-nav-pills">
-              {MODULES.map(t => {
-                const isActive = activeTab === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => {
-                      setActiveTab(t.id);
-                      setMobileMenuOpen(false);
-                    }}
-                  >
-                    <span className="nav-icon-box">
-                      <i className={`fa-solid ${t.icon}`}></i>
-                    </span>
-                    <span className="nav-label-text">{t.label}</span>
-                    <i className={`fa-solid fa-chevron-right nav-arrow ${isActive ? 'visible' : ''}`}></i>
-                  </button>
-                );
-              })}
+            <div className="module-dropdown-badge">
+              <i className={`fa-solid ${currentModule.icon}`}></i>
+              <span>{currentModule.desc}</span>
             </div>
           </div>
 
