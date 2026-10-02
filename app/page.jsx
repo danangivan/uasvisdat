@@ -258,8 +258,8 @@ export default function Home() {
         { x: medX + 22, y: medY - 28, text: '<b>KUADRAN IV</b><br>Pekerja Keras Kurang Kuasa<br>(Ekonomi ↑, Keputusan ↓)', showarrow: false, font: { color: '#d97706', size: 10.5 }, bgcolor: 'rgba(217, 119, 6, 0.1)' }
       ],
       legend: { orientation: 'h', y: -0.18, x: 0.5, xanchor: 'center' },
-      margin: { l: 50, r: 20, t: 50, b: 60 },
-      height: 540,
+      margin: { l: 50, r: 20, t: 45, b: 50 },
+      height: 420,
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent'
     };
@@ -781,8 +781,8 @@ export default function Home() {
       yaxis: { title: `Komponen Utama 2 (${pcaMeta.var_exp_pc2}% Variansi: Partisipasi Politik vs Kerja Fisik)`, zeroline: true, gridcolor: '#f1f5f9' },
       annotations: annotations,
       legend: { orientation: 'h', y: -0.16, x: 0.5, xanchor: 'center' },
-      margin: { l: 50, r: 20, t: 50, b: 60 },
-      height: 540,
+      margin: { l: 50, r: 20, t: 40, b: 50 },
+      height: 420,
       paper_bgcolor: 'transparent',
       plot_bgcolor: 'transparent'
     };
@@ -813,8 +813,8 @@ export default function Home() {
 
     const layout = {
       title: { text: '<b>Diagram Koordinat Paralel (Brushing & Filtering 8 Peubah)</b>', font: { size: 13.5 } },
-      margin: { l: 60, r: 40, t: 60, b: 30 },
-      height: 500,
+      margin: { l: 50, r: 30, t: 40, b: 25 },
+      height: 420,
       paper_bgcolor: 'transparent'
     };
 
@@ -836,8 +836,8 @@ export default function Home() {
     };
     const layout = {
       title: { text: '<b>Clustered Heatmap: Matriks Asosiasi 8 Indikator BPS</b>', font: { size: 13.5 } },
-      margin: { l: 120, r: 20, t: 50, b: 120 },
-      height: 500,
+      margin: { l: 110, r: 20, t: 40, b: 100 },
+      height: 420,
       paper_bgcolor: 'transparent'
     };
     window.Plotly.react('heatmap-chart', [trace], layout, { responsive: true, displayModeBar: false });
@@ -875,8 +875,8 @@ export default function Home() {
     const layout = {
       title: { text: '<b>Radar Chart: Perbandingan Profil Multidimensi Antar Wilayah</b>', font: { size: 13.5 } },
       polar: { radialaxis: { visible: true, range: [0, 100] } },
-      margin: { l: 40, r: 40, t: 50, b: 40 },
-      height: 480,
+      margin: { l: 40, r: 40, t: 40, b: 30 },
+      height: 420,
       paper_bgcolor: 'transparent'
     };
 
@@ -1024,8 +1024,8 @@ export default function Home() {
     const modeLabel = hierViewMode === 'pulau' ? 'Pengelompokan Pulau' : hierViewMode === 'provinsi' ? 'Pengelompokan Provinsi' : 'Daftar Kab/Kota';
     const layout = {
       title: { text: `<b>Interactive Treemap (${modeLabel}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
-      margin: { l: 10, r: 10, t: 40, b: 10 },
-      height: 480,
+      margin: { l: 10, r: 10, t: 35, b: 10 },
+      height: 420,
       paper_bgcolor: 'transparent'
     };
 
@@ -1163,8 +1163,8 @@ export default function Home() {
     const modeLabel = hierViewMode === 'pulau' ? 'Pengelompokan Pulau' : hierViewMode === 'provinsi' ? 'Pengelompokan Provinsi' : 'Daftar Kab/Kota';
     const layout = {
       title: { text: `<b>Interactive Sunburst (${modeLabel}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
-      margin: { l: 10, r: 10, t: 40, b: 10 },
-      height: 480,
+      margin: { l: 10, r: 10, t: 35, b: 10 },
+      height: 420,
       paper_bgcolor: 'transparent'
     };
 
@@ -1442,63 +1442,66 @@ export default function Home() {
           </div>
 
           <div className="header-meta">
-            <div className="header-title">
-              <div className="institution-pill">
-                <i className="fa-solid fa-building-columns"></i>
-                <span>Badan Pusat Statistik RI &bull; Politeknik Statistika STIS</span>
+            <div className="header-left">
+              <span className="institution-pill">
+                <i className="fa-solid fa-building-columns"></i> BPS RI &bull; Polstat STIS
+              </span>
+              <div className="header-title-box">
+                <h1>Disparitas Spasial Partisipasi Ekonomi &amp; Keputusan Perempuan Indonesia</h1>
+                <p>Pangkalan 514 Kabupaten/Kota &bull; 38 Provinsi &bull; Sumber Data: BPS RI 2024</p>
               </div>
-              <h1>Eksplorasi Disparitas Spasial Partisipasi Ekonomi &amp; Pengambilan Keputusan Perempuan di Indonesia</h1>
-              <p>Visualisasi Analitik Komprehensif Berbasis 514 Kabupaten/Kota &amp; 38 Provinsi (Framework Next.js / BPS 2024)</p>
             </div>
-            <div className="badges-row">
-              <span className="badge badge-bps"><i className="fa-solid fa-landmark"></i> BPS RI 2024</span>
-              <span className="badge badge-primary"><i className="fa-solid fa-shield-halved"></i> Bebas API Key</span>
-              <span className="badge badge-accent"><i className="fa-solid fa-draw-polygon"></i> 514 Kab/Kota SHP</span>
-              <span className="badge badge-success"><i className="fa-solid fa-mobile-screen"></i> Multi-Device</span>
+            <div className="header-right">
+              <div className="active-module-pill">
+                <i className={`fa-solid ${currentModule.icon}`}></i>
+                <span>Modul: <strong>{currentModule.label}</strong></span>
+              </div>
+              <div className="badges-row">
+                <span className="badge badge-bps">BPS 2024</span>
+                <span className="badge badge-primary">514 Daerah</span>
+                <span className="badge badge-success">Zero-API</span>
+              </div>
             </div>
           </div>
         </header>
-
-        {/* Penanda Modul Aktif Terpilih Saja */}
-        <div className="active-module-bar">
-          <div className="active-module-content">
-            <div className="active-module-badge">
-              <i className={`fa-solid ${currentModule.icon}`}></i>
-            </div>
-            <div>
-              <div className="active-module-title">{currentModule.label}</div>
-              <div className="active-module-desc">{currentModule.desc}</div>
-            </div>
-          </div>
-        </div>
 
         {/* Tab 1: Overview */}
         <section className={`tab-pane ${activeTab === 'tab-overview' ? 'active' : ''}`}>
           <div className="kpi-grid">
             <div className="kpi-card">
               <span className="kpi-label"><i className="fa-solid fa-landmark"></i> Parlemen Perempuan</span>
-              <span className="kpi-value">{avgParlemen.toFixed(2)}%</span>
-              <span className="kpi-delta neg">{(avgParlemen - 30.0).toFixed(1)}% vs Kuota 30%</span>
+              <div className="kpi-main-row">
+                <span className="kpi-value">{avgParlemen.toFixed(2)}%</span>
+                <span className="kpi-delta neg">{(avgParlemen - 30.0).toFixed(1)}% vs Kuota</span>
+              </div>
             </div>
             <div className="kpi-card">
               <span className="kpi-label"><i className="fa-solid fa-user-tie"></i> Tenaga Profesional</span>
-              <span className="kpi-value">{avgProfesional.toFixed(2)}%</span>
-              <span className="kpi-delta neu">Mendekati Paritas 50%</span>
+              <div className="kpi-main-row">
+                <span className="kpi-value">{avgProfesional.toFixed(2)}%</span>
+                <span className="kpi-delta neu">Paritas 50%</span>
+              </div>
             </div>
             <div className="kpi-card">
               <span className="kpi-label"><i className="fa-solid fa-hand-holding-dollar"></i> Sumbangan Pendapatan</span>
-              <span className="kpi-value">{avgPendapatan.toFixed(2)}%</span>
-              <span className="kpi-delta neg">{(avgPendapatan - 50.0).toFixed(1)}% vs Paritas</span>
+              <div className="kpi-main-row">
+                <span className="kpi-value">{avgPendapatan.toFixed(2)}%</span>
+                <span className="kpi-delta neg">{(avgPendapatan - 50.0).toFixed(1)}%</span>
+              </div>
             </div>
             <div className="kpi-card">
               <span className="kpi-label"><i className="fa-solid fa-briefcase"></i> TPAK Perempuan</span>
-              <span className="kpi-value">{avgTPAK.toFixed(2)}%</span>
-              <span className="kpi-delta pos">Partisipasi Kerja Aktif</span>
+              <div className="kpi-main-row">
+                <span className="kpi-value">{avgTPAK.toFixed(2)}%</span>
+                <span className="kpi-delta pos">Kerja Aktif</span>
+              </div>
             </div>
             <div className="kpi-card">
-              <span className="kpi-label"><i className="fa-solid fa-globe"></i> Autokorelasi Moran&apos;s I</span>
-              <span className="kpi-value">0.354 | 0.450</span>
-              <span className="kpi-delta pos">p = 0.001 (Signifikan)</span>
+              <span className="kpi-label"><i className="fa-solid fa-globe"></i> Moran&apos;s I Spasial</span>
+              <div className="kpi-main-row">
+                <span className="kpi-value">0.354 | 0.450</span>
+                <span className="kpi-delta pos">p = 0.001</span>
+              </div>
             </div>
           </div>
 
