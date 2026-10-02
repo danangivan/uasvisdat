@@ -682,7 +682,7 @@ export default function Home() {
           fetch('/data/nasional.json').then(r => r.json()),
           fetch('/data/pca_meta.json').then(r => r.json()),
           fetch('/data/correlation_matrix.json').then(r => r.json()),
-          fetch('/data/provinsi.geojson').then(r => r.json()).catch(() => null),
+          fetch('/data/provinsi_indonesia.geojson').then(r => r.json()).catch(() => null),
           fetch('/data/kabkota_indonesia.geojson').then(r => r.json()).catch(() => null)
         ]);
 
@@ -845,6 +845,7 @@ export default function Home() {
     heatmapBlur,
     heatmapShowBoundaries,
     heatmapShowPoints,
+    geojsonData,
     kabkotaGeojson,
     lisaClusterVar,
     pcaColorBy,
@@ -920,10 +921,10 @@ export default function Home() {
   const CLEAN_BASEMAP_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
   const CLEAN_BASEMAP_ATTR = '&copy; Esri, HERE, Garmin, &copy; OpenStreetMap | Bebas API Key & Tanpa Watermark';
 
-  // 2a. Peta Batas Kabupaten/Kota (GeoJSON Nasional 514 Kab/Kota - Zero API)
+  // 2a. Peta Batas Wilayah (GeoJSON 38 Batas Murni Provinsi saat Provinsi, atau 514 Kab/Kota)
   function renderLeafletKabkotaBoundary() {
     const el = document.getElementById('kabkota-boundary-map');
-    const activeGeo = kabkotaGeojson;
+    const activeGeo = isProvinsi ? (geojsonData || kabkotaGeojson) : kabkotaGeojson;
     if (!el || !activeGeo || !window.L) return;
 
     if (!kabkotaBoundaryMapRef.current) {
@@ -1002,10 +1003,10 @@ export default function Home() {
         const matchesFilter = selectedProv === 'Semua Provinsi' || p.provinsi === selectedProv;
         return {
           fillColor: getPolygonColor(p),
-          weight: 1.1,
+          weight: isProvinsi ? 1.8 : 1.1,
           opacity: 1,
           color: '#ffffff',
-          dashArray: '1',
+          dashArray: isProvinsi ? '' : '1',
           fillOpacity: matchesFilter ? 0.85 : 0.2
         };
       },
@@ -1035,7 +1036,7 @@ export default function Home() {
           mouseover: (e) => {
             const l = e.target;
             l.setStyle({
-              weight: 2.8,
+              weight: isProvinsi ? 3.0 : 2.8,
               color: '#0f172a',
               dashArray: '',
               fillOpacity: 0.95
@@ -1132,7 +1133,7 @@ export default function Home() {
       }
     }).addTo(heatmapMapRef.current);
 
-    const activeGeo = kabkotaGeojson;
+    const activeGeo = isProvinsi ? (geojsonData || kabkotaGeojson) : kabkotaGeojson;
 
     if (heatmapShowBoundaries && activeGeo) {
       window.L.geoJson(activeGeo, {
@@ -1144,12 +1145,12 @@ export default function Home() {
           fillColor: 'transparent',
           fillOpacity: 0,
           color: '#334155',
-          weight: 1.1,
+          weight: isProvinsi ? 1.6 : 1.1,
           opacity: 0.65,
-          dashArray: '3'
+          dashArray: isProvinsi ? '' : '3'
         }),
         onEachFeature: (feature, layer) => {
-          layer.bindTooltip(`<b>${feature.properties.nama_resmi}</b> (${feature.properties.provinsi})`, { sticky: true });
+          layer.bindTooltip(isProvinsi ? `<b>Provinsi ${feature.properties.provinsi}</b>` : `<b>${feature.properties.nama_resmi}</b> (${feature.properties.provinsi})`, { sticky: true });
         }
       }).addTo(heatmapMapRef.current);
     }
@@ -1290,21 +1291,21 @@ export default function Home() {
 
     window.L.geoJson(geojsonData, {
       style: (feature) => {
-        const name = (feature.properties.Propinsi || feature.properties.name || '').toUpperCase();
+        const name = (feature.properties.provinsi || feature.properties.Propinsi || feature.properties.name || '').toUpperCase();
         const val = provMap[name] || provMap[name.replace('IRIAN JAYA BARAT', 'PAPUA BARAT')];
         return {
           fillColor: getColor(val),
-          weight: 1.2,
+          weight: 1.5,
           opacity: 1,
           color: '#ffffff',
-          dashArray: '2',
-          fillOpacity: 0.75
+          dashArray: '',
+          fillOpacity: 0.85
         };
       },
       onEachFeature: (feature, layer) => {
-        const name = feature.properties.Propinsi || feature.properties.name;
-        const val = provMap[name.toUpperCase()] || 'N/A';
-        layer.bindTooltip(`<b>${name}</b><br>${choroplethVar.toUpperCase()}: ${val}`);
+        const name = feature.properties.provinsi || feature.properties.Propinsi || feature.properties.name;
+        const val = provMap[(name || '').toUpperCase()] || 'N/A';
+        layer.bindTooltip(`<b>Provinsi ${name}</b><br>${choroplethVar.toUpperCase()}: ${val}`);
       }
     }).addTo(choroplethMapRef.current);
 
@@ -2019,12 +2020,12 @@ export default function Home() {
                   </span>
 
                   <a
-                    href="/data/kabkota_indonesia.geojson"
-                    download="kabkota_indonesia.geojson"
+                    href={isProvinsi ? "/data/provinsi_indonesia.geojson" : "/data/kabkota_indonesia.geojson"}
+                    download={isProvinsi ? "provinsi_indonesia.geojson" : "kabkota_indonesia.geojson"}
                     className="btn-export"
-                    title="Unduh berkas GeoJSON Batas 514 Kab/Kota"
+                    title={isProvinsi ? "Unduh berkas GeoJSON Batas 38 Provinsi" : "Unduh berkas GeoJSON Batas 514 Kab/Kota"}
                   >
-                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON (0.79 MB)
+                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON ({isProvinsi ? '0.22 MB' : '0.79 MB'})
                   </a>
 
                   <select
@@ -2073,7 +2074,10 @@ export default function Home() {
                         {selectedKabDetail.nama_resmi}
                       </h3>
                       <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
-                        {selectedKabDetail.provinsi} &bull; Tipe: <strong>{selectedKabDetail.tipe}</strong> &bull; Kode: <code>{selectedKabDetail.kode_wilayah}</code> &bull; Luas: {Number(selectedKabDetail.LUASWH || 0).toLocaleString('id-ID')} km²
+                        {selectedKabDetail.provinsi} &bull; Tipe: <strong>{selectedKabDetail.tipe || (isProvinsi ? 'Provinsi' : 'Kab/Kota')}</strong>
+                        {selectedKabDetail.kode_wilayah ? <> &bull; Kode: <code>{selectedKabDetail.kode_wilayah}</code></> : null}
+                        {selectedKabDetail.LUASWH ? <> &bull; Luas: {Number(selectedKabDetail.LUASWH || 0).toLocaleString('id-ID')} km²</> : null}
+                        {selectedKabDetail.pulau ? <> &bull; Gugus: <strong>{selectedKabDetail.pulau}</strong></> : null}
                       </p>
                     </div>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
