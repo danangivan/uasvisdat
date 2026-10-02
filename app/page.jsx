@@ -29,6 +29,11 @@ export default function Home() {
   const [activeMultiSubtab, setActiveMultiSubtab] = useState('multi-subtab-pca');
   const [activeHierSubtab, setActiveHierSubtab] = useState('hier-subtab-treemap');
 
+  // Hierarchical Region Selector
+  const [hierViewMode, setHierViewMode] = useState('pulau');
+  const [hierSelectedProv, setHierSelectedProv] = useState('Semua Provinsi');
+  const [hierSelectedKab, setHierSelectedKab] = useState('Semua Kab/Kota');
+
   // Dynamic Chart Controls
   const [geoSizeVar, setGeoSizeVar] = useState('pengeluaran');
   const [geoColorVar, setGeoColorVar] = useState('skor_keputusan');
@@ -140,6 +145,27 @@ export default function Home() {
     )
   ].sort();
 
+  // Hierarchical tab: available provinces and kabkota based on hierViewMode
+  const hierAvailableProvs = [
+    'Semua Provinsi',
+    ...new Set(filteredKabkota.map(d => d.provinsi))
+  ].sort();
+
+  const hierAvailableKabs = [
+    'Semua Kab/Kota',
+    ...(hierSelectedProv === 'Semua Provinsi'
+      ? filteredKabkota.map(d => d.nama_resmi)
+      : filteredKabkota.filter(d => d.provinsi === hierSelectedProv).map(d => d.nama_resmi)
+    )
+  ].sort();
+
+  // Hierarchical filtered data
+  const hierFilteredData = filteredKabkota.filter(d => {
+    if (hierSelectedProv !== 'Semua Provinsi' && d.provinsi !== hierSelectedProv) return false;
+    if (hierSelectedKab !== 'Semua Kab/Kota' && d.nama_resmi !== hierSelectedKab) return false;
+    return true;
+  });
+
   // Color Palettes
   const PALETTES = {
     Viridis: ['#440154', '#482878', '#3e4989', '#31688e', '#26828e', '#1f9e89', '#35b779', '#6ece58', '#b5de2b', '#fde725'],
@@ -188,7 +214,10 @@ export default function Home() {
     lisaClusterVar,
     pcaColorBy,
     hierSizeVar,
-    hierColorVar
+    hierColorVar,
+    hierViewMode,
+    hierSelectedProv,
+    hierSelectedKab
   ]);
 
   // 1. Quadrant Scatter
@@ -864,42 +893,98 @@ export default function Home() {
   }
 
   function renderTreemap() {
+    const data = hierFilteredData;
+    if (data.length === 0) return;
+
     const trace = {
       type: 'treemap',
-      labels: filteredKabkota.map(d => d.nama_resmi),
-      parents: filteredKabkota.map(d => d.provinsi),
-      values: filteredKabkota.map(d => d[hierSizeVar]),
-      text: filteredKabkota.map(d => `${d.nama_resmi}<br>Prov: ${d.provinsi}<br>${hierColorVar}: ${d[hierColorVar]}`),
+      labels: [],
+      parents: [],
+      values: [],
+      text: [],
       hoverinfo: 'text',
       marker: {
-        colors: filteredKabkota.map(d => d[hierColorVar]),
+        colors: [],
         colorscale: 'Viridis',
         showscale: true,
         colorbar: { title: hierColorVar.toUpperCase() }
       }
     };
 
-    const pulauSet = [...new Set(filteredKabkota.map(d => d.pulau))];
-    const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
-
-    pulauSet.forEach(pulau => {
-      trace.labels.push(pulau);
-      trace.parents.push('Indonesia');
-      trace.values.push(0);
+    // Add kab/kota nodes
+    data.forEach(d => {
+      trace.labels.push(d.nama_resmi);
+      if (hierViewMode === 'kabkota') {
+        trace.parents.push(hierSelectedProv !== 'Semua Provinsi' ? hierSelectedProv : 'Indonesia');
+      } else {
+        trace.parents.push(d.provinsi);
+      }
+      trace.values.push(d[hierSizeVar]);
+      trace.text.push(`${d.nama_resmi}<br>Prov: ${d.provinsi}<br>${hierColorVar}: ${d[hierColorVar]}`);
+      trace.marker.colors.push(d[hierColorVar]);
     });
 
-    provSet.forEach(p => {
-      trace.labels.push(p.prov);
-      trace.parents.push(p.pulau);
+    if (hierViewMode === 'pulau') {
+      // Full hierarchy: Indonesia > Pulau > Provinsi > Kab/Kota
+      const pulauSet = [...new Set(data.map(d => d.pulau))];
+      const provSet = [...new Set(data.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
+
+      pulauSet.forEach(pulau => {
+        trace.labels.push(pulau);
+        trace.parents.push('Indonesia');
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      });
+
+      provSet.forEach(p => {
+        trace.labels.push(p.prov);
+        trace.parents.push(p.pulau);
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      });
+
+      trace.labels.push('Indonesia');
+      trace.parents.push('');
       trace.values.push(0);
-    });
+      trace.text.push('');
+      trace.marker.colors.push(0);
+    } else if (hierViewMode === 'provinsi') {
+      // Group by province: Root > Provinsi > Kab/Kota
+      const provSet = [...new Set(data.map(d => d.provinsi))];
+      const root = hierSelectedProv !== 'Semua Provinsi' ? hierSelectedProv : 'Indonesia';
 
-    trace.labels.push('Indonesia');
-    trace.parents.push('');
-    trace.values.push(0);
+      if (hierSelectedProv === 'Semua Provinsi') {
+        provSet.forEach(prov => {
+          trace.labels.push(prov);
+          trace.parents.push(root);
+          trace.values.push(0);
+          trace.text.push('');
+          trace.marker.colors.push(0);
+        });
 
+        trace.labels.push(root);
+        trace.parents.push('');
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      }
+    } else {
+      // kabkota mode: flat list under root
+      const root = hierSelectedProv !== 'Semua Provinsi' ? hierSelectedProv : 'Indonesia';
+      if (!trace.labels.includes(root)) {
+        trace.labels.push(root);
+        trace.parents.push('');
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      }
+    }
+
+    const modeLabel = hierViewMode === 'pulau' ? 'Pulau' : hierViewMode === 'provinsi' ? 'Provinsi' : 'Kab/Kota';
     const layout = {
-      title: { text: `<b>Interactive Treemap: Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
+      title: { text: `<b>Interactive Treemap (${modeLabel}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
       margin: { l: 10, r: 10, t: 40, b: 10 },
       height: 560,
       paper_bgcolor: 'transparent'
@@ -909,38 +994,69 @@ export default function Home() {
   }
 
   function renderSunburst() {
+    const data = hierFilteredData;
+    if (data.length === 0) return;
+
     const trace = {
       type: 'sunburst',
-      labels: filteredKabkota.map(d => d.nama_resmi),
-      parents: filteredKabkota.map(d => d.provinsi),
-      values: filteredKabkota.map(d => d[hierSizeVar]),
-      text: filteredKabkota.map(d => `${d.nama_resmi}<br>${hierColorVar}: ${d[hierColorVar]}`),
+      labels: [],
+      parents: [],
+      values: [],
+      text: [],
       hoverinfo: 'text',
       marker: {
-        colors: filteredKabkota.map(d => d[hierColorVar]),
+        colors: [],
         colorscale: 'Viridis',
         showscale: true,
         colorbar: { title: hierColorVar.toUpperCase() }
       }
     };
 
-    const pulauSet = [...new Set(filteredKabkota.map(d => d.pulau))];
-    const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
-
-    pulauSet.forEach(pulau => {
-      trace.labels.push(pulau);
-      trace.parents.push('');
-      trace.values.push(0);
+    data.forEach(d => {
+      trace.labels.push(d.nama_resmi);
+      if (hierViewMode === 'kabkota') {
+        trace.parents.push(hierSelectedProv !== 'Semua Provinsi' ? hierSelectedProv : '');
+      } else {
+        trace.parents.push(d.provinsi);
+      }
+      trace.values.push(d[hierSizeVar]);
+      trace.text.push(`${d.nama_resmi}<br>${hierColorVar}: ${d[hierColorVar]}`);
+      trace.marker.colors.push(d[hierColorVar]);
     });
 
-    provSet.forEach(p => {
-      trace.labels.push(p.prov);
-      trace.parents.push(p.pulau);
-      trace.values.push(0);
-    });
+    if (hierViewMode === 'pulau') {
+      const pulauSet = [...new Set(data.map(d => d.pulau))];
+      const provSet = [...new Set(data.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
 
+      pulauSet.forEach(pulau => {
+        trace.labels.push(pulau);
+        trace.parents.push('');
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      });
+
+      provSet.forEach(p => {
+        trace.labels.push(p.prov);
+        trace.parents.push(p.pulau);
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      });
+    } else if (hierViewMode === 'provinsi' && hierSelectedProv === 'Semua Provinsi') {
+      const provSet = [...new Set(data.map(d => d.provinsi))];
+      provSet.forEach(prov => {
+        trace.labels.push(prov);
+        trace.parents.push('');
+        trace.values.push(0);
+        trace.text.push('');
+        trace.marker.colors.push(0);
+      });
+    }
+
+    const modeLabel = hierViewMode === 'pulau' ? 'Pulau' : hierViewMode === 'provinsi' ? 'Provinsi' : 'Kab/Kota';
     const layout = {
-      title: { text: `<b>Interactive Sunburst Chart: Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
+      title: { text: `<b>Interactive Sunburst (${modeLabel}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
       margin: { l: 10, r: 10, t: 40, b: 10 },
       height: 580,
       paper_bgcolor: 'transparent'
@@ -949,13 +1065,31 @@ export default function Home() {
     window.Plotly.react('sunburst-chart', [trace], layout, { responsive: true, displayModeBar: false });
   }
 
-  // Summary Table Data
+  // Summary Table Data (by Island)
   const islandAgg = {};
-  filteredKabkota.forEach(d => {
+  hierFilteredData.forEach(d => {
     if (!islandAgg[d.pulau]) {
       islandAgg[d.pulau] = { count: 0, parlemen: 0, pendapatan: 0, profesional: 0, tpak: 0, pengeluaran: 0, keputusan: 0, ekonomi: 0, ikpp: 0 };
     }
     const item = islandAgg[d.pulau];
+    item.count++;
+    item.parlemen += d.parlemen;
+    item.pendapatan += d.pendapatan;
+    item.profesional += d.profesional;
+    item.tpak += d.tpak;
+    item.pengeluaran += d.pengeluaran;
+    item.keputusan += d.skor_keputusan;
+    item.ekonomi += d.skor_ekonomi;
+    item.ikpp += d.ikpp_komposit;
+  });
+
+  // Summary Table Data (by Province)
+  const provAgg = {};
+  hierFilteredData.forEach(d => {
+    if (!provAgg[d.provinsi]) {
+      provAgg[d.provinsi] = { count: 0, parlemen: 0, pendapatan: 0, profesional: 0, tpak: 0, pengeluaran: 0, keputusan: 0, ekonomi: 0, ikpp: 0, pulau: d.pulau };
+    }
+    const item = provAgg[d.provinsi];
     item.count++;
     item.parlemen += d.parlemen;
     item.pendapatan += d.pendapatan;
@@ -1075,12 +1209,12 @@ export default function Home() {
                   setMobileMenuOpen(false);
                 }}
               >
-                <option value="tab-overview">📈 1. Ringkasan &amp; Storytelling</option>
-                <option value="tab-geospatial">🗺️ 2. Analisis Geospasial (Peta &amp; Heatmap)</option>
-                <option value="tab-multivariate">🔀 3. Dimensi Tinggi (Multivariat &amp; PCA)</option>
-                <option value="tab-hierarchical">🌳 4. Analisis Berhierarki (Treemap &amp; Sunburst)</option>
-                <option value="tab-data">📊 5. Eksplorasi Data (Pangkalan 514 Kab/Kota)</option>
-                <option value="tab-method">📖 6. Metodologi &amp; Integritas AI</option>
+                <option value="tab-overview">1. Ringkasan &amp; Storytelling</option>
+                <option value="tab-geospatial">2. Analisis Geospasial (Peta &amp; Heatmap)</option>
+                <option value="tab-multivariate">3. Dimensi Tinggi (Multivariat &amp; PCA)</option>
+                <option value="tab-hierarchical">4. Analisis Berhierarki (Treemap &amp; Sunburst)</option>
+                <option value="tab-data">5. Eksplorasi Data (Pangkalan 514 Kab/Kota)</option>
+                <option value="tab-method">6. Metodologi &amp; Integritas AI</option>
               </select>
               <i className="fa-solid fa-chevron-down select-arrow-icon"></i>
             </div>
@@ -1249,29 +1383,36 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="card">
-            <div className="card-header">
-              <div>
-                <div className="card-title"><i className="fa-solid fa-crosshairs"></i> Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan</div>
-                <div className="card-caption">Memetakan 514 kabupaten/kota terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
+          <div className="content-with-sidebar">
+            <div className="content-main-col">
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title"><i className="fa-solid fa-crosshairs"></i> Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan</div>
+                    <div className="card-caption">Memetakan 514 kabupaten/kota terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
+                  </div>
+                </div>
+                <div id="quadrant-chart" className="chart-box"></div>
               </div>
             </div>
-            <div id="quadrant-chart" className="chart-box"></div>
-          </div>
 
-          <div className="story-grid">
-            <div className="story-card green">
-              <h4><i className="fa-solid fa-fire"></i> 1. Hotspot Sulawesi Utara vs Defisit Parlemen</h4>
-              <p>Sulawesi Utara membentuk klaster <em>High-High Hotspot</em> terkuat nasional dengan keterwakilan DPRD perempuan &gt; 40% dan tenaga profesional &gt; 55% berkat kultur egaliter Minahasa. Sebaliknya, lebih dari 85% kabupaten/kota di Indonesia masih gagal mencapai kuota afirmasi 30%.</p>
-            </div>
-            <div className="story-card amber">
-              <h4><i className="fa-solid fa-person-digging"></i> 2. Paradoks Kerja Wilayah Timur (Sticky Floor)</h4>
-              <p>Daerah pedalaman Papua dan NTT mencatatkan TPAK perempuan sangat tinggi (70% - 95%), namun sumbangan pendapatan riil mereka tertekan rendah. Beban kerja fisik perempuan di sektor pertanian tradisional belum terkonversi menjadi kemandirian ekonomi formal.</p>
-            </div>
-            <div className="story-card purple">
-              <h4><i className="fa-solid fa-building-flag"></i> 3. Keunggulan Perkotaan (Urban Advantage)</h4>
-              <p>Entitas Kota secara konsisten mengungguli Kabupaten pada proporsi Tenaga Profesional (52.4% vs 42.1%) dan pengeluaran riil per kapita, ditopang oleh akses pendidikan tinggi dan terbukanya sektor jasa modern.</p>
-            </div>
+            <aside className="analysis-sidebar">
+              <div className="analysis-section-title">
+                <i className="fa-solid fa-lightbulb"></i> Analisis dan Temuan Utama
+              </div>
+              <div className="analysis-card green">
+                <h4><i className="fa-solid fa-fire"></i> 1. Hotspot Sulawesi Utara vs Defisit Parlemen</h4>
+                <p>Sulawesi Utara membentuk klaster <em>High-High Hotspot</em> terkuat nasional dengan keterwakilan DPRD perempuan &gt; 40% dan tenaga profesional &gt; 55% berkat kultur egaliter Minahasa. Sebaliknya, lebih dari 85% kabupaten/kota di Indonesia masih gagal mencapai kuota afirmasi 30%.</p>
+              </div>
+              <div className="analysis-card amber">
+                <h4><i className="fa-solid fa-person-digging"></i> 2. Paradoks Kerja Wilayah Timur (Sticky Floor)</h4>
+                <p>Daerah pedalaman Papua dan NTT mencatatkan TPAK perempuan sangat tinggi (70% - 95%), namun sumbangan pendapatan riil mereka tertekan rendah. Beban kerja fisik perempuan di sektor pertanian tradisional belum terkonversi menjadi kemandirian ekonomi formal.</p>
+              </div>
+              <div className="analysis-card purple">
+                <h4><i className="fa-solid fa-building-flag"></i> 3. Keunggulan Perkotaan (Urban Advantage)</h4>
+                <p>Entitas Kota secara konsisten mengungguli Kabupaten pada proporsi Tenaga Profesional (52.4% vs 42.1%) dan pengeluaran riil per kapita, ditopang oleh akses pendidikan tinggi dan terbukanya sektor jasa modern.</p>
+              </div>
+            </aside>
           </div>
         </section>
 
@@ -1301,10 +1442,10 @@ export default function Home() {
               <div className="card-header">
                 <div>
                   <div className="card-title">
-                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas &amp; Poligon Tematik Kabupaten/Kota (GeoJSON BPS 2024)
+                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas dan Poligon Tematik Kabupaten/Kota (GeoJSON BPS 2024)
                   </div>
                   <div className="card-caption">
-                    Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia dan detail shapefile Kalimantan, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark &amp; Tanpa API Key).
+                    Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia dan detail shapefile Kalimantan, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark dan Tanpa API Key).
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -1312,7 +1453,6 @@ export default function Home() {
                     <i className="fa-solid fa-shield-halved"></i> 100% Bebas Watermark (No API Required)
                   </span>
 
-                  {/* Selector Cakupan Wilayah: Nasional vs Kalimantan */}
                   <select
                     value={boundaryScope}
                     onChange={e => setBoundaryScope(e.target.value)}
@@ -1346,7 +1486,7 @@ export default function Home() {
                       <option value="rls">Rata-rata Lama Sekolah (RLS)</option>
                       <option value="hls">Harapan Lama Sekolah (HLS)</option>
                     </optgroup>
-                    <optgroup label="Indeks & Tipologi Analitik">
+                    <optgroup label="Indeks dan Tipologi Analitik">
                       <option value="skor_keputusan">Skor Pengambilan Keputusan (0-100)</option>
                       <option value="skor_ekonomi">Skor Partisipasi Ekonomi (0-100)</option>
                       <option value="ikpp_komposit">IKPP Komposit Gender (0-100)</option>
@@ -1358,90 +1498,96 @@ export default function Home() {
                 </div>
               </div>
 
-              <div id="kabkota-boundary-map"></div>
+              <div className="content-with-sidebar">
+                <div className="content-main-col">
+                  <div id="kabkota-boundary-map"></div>
 
-              {/* Detail Panel Saat Wilayah Diklik */}
-              {selectedKabDetail ? (
-                <div className="kab-detail-panel">
-                  <div className="kab-detail-header">
-                    <div>
-                      <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
-                        <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', marginRight: '6px' }}></i>
-                        {selectedKabDetail.nama_resmi}
-                      </h3>
-                      <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
-                        {selectedKabDetail.provinsi} &bull; Tipe: <strong>{selectedKabDetail.tipe}</strong> &bull; Kode: <code>{selectedKabDetail.kode_wilayah}</code> &bull; Luas: {Number(selectedKabDetail.LUASWH || 0).toLocaleString('id-ID')} km²
-                      </p>
+                  {selectedKabDetail ? (
+                    <div className="kab-detail-panel">
+                      <div className="kab-detail-header">
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
+                            <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', marginRight: '6px' }}></i>
+                            {selectedKabDetail.nama_resmi}
+                          </h3>
+                          <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
+                            {selectedKabDetail.provinsi} &bull; Tipe: <strong>{selectedKabDetail.tipe}</strong> &bull; Kode: <code>{selectedKabDetail.kode_wilayah}</code> &bull; Luas: {Number(selectedKabDetail.LUASWH || 0).toLocaleString('id-ID')} km2
+                          </p>
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          <span className="badge badge-primary">{selectedKabDetail.kuadran}</span>
+                          <button
+                            onClick={() => setSelectedKabDetail(null)}
+                            style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}
+                          >
+                            <i className="fa-solid fa-xmark"></i> Tutup Detail
+                          </button>
+                        </div>
+                      </div>
+                      <div className="kab-detail-grid">
+                        <div className="kab-metric-card">
+                          <span className="k-label">Parlemen Perempuan</span>
+                          <span className="k-val">{selectedKabDetail.parlemen}%</span>
+                          <span className="k-sub">{selectedKabDetail.parlemen >= 30 ? 'Memenuhi Kuota 30%' : 'Di bawah Kuota 30%'}</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">Sumbangan Pendapatan</span>
+                          <span className="k-val">{selectedKabDetail.pendapatan}%</span>
+                          <span className="k-sub">Paritas: 50%</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">Tenaga Profesional</span>
+                          <span className="k-val">{selectedKabDetail.profesional}%</span>
+                          <span className="k-sub">Sektor Formal</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">TPAK Perempuan</span>
+                          <span className="k-val">{selectedKabDetail.tpak}%</span>
+                          <span className="k-sub">Partisipasi Kerja</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">Pengeluaran Riil</span>
+                          <span className="k-val">Rp{Number(selectedKabDetail.pengeluaran).toLocaleString('id-ID')}</span>
+                          <span className="k-sub">per kapita/thn</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">IKPP Komposit</span>
+                          <span className="k-val">{selectedKabDetail.ikpp_komposit}</span>
+                          <span className="k-sub">Skor 0-100</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">Skor Keputusan</span>
+                          <span className="k-val">{selectedKabDetail.skor_keputusan}</span>
+                          <span className="k-sub">Politik dan Agensi</span>
+                        </div>
+                        <div className="kab-metric-card">
+                          <span className="k-label">Skor Ekonomi</span>
+                          <span className="k-val">{selectedKabDetail.skor_ekonomi}</span>
+                          <span className="k-sub">Kemandirian Finansial</span>
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span className="badge badge-primary">{selectedKabDetail.kuadran}</span>
-                      <button
-                        onClick={() => setSelectedKabDetail(null)}
-                        style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}
-                      >
-                        <i className="fa-solid fa-xmark"></i> Tutup Detail
-                      </button>
+                  ) : (
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <i className="fa-solid fa-circle-info" style={{ color: '#2563eb' }}></i>
+                      <span><strong>Tip Eksplorasi:</strong> Gunakan menu <em>&quot;Cakupan&quot;</em> untuk beralih antara <strong>Seluruh Indonesia (514 Kab/Kota)</strong> dan <strong>Pulau Kalimantan (Detail SHP)</strong>. Anda juga dapat menggunakan filter Pulau dan Provinsi di sidebar kiri untuk zoom otomatis ke wilayah target.</span>
                     </div>
-                  </div>
-                  <div className="kab-detail-grid">
-                    <div className="kab-metric-card">
-                      <span className="k-label">Parlemen Perempuan</span>
-                      <span className="k-val">{selectedKabDetail.parlemen}%</span>
-                      <span className="k-sub">{selectedKabDetail.parlemen >= 30 ? 'Memenuhi Kuota 30%' : 'Di bawah Kuota 30%'}</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">Sumbangan Pendapatan</span>
-                      <span className="k-val">{selectedKabDetail.pendapatan}%</span>
-                      <span className="k-sub">Paritas: 50%</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">Tenaga Profesional</span>
-                      <span className="k-val">{selectedKabDetail.profesional}%</span>
-                      <span className="k-sub">Sektor Formal</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">TPAK Perempuan</span>
-                      <span className="k-val">{selectedKabDetail.tpak}%</span>
-                      <span className="k-sub">Partisipasi Kerja</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">Pengeluaran Riil</span>
-                      <span className="k-val">Rp{Number(selectedKabDetail.pengeluaran).toLocaleString('id-ID')}</span>
-                      <span className="k-sub">per kapita/thn</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">IKPP Komposit</span>
-                      <span className="k-val">{selectedKabDetail.ikpp_komposit}</span>
-                      <span className="k-sub">Skor 0-100</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">Skor Keputusan</span>
-                      <span className="k-val">{selectedKabDetail.skor_keputusan}</span>
-                      <span className="k-sub">Politik & Agensi</span>
-                    </div>
-                    <div className="kab-metric-card">
-                      <span className="k-label">Skor Ekonomi</span>
-                      <span className="k-val">{selectedKabDetail.skor_ekonomi}</span>
-                      <span className="k-sub">Kemandirian Finansial</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
-              ) : (
-                <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-circle-info" style={{ color: '#2563eb' }}></i>
-                  <span><strong>Tip Eksplorasi:</strong> Gunakan menu <em>&quot;Cakupan&quot;</em> untuk beralih antara <strong>Seluruh Indonesia (514 Kab/Kota)</strong> dan <strong>Pulau Kalimantan (Detail SHP)</strong>. Anda juga dapat menggunakan filter Pulau dan Provinsi di sidebar kiri untuk zoom otomatis ke wilayah target.</span>
-                </div>
-              )}
 
-              <div className="story-grid">
-                <div className="story-card green">
-                  <h4><i className="fa-solid fa-earth-asia"></i> Cakupan Spasial 514 Kabupaten/Kota Seluruh Indonesia</h4>
-                  <p>Aplikasi ini memadankan batas poligon digital 514 kabupaten/kota dari 38 provinsi di Indonesia dengan 8 indikator gender BPS 2024. Melalui dasbor ini, disparitas antara wilayah barat (Jawa &amp; Sumatera) dan timur (Nusa Tenggara, Maluku, Papua) dapat diinspeksi secara detail tanpa batasan wilayah tunggal.</p>
-                </div>
-                <div className="story-card purple">
-                  <h4><i className="fa-solid fa-shield-halved"></i> Solusi Zero-API &amp; Bebas Watermark</h4>
-                  <p>Watermark <em>&quot;API KEY REQUIRED&quot;</em> pada tile basemap CartoDB telah dieliminasi sepenuhnya dengan beralih ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap yang 100% bebas token dan bebas biaya. Poligon GeoJSON disimpan dan dirender secara mandiri di sisi klien (*client-side*).</p>
-                </div>
+                <aside className="analysis-sidebar">
+                  <div className="analysis-section-title">
+                    <i className="fa-solid fa-lightbulb"></i> Analisis Geospasial
+                  </div>
+                  <div className="analysis-card green">
+                    <h4><i className="fa-solid fa-earth-asia"></i> Cakupan Spasial 514 Kabupaten/Kota</h4>
+                    <p>Aplikasi ini memadankan batas poligon digital 514 kabupaten/kota dari 38 provinsi di Indonesia dengan 8 indikator gender BPS 2024. Disparitas antara wilayah barat (Jawa dan Sumatera) dan timur (Nusa Tenggara, Maluku, Papua) dapat diinspeksi secara detail.</p>
+                  </div>
+                  <div className="analysis-card purple">
+                    <h4><i className="fa-solid fa-shield-halved"></i> Solusi Zero-API dan Bebas Watermark</h4>
+                    <p>Watermark pada tile basemap CartoDB telah dieliminasi sepenuhnya dengan beralih ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap yang 100% bebas token dan bebas biaya. Poligon GeoJSON disimpan dan dirender secara mandiri di sisi klien.</p>
+                  </div>
+                </aside>
               </div>
             </div>
           )}
@@ -1535,17 +1681,24 @@ export default function Home() {
                 </div>
               </div>
 
-              <div id="heatmap-map"></div>
+              <div className="content-with-sidebar">
+                <div className="content-main-col">
+                  <div id="heatmap-map"></div>
+                </div>
 
-              <div className="story-grid">
-                <div className="story-card green">
-                  <h4><i className="fa-solid fa-temperature-arrow-up"></i> Interpretasi Hotspot Spasial</h4>
-                  <p>Heatmap spasial menampilkan konsentrasi peubah secara kontinu. Warna merah menunjukkan zona konsentrasi tertinggi (Hotspot), sedangkan warna biru menunjukkan zona intensitas rendah (Coldspot). Pada indikator Parlemen di Kalimantan, zona hotspot terkonsentrasi di Kalimantan Selatan dan Kalimantan Timur bagian pesisir, sedangkan wilayah hulu/pedalaman menunjukkan intensitas dingin yang mengindikasikan defisit keterwakilan politik perempuan.</p>
-                </div>
-                <div className="story-card amber">
-                  <h4><i className="fa-solid fa-layer-group"></i> Sinergi Heatmap &amp; Batas Administrasi</h4>
-                  <p>Dengan mengaktifkan centang <em>&quot;Overlay Garis Batas Poligon SHP&quot;</em>, batas administratif hasil ekstraksi shapefile ditumpangkan secara presisi di atas permukaan heatmap kontinu. Hal ini memudahkan pengambil kebijakan untuk mengidentifikasi batas yurisdiksi kab/kota mana yang berada di pusat hotspot maupun coldspot.</p>
-                </div>
+                <aside className="analysis-sidebar">
+                  <div className="analysis-section-title">
+                    <i className="fa-solid fa-lightbulb"></i> Analisis Heatmap
+                  </div>
+                  <div className="analysis-card green">
+                    <h4><i className="fa-solid fa-temperature-arrow-up"></i> Interpretasi Hotspot Spasial</h4>
+                    <p>Heatmap spasial menampilkan konsentrasi peubah secara kontinu. Warna merah menunjukkan zona konsentrasi tertinggi (Hotspot), sedangkan warna biru menunjukkan zona intensitas rendah (Coldspot). Pada indikator Parlemen di Kalimantan, zona hotspot terkonsentrasi di Kalimantan Selatan dan Kalimantan Timur bagian pesisir.</p>
+                  </div>
+                  <div className="analysis-card amber">
+                    <h4><i className="fa-solid fa-layer-group"></i> Sinergi Heatmap dan Batas Administrasi</h4>
+                    <p>Dengan mengaktifkan centang <em>&quot;Overlay Garis Batas Poligon SHP&quot;</em>, batas administratif hasil ekstraksi shapefile ditumpangkan secara presisi di atas permukaan heatmap kontinu. Hal ini memudahkan pengambil kebijakan untuk mengidentifikasi yurisdiksi yang berada di pusat hotspot maupun coldspot.</p>
+                  </div>
+                </aside>
               </div>
             </div>
           )}
@@ -1678,26 +1831,68 @@ export default function Home() {
           <div className="subtabs-nav">
             <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-treemap' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-treemap')}><i className="fa-solid fa-tree"></i> Treemap Interaktif</button>
             <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-sunburst' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-sunburst')}><i className="fa-solid fa-sun"></i> Sunburst Chart</button>
-            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-summary' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-summary')}><i className="fa-solid fa-list-check"></i> Rangkuman Hierarki per Pulau</button>
+            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-summary' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-summary')}><i className="fa-solid fa-list-check"></i> Rangkuman Hierarki</button>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', flexWrap: 'wrap' }}>
-            <div>
-              <label style={{ fontSize: '11px', fontWeight: '600', color: '#475569' }}>Variabel Ukuran Kotak / Irisan:</label>
-              <select value={hierSizeVar} onChange={e => setHierSizeVar(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', display: 'block' }}>
-                <option value="pengeluaran">Pengeluaran Riil (Ribu Rp)</option>
-                <option value="pendapatan">Sumbangan Pendapatan (%)</option>
-                <option value="tpak">TPAK Perempuan (%)</option>
-              </select>
+          {/* Hierarchical Region Selector & Variable Controls */}
+          <div className="card" style={{ padding: '16px 20px' }}>
+            <div className="hier-region-selector">
+              <div className="filter-item">
+                <label>Mode Pengelompokan</label>
+                <select value={hierViewMode} onChange={e => {
+                  setHierViewMode(e.target.value);
+                  setHierSelectedProv('Semua Provinsi');
+                  setHierSelectedKab('Semua Kab/Kota');
+                }}>
+                  <option value="pulau">Hierarki Pulau (Indonesia &gt; Pulau &gt; Provinsi &gt; Kab/Kota)</option>
+                  <option value="provinsi">Kelompokkan per Provinsi</option>
+                  <option value="kabkota">Daftar Kab/Kota Langsung</option>
+                </select>
+              </div>
+              <div className="filter-item">
+                <label>Pilih Provinsi</label>
+                <select value={hierSelectedProv} onChange={e => {
+                  setHierSelectedProv(e.target.value);
+                  setHierSelectedKab('Semua Kab/Kota');
+                }}>
+                  {hierAvailableProvs.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+              {hierViewMode === 'kabkota' && (
+                <div className="filter-item">
+                  <label>Pilih Kab/Kota</label>
+                  <select value={hierSelectedKab} onChange={e => setHierSelectedKab(e.target.value)}>
+                    {hierAvailableKabs.map(k => (
+                      <option key={k} value={k}>{k}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="filter-item">
+                <label>Variabel Ukuran</label>
+                <select value={hierSizeVar} onChange={e => setHierSizeVar(e.target.value)}>
+                  <option value="pengeluaran">Pengeluaran Riil (Ribu Rp)</option>
+                  <option value="pendapatan">Sumbangan Pendapatan (%)</option>
+                  <option value="tpak">TPAK Perempuan (%)</option>
+                </select>
+              </div>
+              <div className="filter-item">
+                <label>Variabel Warna</label>
+                <select value={hierColorVar} onChange={e => setHierColorVar(e.target.value)}>
+                  <option value="parlemen">Keterlibatan di Parlemen (%)</option>
+                  <option value="profesional">Tenaga Profesional (%)</option>
+                  <option value="skor_keputusan">Skor Keputusan (0-100)</option>
+                  <option value="ikpp_komposit">IKPP Komposit (0-100)</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label style={{ fontSize: '11px', fontWeight: '600', color: '#475569' }}>Variabel Warna Kotak / Irisan:</label>
-              <select value={hierColorVar} onChange={e => setHierColorVar(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px', display: 'block' }}>
-                <option value="parlemen">Keterlibatan di Parlemen (%)</option>
-                <option value="profesional">Tenaga Profesional (%)</option>
-                <option value="skor_keputusan">Skor Keputusan (0-100)</option>
-                <option value="ikpp_komposit">IKPP Komposit (0-100)</option>
-              </select>
+            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '4px' }}>
+              <i className="fa-solid fa-filter" style={{ color: '#2563eb', marginRight: '4px' }}></i>
+              Menampilkan <strong style={{ color: '#0f172a' }}>{hierFilteredData.length}</strong> kab/kota
+              {hierSelectedProv !== 'Semua Provinsi' && <> di <strong style={{ color: '#2563eb' }}>{hierSelectedProv}</strong></>}
+              {hierSelectedKab !== 'Semua Kab/Kota' && <> - <strong style={{ color: '#2563eb' }}>{hierSelectedKab}</strong></>}
             </div>
           </div>
 
@@ -1715,11 +1910,18 @@ export default function Home() {
 
           {activeHierSubtab === 'hier-subtab-summary' && (
             <div className="card">
+              <div className="card-header">
+                <div className="card-title">
+                  <i className="fa-solid fa-table-columns"></i>
+                  Rangkuman Statistik {hierViewMode === 'provinsi' ? 'per Provinsi' : 'per Pulau'}
+                </div>
+              </div>
               <div className="table-responsive">
                 <table className="data-table">
                   <thead>
                     <tr>
-                      <th>Wilayah Pulau</th>
+                      <th>{hierViewMode === 'provinsi' ? 'Provinsi' : 'Wilayah Pulau'}</th>
+                      {hierViewMode === 'provinsi' && <th>Pulau</th>}
                       <th>Jumlah Daerah</th>
                       <th>Parlemen (%)</th>
                       <th>Pendapatan (%)</th>
@@ -1732,20 +1934,37 @@ export default function Home() {
                     </tr>
                   </thead>
                   <tbody>
-                    {Object.entries(islandAgg).map(([pulau, agg]) => (
-                      <tr key={pulau}>
-                        <td><b>{pulau}</b></td>
-                        <td>{agg.count}</td>
-                        <td>{(agg.parlemen / agg.count).toFixed(2)}%</td>
-                        <td>{(agg.pendapatan / agg.count).toFixed(2)}%</td>
-                        <td>{(agg.profesional / agg.count).toFixed(2)}%</td>
-                        <td>{(agg.tpak / agg.count).toFixed(2)}%</td>
-                        <td>Rp{Math.round(agg.pengeluaran / agg.count).toLocaleString()}</td>
-                        <td><span style={{ fontWeight: '700', color: '#2563eb' }}>{(agg.keputusan / agg.count).toFixed(1)}</span></td>
-                        <td><span style={{ fontWeight: '700', color: '#10b981' }}>{(agg.ekonomi / agg.count).toFixed(1)}</span></td>
-                        <td><span style={{ fontWeight: '700', color: '#6366f1' }}>{(agg.ikpp / agg.count).toFixed(1)}</span></td>
-                      </tr>
-                    ))}
+                    {hierViewMode === 'provinsi'
+                      ? Object.entries(provAgg).sort((a, b) => a[0].localeCompare(b[0])).map(([prov, agg]) => (
+                        <tr key={prov}>
+                          <td><b>{prov}</b></td>
+                          <td style={{ color: '#64748b', fontSize: '0.78rem' }}>{agg.pulau}</td>
+                          <td>{agg.count}</td>
+                          <td>{(agg.parlemen / agg.count).toFixed(2)}%</td>
+                          <td>{(agg.pendapatan / agg.count).toFixed(2)}%</td>
+                          <td>{(agg.profesional / agg.count).toFixed(2)}%</td>
+                          <td>{(agg.tpak / agg.count).toFixed(2)}%</td>
+                          <td>Rp{Math.round(agg.pengeluaran / agg.count).toLocaleString()}</td>
+                          <td><span style={{ fontWeight: '700', color: '#2563eb' }}>{(agg.keputusan / agg.count).toFixed(1)}</span></td>
+                          <td><span style={{ fontWeight: '700', color: '#10b981' }}>{(agg.ekonomi / agg.count).toFixed(1)}</span></td>
+                          <td><span style={{ fontWeight: '700', color: '#6366f1' }}>{(agg.ikpp / agg.count).toFixed(1)}</span></td>
+                        </tr>
+                      ))
+                      : Object.entries(islandAgg).map(([pulau, agg]) => (
+                        <tr key={pulau}>
+                          <td><b>{pulau}</b></td>
+                          <td>{agg.count}</td>
+                          <td>{(agg.parlemen / agg.count).toFixed(2)}%</td>
+                          <td>{(agg.pendapatan / agg.count).toFixed(2)}%</td>
+                          <td>{(agg.profesional / agg.count).toFixed(2)}%</td>
+                          <td>{(agg.tpak / agg.count).toFixed(2)}%</td>
+                          <td>Rp{Math.round(agg.pengeluaran / agg.count).toLocaleString()}</td>
+                          <td><span style={{ fontWeight: '700', color: '#2563eb' }}>{(agg.keputusan / agg.count).toFixed(1)}</span></td>
+                          <td><span style={{ fontWeight: '700', color: '#10b981' }}>{(agg.ekonomi / agg.count).toFixed(1)}</span></td>
+                          <td><span style={{ fontWeight: '700', color: '#6366f1' }}>{(agg.ikpp / agg.count).toFixed(1)}</span></td>
+                        </tr>
+                      ))
+                    }
                   </tbody>
                 </table>
               </div>
@@ -1770,7 +1989,7 @@ export default function Home() {
               <input
                 type="text"
                 className="search-input"
-                placeholder="🔍 Cari nama kabupaten, kota, atau provinsi..."
+                placeholder="Cari nama kabupaten, kota, atau provinsi..."
                 value={tableSearch}
                 onChange={e => { setTableSearch(e.target.value); setCurrentPage(1); }}
               />
