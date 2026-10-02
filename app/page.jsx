@@ -2,6 +2,104 @@
 
 import { useState, useEffect, useRef } from 'react';
 
+// ============================================================================
+// BPS Official Statistical Tables (Tahun 2024)
+// Sumber sah: Badan Pusat Statistik Republik Indonesia
+// ============================================================================
+const BPS_STAT_TABLES = {
+  pengeluaran: {
+    nama: '[Metode Baru] Pengeluaran per Kapita Disesuaikan',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDE2IzI=/-metode-baru--pengeluaran-per-kapita-disesuaikan.html'
+  },
+  ahh: {
+    nama: 'Angka Harapan Hidup (AHH) Menurut Kabupaten/Kota dan Jenis Kelamin',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDU1IzI=/angkaharapan-hidup--ahh--menurut-kabupaten-kota-dan-jenis-kelamin.html'
+  },
+  hls: {
+    nama: '[Metode Baru] Harapan Lama Sekolah',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDE3IzI=/-new-method--expected-years-of-schooling.html'
+  },
+  rls: {
+    nama: '[Metode Baru] Rata-rata Lama Sekolah',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDE1IzI=/-metode-baru--rata-rata-lama-sekolah.html'
+  },
+  tpak: {
+    nama: 'Tingkat Partisipasi Angkatan Kerja Menurut Jenis Kelamin',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/MjIwMCMy/tingkat-partisipasi-angkatan-kerja-menurut-jenis-kelamin.html'
+  },
+  pendapatan: {
+    nama: 'Sumbangan Pendapatan Perempuan',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDY3IzI=/revenue-contribution-of-women.html'
+  },
+  parlemen: {
+    nama: 'Keterlibatan Perempuan di Parlemen',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDY0IzI=/the-involvement-of-women-in-parliament.html'
+  },
+  profesional: {
+    nama: 'Tenaga Profesional Perempuan',
+    tahun: '2024',
+    url: 'https://www.bps.go.id/id/statistics-table/2/NDY1IzI=/the-percentage-of-female-professional-staff.html'
+  }
+};
+
+const COMPOSITE_TO_BPS_KEYS = {
+  skor_keputusan: ['parlemen', 'profesional'],
+  skor_ekonomi: ['pendapatan', 'tpak', 'pengeluaran'],
+  ikpp_komposit: ['parlemen', 'profesional', 'pendapatan', 'tpak', 'pengeluaran'],
+  kuadran: ['pendapatan', 'tpak', 'pengeluaran', 'parlemen', 'profesional'],
+  lisa_cluster_keputusan: ['parlemen', 'profesional'],
+  lisa_cluster_ekonomi: ['pendapatan', 'tpak', 'pengeluaran']
+};
+
+function DataSourceBadge({ vars = [] }) {
+  const resolvedKeys = new Set();
+  vars.forEach(v => {
+    if (COMPOSITE_TO_BPS_KEYS[v]) {
+      COMPOSITE_TO_BPS_KEYS[v].forEach(k => resolvedKeys.add(k));
+    } else if (BPS_STAT_TABLES[v]) {
+      resolvedKeys.add(v);
+    }
+  });
+
+  const keys = Array.from(resolvedKeys);
+  if (keys.length === 0) return null;
+
+  return (
+    <div className="data-source-footer">
+      <div className="data-source-label">
+        <i className="fa-solid fa-database"></i>
+        <span>Sumber Tabel BPS (Tahun 2024):</span>
+      </div>
+      <div className="data-source-items">
+        {keys.map(k => {
+          const item = BPS_STAT_TABLES[k];
+          return (
+            <a
+              key={k}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="data-source-chip"
+              title={`Buka tabel resmi BPS: ${item.nama}`}
+            >
+              <span>{item.nama}</span>
+              <span className="source-year">2024</span>
+              <i className="fa-solid fa-arrow-up-right-from-square"></i>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -288,12 +386,10 @@ export default function Home() {
   const CLEAN_BASEMAP_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
   const CLEAN_BASEMAP_ATTR = '&copy; Esri, HERE, Garmin, &copy; OpenStreetMap | Bebas API Key & Tanpa Watermark';
 
-  // 2a. Peta Batas Kabupaten/Kota (GeoJSON Nasional 514 Kab/Kota & Kalimantan SHP - Zero API)
+  // 2a. Peta Batas Kabupaten/Kota (GeoJSON Nasional 514 Kab/Kota - Zero API)
   function renderLeafletKabkotaBoundary() {
     const el = document.getElementById('kabkota-boundary-map');
-    const activeGeo = boundaryScope === 'kalimantan'
-      ? (kabkotaKalimantanGeojson || kabkotaGeojson)
-      : (kabkotaGeojson || kabkotaKalimantanGeojson);
+    const activeGeo = kabkotaGeojson || kabkotaKalimantanGeojson;
     if (!el || !activeGeo || !window.L) return;
 
     if (!kabkotaBoundaryMapRef.current) {
@@ -428,8 +524,6 @@ export default function Home() {
         const tempGroup = window.L.geoJson({ type: 'FeatureCollection', features: pulauFeatures });
         kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), { padding: [30, 30] });
       }
-    } else if (boundaryScope === 'kalimantan') {
-      kabkotaBoundaryMapRef.current.setView([-0.5, 114.5], 6);
     } else {
       kabkotaBoundaryMapRef.current.setView([-2.2, 118.0], 5);
     }
@@ -469,9 +563,7 @@ export default function Home() {
       });
     }
 
-    const dataset = heatmapScope === 'kalimantan'
-      ? allKabkota.filter(d => d.pulau === 'Kalimantan')
-      : filteredKabkota;
+    const dataset = filteredKabkota;
 
     const validData = dataset.filter(d => d.lat && d.lon && d[heatmapVar] !== undefined && d[heatmapVar] !== null);
     if (validData.length === 0) return;
@@ -499,14 +591,11 @@ export default function Home() {
       }
     }).addTo(heatmapMapRef.current);
 
-    const activeGeo = heatmapScope === 'kalimantan'
-      ? (kabkotaKalimantanGeojson || kabkotaGeojson)
-      : kabkotaGeojson;
+    const activeGeo = kabkotaGeojson;
 
     if (heatmapShowBoundaries && activeGeo) {
       window.L.geoJson(activeGeo, {
         filter: (feature) => {
-          if (heatmapScope === 'kalimantan' && feature.properties.pulau !== 'Kalimantan') return false;
           if (selectedPulau !== 'Semua Pulau' && feature.properties.pulau !== selectedPulau) return false;
           return true;
         },
@@ -545,8 +634,18 @@ export default function Home() {
       });
     }
 
-    if (heatmapScope === 'kalimantan') {
-      heatmapMapRef.current.setView([-0.5, 114.5], 6);
+    if (selectedProv !== 'Semua Provinsi' && kabkotaGeojson) {
+      const provFeatures = kabkotaGeojson.features.filter(f => f.properties.provinsi === selectedProv);
+      if (provFeatures.length > 0) {
+        const tempGroup = window.L.geoJson({ type: 'FeatureCollection', features: provFeatures });
+        heatmapMapRef.current.fitBounds(tempGroup.getBounds(), { padding: [30, 30] });
+      }
+    } else if (selectedPulau !== 'Semua Pulau' && kabkotaGeojson) {
+      const pulauFeatures = kabkotaGeojson.features.filter(f => f.properties.pulau === selectedPulau);
+      if (pulauFeatures.length > 0) {
+        const tempGroup = window.L.geoJson({ type: 'FeatureCollection', features: pulauFeatures });
+        heatmapMapRef.current.fitBounds(tempGroup.getBounds(), { padding: [30, 30] });
+      }
     } else {
       heatmapMapRef.current.setView([-2.2, 118.0], 5);
     }
@@ -1443,9 +1542,6 @@ export default function Home() {
 
           <div className="header-meta">
             <div className="header-left">
-              <span className="institution-pill">
-                <i className="fa-solid fa-building-columns"></i> BPS RI &bull; Polstat STIS
-              </span>
               <div className="header-title-box">
                 <h1>Disparitas Spasial Partisipasi Ekonomi &amp; Keputusan Perempuan Indonesia</h1>
                 <p>Pangkalan 514 Kabupaten/Kota &bull; 38 Provinsi &bull; Sumber Data: BPS RI 2024</p>
@@ -1455,11 +1551,6 @@ export default function Home() {
               <div className="active-module-pill">
                 <i className={`fa-solid ${currentModule.icon}`}></i>
                 <span>Modul: <strong>{currentModule.label}</strong></span>
-              </div>
-              <div className="badges-row">
-                <span className="badge badge-bps">BPS 2024</span>
-                <span className="badge badge-primary">514 Daerah</span>
-                <span className="badge badge-success">Zero-API</span>
               </div>
             </div>
           </div>
@@ -1515,6 +1606,7 @@ export default function Home() {
                   </div>
                 </div>
                 <div id="quadrant-chart" className="chart-box"></div>
+                <DataSourceBadge vars={['skor_ekonomi', 'skor_keputusan', 'pengeluaran']} />
               </div>
             </div>
 
@@ -1558,7 +1650,7 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Subtab 1: Peta Batas Kabupaten/Kota dari GeoJSON (Nasional 514 Kab/Kota & Kalimantan SHP) */}
+          {/* Subtab 1: Peta Batas Kabupaten/Kota dari GeoJSON (Nasional 514 Kab/Kota) */}
           {activeGeoSubtab === 'geo-subtab-kabkota-boundary' && (
             <div className="card">
               <div className="card-header">
@@ -1567,7 +1659,7 @@ export default function Home() {
                     <i className="fa-solid fa-draw-polygon"></i> Peta Batas dan Poligon Tematik Kabupaten/Kota (GeoJSON BPS 2024)
                   </div>
                   <div className="card-caption">
-                    Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia dan detail shapefile Kalimantan, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark dan Tanpa API Key).
+                    Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark dan Tanpa API Key).
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
@@ -1575,22 +1667,17 @@ export default function Home() {
                     <i className="fa-solid fa-shield-halved"></i> 100% Bebas Watermark (No API Required)
                   </span>
 
-                  <select
-                    value={boundaryScope}
-                    onChange={e => setBoundaryScope(e.target.value)}
-                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1.5px solid #2563eb', fontSize: '12px', fontWeight: '700', color: '#1e40af', background: '#eff6ff' }}
-                  >
-                    <option value="nasional">Cakupan: Seluruh Indonesia (514 Kab/Kota)</option>
-                    <option value="kalimantan">Cakupan: Pulau Kalimantan (Detail SHP LapakGIS)</option>
-                  </select>
+                  <span className="badge badge-primary" style={{ padding: '6px 10px', fontSize: '12px' }}>
+                    <i className="fa-solid fa-earth-asia"></i> Cakupan: Seluruh Indonesia (514 Kab/Kota)
+                  </span>
 
                   <a
-                    href={boundaryScope === 'kalimantan' ? '/data/kabkota_kalimantan.geojson' : '/data/kabkota_indonesia.geojson'}
-                    download={boundaryScope === 'kalimantan' ? 'kabkota_kalimantan.geojson' : 'kabkota_indonesia.geojson'}
+                    href="/data/kabkota_indonesia.geojson"
+                    download="kabkota_indonesia.geojson"
                     className="btn-export"
-                    title="Unduh berkas GeoJSON aktif"
+                    title="Unduh berkas GeoJSON 514 Kabupaten/Kota"
                   >
-                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON ({boundaryScope === 'kalimantan' ? '595 KB' : '0.79 MB'})
+                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON (0.79 MB)
                   </a>
 
                   <select
@@ -1692,7 +1779,7 @@ export default function Home() {
                   ) : (
                     <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <i className="fa-solid fa-circle-info" style={{ color: '#2563eb' }}></i>
-                      <span><strong>Tip Eksplorasi:</strong> Gunakan menu <em>&quot;Cakupan&quot;</em> untuk beralih antara <strong>Seluruh Indonesia (514 Kab/Kota)</strong> dan <strong>Pulau Kalimantan (Detail SHP)</strong>. Anda juga dapat menggunakan filter Pulau dan Provinsi di sidebar kiri untuk zoom otomatis ke wilayah target.</span>
+                      <span><strong>Tip Eksplorasi:</strong> Gunakan filter Pulau dan Provinsi di bilah kiri untuk navigasi otomatis ke wilayah target, serta klik pada poligon 514 kabupaten/kota untuk melihat rincian 8 indikator pembangunan gender BPS 2024.</span>
                     </div>
                   )}
                 </div>
@@ -1711,6 +1798,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={[kabkotaChoroplethVar]} />
             </div>
           )}
 
@@ -1744,14 +1832,9 @@ export default function Home() {
                     <option value="skor_ekonomi">Intensitas: Skor Partisipasi Ekonomi</option>
                     <option value="ikpp_komposit">Intensitas: IKPP Komposit Gender</option>
                   </select>
-                  <select
-                    value={heatmapScope}
-                    onChange={e => setHeatmapScope(e.target.value)}
-                    style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '12px' }}
-                  >
-                    <option value="kalimantan">Cakupan: Pulau Kalimantan (Fokus SHP)</option>
-                    <option value="nasional">Cakupan: Seluruh Indonesia (514 Kab/Kota)</option>
-                  </select>
+                  <span className="badge badge-primary" style={{ padding: '6px 10px', fontSize: '12px' }}>
+                    <i className="fa-solid fa-earth-asia"></i> Cakupan: Seluruh Indonesia (514 Kab/Kota)
+                  </span>
                 </div>
               </div>
 
@@ -1814,7 +1897,7 @@ export default function Home() {
                   </div>
                   <div className="analysis-card green">
                     <h4><i className="fa-solid fa-temperature-arrow-up"></i> Interpretasi Hotspot Spasial</h4>
-                    <p>Heatmap spasial menampilkan konsentrasi peubah secara kontinu. Warna merah menunjukkan zona konsentrasi tertinggi (Hotspot), sedangkan warna biru menunjukkan zona intensitas rendah (Coldspot). Pada indikator Parlemen di Kalimantan, zona hotspot terkonsentrasi di Kalimantan Selatan dan Kalimantan Timur bagian pesisir.</p>
+                    <p>Heatmap spasial menampilkan konsentrasi peubah secara kontinu. Warna merah menunjukkan zona konsentrasi tertinggi (Hotspot), sedangkan warna biru menunjukkan zona intensitas rendah (Coldspot). Pada indikator Parlemen, zona hotspot terdeteksi kuat di Sulawesi Utara, Bali, dan sejumlah kota pesisir, sedangkan wilayah pedalaman menunjukkan intensitas coldspot.</p>
                   </div>
                   <div className="analysis-card amber">
                     <h4><i className="fa-solid fa-layer-group"></i> Sinergi Heatmap dan Batas Administrasi</h4>
@@ -1822,6 +1905,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={[heatmapVar]} />
             </div>
           )}
 
@@ -1867,6 +1951,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={[geoSizeVar, geoColorVar]} />
             </div>
           )}
 
@@ -1908,6 +1993,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={[choroplethVar]} />
             </div>
           )}
 
@@ -1945,6 +2031,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={[lisaClusterVar]} />
             </div>
           )}
         </section>
@@ -1993,6 +2080,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
 
@@ -2024,6 +2112,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
 
@@ -2055,6 +2144,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
 
@@ -2086,6 +2176,7 @@ export default function Home() {
                   </div>
                 </aside>
               </div>
+              <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
         </section>
@@ -2196,12 +2287,14 @@ export default function Home() {
               {activeHierSubtab === 'hier-subtab-treemap' && (
                 <div className="card">
                   <div id="treemap-chart" className="chart-box"></div>
+                  <DataSourceBadge vars={[hierSizeVar, hierColorVar]} />
                 </div>
               )}
 
               {activeHierSubtab === 'hier-subtab-sunburst' && (
                 <div className="card">
                   <div id="sunburst-chart" className="chart-box"></div>
+                  <DataSourceBadge vars={[hierSizeVar, hierColorVar]} />
                 </div>
               )}
 
@@ -2265,6 +2358,7 @@ export default function Home() {
                       </tbody>
                     </table>
                   </div>
+                  <DataSourceBadge vars={['parlemen', 'pendapatan', 'profesional', 'tpak', 'pengeluaran']} />
                 </div>
               )}
             </div>
@@ -2485,6 +2579,7 @@ export default function Home() {
                 </button>
               </div>
             </div>
+            <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
           </div>
         </section>
 
@@ -2492,14 +2587,57 @@ export default function Home() {
         <section className={`tab-pane ${activeTab === 'tab-method' ? 'active' : ''}`}>
           <div className="method-box">
             <h3><i className="fa-solid fa-book-bookmark"></i> 1. Sumber Data Resmi BPS (Tahun 2024)</h3>
-            <p>Seluruh indikator dalam proyek visualisasi ini bersumber secara sah dari publikasi resmi Badan Pusat Statistik (BPS) Republik Indonesia tahun 2024:</p>
+            <p>Seluruh indikator dalam proyek visualisasi ini bersumber secara sah dari publikasi tabel statistik resmi Badan Pusat Statistik (BPS) Republik Indonesia (Tahun 2024):</p>
             <ul>
-              <li><strong>Keterlibatan Perempuan di Parlemen (%):</strong> BPS RI, Statistik Politik dan Keamanan 2024.</li>
-              <li><strong>Sumbangan Pendapatan Perempuan (%):</strong> BPS RI, Indeks Pemberdayaan Gender (IDG) 2024.</li>
-              <li><strong>Perempuan sebagai Tenaga Profesional (%):</strong> BPS RI, Indeks Pemberdayaan Gender (IDG) 2024.</li>
-              <li><strong>Tingkat Partisipasi Angkatan Kerja (TPAK) Perempuan (%):</strong> BPS RI, Survei Angkatan Kerja Nasional (Sakernas) 2024.</li>
-              <li><strong>Pengeluaran per Kapita Disesuaikan, AHH, RLS, HLS:</strong> BPS RI, Indeks Pembangunan Gender (IPG) dan IPM 2024.</li>
-              <li><strong>Atribusi Wajib:</strong> Sumber: BPS (Badan Pusat Statistik Republik Indonesia).</li>
+              <li>
+                <strong>Pengeluaran per Kapita Disesuaikan:</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDE2IzI=/-metode-baru--pengeluaran-per-kapita-disesuaikan.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  [Metode Baru] Pengeluaran per Kapita Disesuaikan (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Angka Harapan Hidup (AHH):</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDU1IzI=/angkaharapan-hidup--ahh--menurut-kabupaten-kota-dan-jenis-kelamin.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  Angka Harapan Hidup (AHH) Menurut Kabupaten/Kota dan Jenis Kelamin (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Harapan Lama Sekolah (HLS):</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDE3IzI=/-new-method--expected-years-of-schooling.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  [Metode Baru] Harapan Lama Sekolah (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Rata-rata Lama Sekolah (RLS):</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDE1IzI=/-metode-baru--rata-rata-lama-sekolah.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  [Metode Baru] Rata-rata Lama Sekolah (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Tingkat Partisipasi Angkatan Kerja (TPAK):</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/MjIwMCMy/tingkat-partisipasi-angkatan-kerja-menurut-jenis-kelamin.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  Tingkat Partisipasi Angkatan Kerja Menurut Jenis Kelamin (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Sumbangan Pendapatan Perempuan:</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDY3IzI=/revenue-contribution-of-women.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  Sumbangan Pendapatan Perempuan (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Keterlibatan Perempuan di Parlemen:</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDY0IzI=/the-involvement-of-women-in-parliament.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  Keterlibatan Perempuan di Parlemen (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li>
+                <strong>Tenaga Profesional Perempuan:</strong>{' '}
+                <a href="https://www.bps.go.id/id/statistics-table/2/NDY1IzI=/the-percentage-of-female-professional-staff.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                  Tenaga Profesional Perempuan (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
+                </a>
+              </li>
+              <li><strong>Atribusi Resmi:</strong> Seluruh indikator bersumber secara sah dari Badan Pusat Statistik (BPS Republik Indonesia).</li>
             </ul>
           </div>
 
