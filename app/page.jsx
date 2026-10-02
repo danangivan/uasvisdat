@@ -1389,7 +1389,7 @@ export default function Home() {
   const CLEAN_BASEMAP_URL =
     "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
   const CLEAN_BASEMAP_ATTR =
-    "&copy; Esri, HERE, Garmin, &copy; OpenStreetMap | Bebas API Key & Tanpa Watermark";
+    "&copy; Esri, HERE, Garmin, &copy; OpenStreetMap";
 
   // 2a. Peta Batas Wilayah (GeoJSON 38 Batas Murni Provinsi saat Provinsi, atau 514 Kab/Kota)
   function renderLeafletKabkotaBoundary() {
@@ -1589,7 +1589,7 @@ export default function Home() {
     kabkotaBoundaryMapRef.current.invalidateSize();
   }
 
-  // 2b. Peta Heatmap Spasial Kab/Kota (Kernel Density Estimation - Zero API)
+  // 2b. Peta Heatmap Spasial Kab/Kota (Kernel Density Estimation)
   function renderLeafletHeatmap() {
     const el = document.getElementById("heatmap-map");
     if (!el || !window.L) return;
@@ -2837,7 +2837,7 @@ export default function Home() {
             </div>
             <div className="badges-row">
               <span className="badge badge-bps">BPS RI 2024</span>
-              <span className="badge badge-primary">Bebas API Key</span>
+              <span className="badge badge-primary">Dashboard Analitik</span>
               <span className="badge badge-accent">514 Kab/Kota SHP</span>
               <span className="badge badge-success">Multi-Device</span>
             </div>
@@ -2999,8 +2999,8 @@ export default function Home() {
                   </div>
                   <div className="card-caption">
                     {isProvinsi
-                      ? "Batas administrasi poligon teragregasi 38 Provinsi di Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark & Tanpa API Key)."
-                      : "Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark & Tanpa API Key)."}
+                      ? "Batas administrasi poligon teragregasi 38 Provinsi di Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas."
+                      : "Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas."}
                   </div>
                 </div>
                 <div
@@ -3280,14 +3280,11 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="story-card purple">
-                  <h4>Solusi Zero-API &amp; Bebas Watermark</h4>
+                  <h4>Integrasi Basemap ESRI Canvas &amp; GeoJSON</h4>
                   <p>
-                    Watermark <em>&quot;API KEY REQUIRED&quot;</em> pada tile
-                    basemap CartoDB telah dieliminasi sepenuhnya dengan beralih
-                    ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap
-                    yang 100% bebas token dan bebas biaya. Poligon GeoJSON
-                    disimpan dan dirender secara mandiri di sisi klien
-                    (*client-side*).
+                    Basemap menggunakan <strong>ESRI World Gray Canvas</strong> dan
+                    OpenStreetMap dengan rendering poligon GeoJSON teroptimasi secara
+                    mandiri di sisi klien (*client-side*).
                   </p>
                 </div>
               </div>
@@ -3308,7 +3305,7 @@ export default function Home() {
                   <div className="card-caption">
                     Visualisasi intensitas spasial bergradien halus menggunakan
                     algoritma Kernel Density pada peramban (Client-side Canvas
-                    Heatmap), tanpa token/API eksternal.
+                    Heatmap).
                   </div>
                 </div>
                 <div
@@ -3320,7 +3317,7 @@ export default function Home() {
                   }}
                 >
                   <span className="badge badge-success">
-                    Client-Side Heatmap (No API Required)
+                    Client-Side Heatmap
                   </span>
                   <select
                     value={heatmapVar}
