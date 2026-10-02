@@ -1952,8 +1952,14 @@ export default function Home() {
                 <div className="card-caption">Memetakan {filteredKabkota.length} {isProvinsi ? 'provinsi' : 'kabupaten/kota'} terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
               </div>
             </div>
-            <div id="quadrant-chart" className="chart-box"></div>
-            <VizLegendQuadrant />
+            <div className="viz-layout-row">
+              <div className="viz-layout-main">
+                <div id="quadrant-chart" className="chart-box"></div>
+              </div>
+              <div className="viz-layout-sidebar">
+                <VizLegendQuadrant />
+              </div>
+            </div>
             <DataSourceBadge vars={['parlemen', 'pendapatan']} />
           </div>
 
@@ -2048,7 +2054,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div id="kabkota-boundary-map"></div>
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="kabkota-boundary-map"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendBoundaryMap isProvinsi={isProvinsi} varName={kabkotaChoroplethVar} paletteName={selectedPalette} />
+                </div>
+              </div>
 
               {/* Detail Panel Saat Wilayah Diklik */}
               {selectedKabDetail ? (
@@ -2133,7 +2146,6 @@ export default function Home() {
                   <p>Watermark <em>&quot;API KEY REQUIRED&quot;</em> pada tile basemap CartoDB telah dieliminasi sepenuhnya dengan beralih ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap yang 100% bebas token dan bebas biaya. Poligon GeoJSON disimpan dan dirender secara mandiri di sisi klien (*client-side*).</p>
                 </div>
               </div>
-              <VizLegendBoundaryMap isProvinsi={isProvinsi} varName={kabkotaChoroplethVar} paletteName={selectedPalette} />
               <DataSourceBadge vars={[kabkotaChoroplethVar]} />
             </div>
           )}
@@ -2219,7 +2231,14 @@ export default function Home() {
                 </div>
               </div>
 
-              <div id="heatmap-map"></div>
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="heatmap-map"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendHeatmap varName={heatmapVar} />
+                </div>
+              </div>
 
               <div className="story-grid">
                 <div className="story-card green">
@@ -2231,7 +2250,6 @@ export default function Home() {
                   <p>Dengan mengaktifkan centang <em>&quot;Overlay Garis Batas Poligon SHP&quot;</em>, batas administratif hasil ekstraksi shapefile ditumpangkan secara presisi di atas permukaan heatmap kontinu. Hal ini memudahkan pengambil kebijakan untuk mengidentifikasi batas yurisdiksi kab/kota mana yang berada di pusat hotspot maupun coldspot.</p>
                 </div>
               </div>
-              <VizLegendHeatmap varName={heatmapVar} />
               <DataSourceBadge vars={[heatmapVar]} />
             </div>
           )}
@@ -2258,8 +2276,14 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-              <div id="leaflet-map"></div>
-              <VizLegendProportional sizeVar={geoSizeVar} colorVar={geoColorVar} />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="leaflet-map"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendProportional sizeVar={geoSizeVar} colorVar={geoColorVar} />
+                </div>
+              </div>
               <DataSourceBadge vars={[geoSizeVar, geoColorVar]} />
             </div>
           )}
@@ -2282,8 +2306,14 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-              <div id="choropleth-map"></div>
-              <VizLegendChoropleth varName={choroplethVar} />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="choropleth-map"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendChoropleth varName={choroplethVar} />
+                </div>
+              </div>
               <DataSourceBadge vars={[choroplethVar]} />
             </div>
           )}
@@ -2302,8 +2332,14 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-              <div id="lisa-map"></div>
-              <VizLegendLISA clusterVar={lisaClusterVar} />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="lisa-map"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendLISA clusterVar={lisaClusterVar} />
+                </div>
+              </div>
               <DataSourceBadge vars={[lisaClusterVar]} />
             </div>
           )}
@@ -2333,8 +2369,14 @@ export default function Home() {
                   </select>
                 </div>
               </div>
-              <div id="pca-biplot-chart" className="chart-box"></div>
-              <VizLegendPCA varPC1={pcaMeta?.var_exp_pc1 || '42.4'} varPC2={pcaMeta?.var_exp_pc2 || '24.5'} />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="pca-biplot-chart" className="chart-box"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendPCA varPC1={pcaMeta?.var_exp_pc1 || '42.4'} varPC2={pcaMeta?.var_exp_pc2 || '24.5'} />
+                </div>
+              </div>
               <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
@@ -2344,8 +2386,14 @@ export default function Home() {
               <div className="card-header">
                 <div className="card-title"><i className="fa-solid fa-sliders"></i> Diagram Koordinat Paralel (Parallel Coordinates)</div>
               </div>
-              <div id="parallel-coords-chart" className="chart-box"></div>
-              <VizLegendParcoords />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="parallel-coords-chart" className="chart-box"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendParcoords />
+                </div>
+              </div>
               <DataSourceBadge vars={['parlemen', 'pendapatan', 'tpak', 'profesional', 'pengeluaran']} />
             </div>
           )}
@@ -2355,8 +2403,14 @@ export default function Home() {
               <div className="card-header">
                 <div className="card-title"><i className="fa-solid fa-temperature-half"></i> Clustered Heatmap: Matriks Korelasi Hierarkis</div>
               </div>
-              <div id="heatmap-chart" className="chart-box"></div>
-              <VizLegendCorrHeatmap />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="heatmap-chart" className="chart-box"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendCorrHeatmap />
+                </div>
+              </div>
               <DataSourceBadge vars={['parlemen', 'pendapatan', 'tpak', 'profesional', 'pengeluaran', 'ahh', 'hls', 'rls']} />
             </div>
           )}
@@ -2366,8 +2420,14 @@ export default function Home() {
               <div className="card-header">
                 <div className="card-title"><i className="fa-solid fa-circle-notch"></i> Radar Chart: Perbandingan Profil Multidimensi Antar Wilayah</div>
               </div>
-              <div id="radar-chart" className="chart-box"></div>
-              <VizLegendRadar />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="radar-chart" className="chart-box"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendRadar />
+                </div>
+              </div>
               <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
@@ -2403,16 +2463,28 @@ export default function Home() {
 
           {activeHierSubtab === 'hier-subtab-treemap' && (
             <div className="card hierarchical-card">
-              <div id="treemap-chart" className="chart-box"></div>
-              <VizLegendTreemap isProvinsi={isProvinsi} sizeVar={hierSizeVar} colorVar={hierColorVar} />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="treemap-chart" className="chart-box"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendTreemap isProvinsi={isProvinsi} sizeVar={hierSizeVar} colorVar={hierColorVar} />
+                </div>
+              </div>
               <DataSourceBadge vars={[hierSizeVar, hierColorVar]} />
             </div>
           )}
 
           {activeHierSubtab === 'hier-subtab-sunburst' && (
             <div className="card hierarchical-card">
-              <div id="sunburst-chart" className="chart-box"></div>
-              <VizLegendSunburst isProvinsi={isProvinsi} sizeVar={hierSizeVar} colorVar={hierColorVar} />
+              <div className="viz-layout-row">
+                <div className="viz-layout-main">
+                  <div id="sunburst-chart" className="chart-box"></div>
+                </div>
+                <div className="viz-layout-sidebar">
+                  <VizLegendSunburst isProvinsi={isProvinsi} sizeVar={hierSizeVar} colorVar={hierColorVar} />
+                </div>
+              </div>
               <DataSourceBadge vars={[hierSizeVar, hierColorVar]} />
             </div>
           )}
