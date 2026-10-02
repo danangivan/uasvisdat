@@ -100,6 +100,524 @@ function DataSourceBadge({ vars = [] }) {
   );
 }
 
+function VizLegendQuadrant() {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Tipologi Kuadran Disparitas</span>
+        </div>
+        <span className="viz-legend-badge">Klasifikasi Analitik 4 Kuadran</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Mengelompokkan wilayah berdasarkan keterkaitan antara kemandirian ekonomi perempuan terhadap agensi pengambilan keputusan publik mengacu pada garis median nasional.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#16a34a' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#16a34a' }}>Kuadran I: Maju &amp; Seimbang</div>
+            <div className="viz-legend-item-desc">Ekonomi Tinggi (≥45.8) &amp; Keputusan Tinggi (≥38.2). Wilayah ideal di mana partisipasi ekonomi perempuan terkonversi nyata menjadi kepemimpinan politik dan profesional.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#2563eb' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#2563eb' }}>Kuadran II: Representasi Kuat</div>
+            <div className="viz-legend-item-desc">Ekonomi Rendah (&lt;45.8) &amp; Keputusan Tinggi (≥38.2). Keterwakilan perempuan di legislatif kuat meskipun tingkat pendapatan daerah masih relatif terbatas.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#dc2626' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#dc2626' }}>Kuadran III: Tertinggal Ganda</div>
+            <div className="viz-legend-item-desc">Ekonomi Rendah (&lt;45.8) &amp; Keputusan Rendah (&lt;38.2). Wilayah yang mengalami ketertinggalan di kedua ranah sekaligus; sasaran prioritas intervensi afirmasi.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#d97706' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#d97706' }}>Kuadran IV: Pekerja Tanpa Kuasa</div>
+            <div className="viz-legend-item-desc">Ekonomi Tinggi (≥45.8) &amp; Keputusan Rendah (&lt;38.2). Indikasi <em>sticky floor</em>: partisipasi kerja tinggi namun minim akses dalam pengambilan keputusan publik.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item full-width">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-shapes"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Encoding Visual Sumbu &amp; Simbol</div>
+            <div className="viz-legend-item-desc">
+              <strong>Sumbu X:</strong> Indeks Partisipasi Ekonomi (0–100) &bull; <strong>Sumbu Y:</strong> Indeks Pengambilan Keputusan (0–100) &bull; <strong>Garis Putus-Putus:</strong> Ambang Median Nasional (X=45.8, Y=38.2) &bull; <strong>Ukuran Lingkaran:</strong> Pengeluaran Riil per Kapita (skala taraf hidup) &bull; <strong>Warna Titik:</strong> Gugus Kepulauan Indonesia.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Peta Batas Poligon Tematik</span>
+        </div>
+        <span className="viz-legend-badge">{isProvinsi ? 'Tingkat Provinsi (38 Wilayah)' : 'Tingkat Kab/Kota (514 Wilayah)'}</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Menginspeksi sebaran spasial indikator gender BPS 2024 langsung pada poligon yurisdiksi batas administratif resmi tanpa distorsi, guna mendeteksi disparitas wilayah barat vs timur serta ketimpangan intra-provinsi.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-palette"></i></div>
+          <div style={{ width: '100%' }}>
+            <div className="viz-legend-item-title">Skala Gradasi Warna ({paletteName})</div>
+            <div className="viz-legend-ramp-container">
+              <div className="viz-legend-ramp-bar" style={{ background: 'linear-gradient(to right, #440154, #31688e, #35b779, #fde725)' }}></div>
+              <div className="viz-legend-ramp-labels">
+                <span>Nilai Terendah (Zona Defisit)</span>
+                <span>Nilai Tertinggi (Zona Maju)</span>
+              </div>
+            </div>
+            <div className="viz-legend-item-desc">Intensitas warna poligon mencerminkan capaian peubah <strong>{varName?.toUpperCase()}</strong>. Skala warna ramah buta warna (*colorblind-safe*).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-hand-pointer"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Panduan Interaksi Poligon</div>
+            <div className="viz-legend-item-desc">
+              <strong>Sorot (Hover):</strong> Menampilkan label tooltip wilayah, nilai indikator, dan tipologi kuadran.<br/>
+              <strong>Klik Poligon:</strong> Memusatkan peta (zoom-in) dan membuka panel rincian lengkap 8 indikator gender BPS wilayah tersebut di bawah peta.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendHeatmap({ varName }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Peta Heatmap Spasial (Kernel Density)</span>
+        </div>
+        <span className="viz-legend-badge">Client-Side Density Surface</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Mengestimasi kerapatan peubah <strong>{varName?.toUpperCase()}</strong> secara spasial kontinu di seluruh nusantara menggunakan algoritma Kernel Density Estimation (KDE) untuk memperlihatkan zona aglomerasi murni tanpa batasan batas wilayah artifisial.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-fire"></i></div>
+          <div style={{ width: '100%' }}>
+            <div className="viz-legend-item-title">Gradien Spektrum Intensitas Panas</div>
+            <div className="viz-legend-ramp-container">
+              <div className="viz-legend-ramp-bar" style={{ background: 'linear-gradient(to right, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444)' }}></div>
+              <div className="viz-legend-ramp-labels">
+                <span>Biru: Coldspot Rendah</span>
+                <span>Hijau: Moderat</span>
+                <span>Merah: Hotspot Sangat Tinggi</span>
+              </div>
+            </div>
+            <div className="viz-legend-item-desc">Zona merah menunjukkan konsentrasi kepadatan capaian gender tertinggi (aglomerasi perkotaan/metropolitan), sedangkan zona biru menandakan defisit capaian spasial.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-sliders"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Fitur Penyesuaian Analisis</div>
+            <div className="viz-legend-item-desc">
+              Gunakan slider <strong>Radius</strong> dan <strong>Blur</strong> di atas untuk mengatur kehalusan permukaan densitas spasial. Centang <em>Overlay Batas SHP</em> untuk menumpangkan garis yurisdiksi di atas heatmap.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendProportional({ sizeVar, colorVar }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Peta Simbol Proporsional (Bivariate)</span>
+        </div>
+        <span className="viz-legend-badge">Encoding Dwipeubah: Ukuran &amp; Warna</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Mengombinasikan dua indikator berbeda dalam satu tampilan peta geospasial untuk menganalisis hubungan timbal balik antara volume/besaran riil dengan persentase performa kualitas gender.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-circle-dot"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Ukuran Radius Lingkaran (Volume: {sizeVar?.toUpperCase()})</div>
+            <div className="viz-legend-item-desc">
+              Besar kecilnya diameter lingkaran dihitung proporsional terhadap besaran absolut peubah <strong>{sizeVar}</strong> (misal taraf hidup pengeluaran atau tingkat partisipasi kerja). Semakin besar lingkaran, semakin masif volumenya.
+            </div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-droplet"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Warna Lingkaran (Kinerja: {colorVar?.toUpperCase()})</div>
+            <div className="viz-legend-item-desc">
+              Gradasi warna lingkaran (dari gelap/ungu hingga terang/kuning) mengkodekan tingkat pencapaian mutu peubah <strong>{colorVar}</strong> (misal keterwakilan parlemen atau skor keputusan).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendChoropleth({ varName }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Peta Choropleth Rasio Provinsi</span>
+        </div>
+        <span className="viz-legend-badge">Agregat Makro 38 Provinsi</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Membandingkan capaian agregat makro antar-provinsi pada indikator <strong>{varName?.toUpperCase()}</strong> untuk melihat kesenjangan regional tingkat pertama di Indonesia.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-layer-group"></i></div>
+          <div style={{ width: '100%' }}>
+            <div className="viz-legend-item-title">Interpretasi Pewarnaan Tematik</div>
+            <div className="viz-legend-ramp-container">
+              <div className="viz-legend-ramp-bar" style={{ background: 'linear-gradient(to right, #440154, #31688e, #35b779, #fde725)' }}></div>
+              <div className="viz-legend-ramp-labels">
+                <span>Nilai Rendah</span>
+                <span>Nilai Rata-rata</span>
+                <span>Nilai Tinggi</span>
+              </div>
+            </div>
+            <div className="viz-legend-item-desc">Provinsi dengan rona warna terang mencatatkan performa terbaik pada indikator {varName}. Arahkan kursor atau klik poligon untuk rincian angka riil.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendLISA({ clusterVar }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Klaster Spasial LISA (Local Moran&apos;s I)</span>
+        </div>
+        <span className="viz-legend-badge">Signifikansi Spasial p &lt; 0.05</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Mengidentifikasi ketergantungan dan autokorelasi spasial lokal pada <strong>{clusterVar === 'lisa_cluster_keputusan' ? 'Skor Pengambilan Keputusan' : 'Skor Partisipasi Ekonomi'}</strong> guna membuktikan keberadaan aglomerasi geografis yang bukan kebetulan acak.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#dc2626' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#dc2626' }}>High-High (Hotspot)</div>
+            <div className="viz-legend-item-desc">Daerah bernilai tinggi yang bertetangga dengan daerah-daerah bernilai tinggi (klaster kemajuan spasial bersama).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#2563eb' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#2563eb' }}>Low-Low (Coldspot)</div>
+            <div className="viz-legend-item-desc">Daerah bernilai rendah yang bertetangga dengan daerah-daerah bernilai rendah (zona ketertinggalan spasial yang butuh intervensi kawasan terpadu).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#d97706' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#d97706' }}>High-Low (Spatial Outlier Positif)</div>
+            <div className="viz-legend-item-desc">Daerah maju yang terisolasi di antara kawasan sekitar yang tertinggal (pusat pertumbuhan mandiri).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#38bdf8' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#0284c7' }}>Low-High (Spatial Outlier Negatif)</div>
+            <div className="viz-legend-item-desc">Daerah tertinggal yang berada di tengah kawasan sekitar yang telah maju (indikasi kesenjangan wilayah satelit).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item full-width">
+          <div className="viz-legend-color-box" style={{ background: '#94a3b8' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#64748b' }}>Not Significant (Abu-Abu)</div>
+            <div className="viz-legend-item-desc">Daerah dengan sebaran nilai acak tanpa ketergantungan spasial yang signifikan secara statistik (p ≥ 0.05).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendPCA({ varPC1 = '42.4', varPC2 = '24.5' }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda PCA Biplot (Reduksi 8 Dimensi)</span>
+        </div>
+        <span className="viz-legend-badge">Total Variansi: {(+varPC1 + +varPC2).toFixed(1)}%</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Merangkum 8 indikator gender BPS yang saling berkorelasi ke dalam 2 komponen utama laten (PC1 dan PC2) tanpa kehilangan banyak informasi, guna mengungkap struktur laten disparitas wilayah di Indonesia.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-arrows-left-right"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Sumbu Horizontal (PC1: {varPC1}% Variansi)</div>
+            <div className="viz-legend-item-desc">Dimensi Kapasitas Sosial &amp; Kesejahteraan Hidup Layak (Pengeluaran riil, AHH, RLS, HLS, dan Tenaga Profesional). Semakin ke kanan koordinat suatu wilayah, semakin tinggi kualitas pendidikan dan daya beli masyarakatnya.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-arrows-up-down"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Sumbu Vertikal (PC2: {varPC2}% Variansi)</div>
+            <div className="viz-legend-item-desc">Dimensi Partisipasi Politik Modern vs Keterpaksaan Kerja Fisik (Parlemen positif ke atas vs TPAK pertanian pedesaan negatif ke bawah). Menjelaskan paradoks kerja di kawasan timur.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item full-width">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-arrow-trend-up" style={{ color: '#dc2626' }}></i></div>
+          <div>
+            <div className="viz-legend-item-title">Vektor Panah Merah (Loading Peubah)</div>
+            <div className="viz-legend-item-desc">
+              Panjang panah mencerminkan kontribusi peubah terhadap pembentukan komponen utama. <strong>Sudut lancip (&lt;90°)</strong> antar dua panah menandakan korelasi positif kuat; <strong>sudut tegak lurus (90°)</strong> menandakan peubah independen; dan <strong>sudut berlawanan (&gt;90°)</strong> menandakan korelasi negatif (*trade-off*).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendParcoords() {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Diagram Koordinat Paralel</span>
+        </div>
+        <span className="viz-legend-badge">Analisis Multivariat 8 Dimensi</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Memvisualisasikan spektrum profil multidimensi lengkap setiap daerah pada 8 indikator gender secara serentak untuk mendeteksi anomali, klaster alami, serta kompromi struktural.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-bars-staggered"></i></div>
+          <div>
+            <div className="viz-legend-item-title">8 Sumbu Vertikal Sejajar</div>
+            <div className="viz-legend-item-desc">Masing-masing sumbu memetakan rentang nilai asli indikator BPS (Parlemen, Pendapatan, Pengeluaran, AHH, Profesional, TPAK, RLS, dan HLS). Setiap garis melintang mewakili 1 wilayah amatan.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-hand-pointer"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Interaktivitas Brushing &amp; Warna Garis</div>
+            <div className="viz-legend-item-desc">Warna garis dikodekan berdasarkan Skor Pengambilan Keputusan (Ungu: Rendah ➔ Kuning: Tinggi). Klik dan tarik vertikal pada sumbu manapun (*brushing*) untuk memfilter wilayah tertentu secara interaktif.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendCorrHeatmap() {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Matriks Korelasi Asosiasi Peubah</span>
+        </div>
+        <span className="viz-legend-badge">Koefisien Pearson (r: -1.0 s.d. +1.0)</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Mengukur kekuatan dan arah hubungan linear antara masing-masing pasangan indikator gender BPS guna membuktikan hipotesis kausalitas dan sinergi pembangunan manusia.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#b91c1c' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#b91c1c' }}>Merah (+0.50 s.d. +1.00): Korelasi Positif Kuat</div>
+            <div className="viz-legend-item-desc">Peningkatan satu indikator berkaitan erat dengan kenaikan indikator lainnya (misal: Rata-rata Lama Sekolah berkorelasi positif kuat dengan Pengeluaran Riil).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#f8fafc', border: '1px solid #cbd5e1' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#475569' }}>Putih / Terang (-0.20 s.d. +0.20): Hubungan Lemah</div>
+            <div className="viz-legend-item-desc">Tidak terdapat korelasi linear yang signifikan antar dua indikator (keduanya bergerak secara independen).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-color-box" style={{ background: '#1d4ed8' }}></div>
+          <div>
+            <div className="viz-legend-item-title" style={{ color: '#1d4ed8' }}>Biru (-0.50 s.d. -1.00): Korelasi Negatif Kuat</div>
+            <div className="viz-legend-item-desc">Kedua indikator bergerak berlawanan arah (*trade-off* terbalik, misal TPAK perempuan tinggi di sektor tradisional berkorelasi negatif dengan tingkat pendidikan formal).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendRadar() {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Radar Profil Multidimensi</span>
+        </div>
+        <span className="viz-legend-badge">Skala Relatif Ternormalisasi (0-100)</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Menilai keseimbangan holistik profil pembangunan gender antar-wilayah kepulauan utama (Jawa, Sulawesi, Papua) dengan membandingkan bentuk poligon jaring laba-laba.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-spider"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Bentuk &amp; Luas Poligon Spasial</div>
+            <div className="viz-legend-item-desc">Poligon yang merekah keluar mendekati batas terluar (skor 100) mengindikasikan capaian pembangunan gender yang menyeluruh dan merata. Cekungan ke arah pusat menandakan dimensi yang menjadi kelemahan mendesak.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendTreemap({ isProvinsi, sizeVar, colorVar }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Interactive Treemap</span>
+        </div>
+        <span className="viz-legend-badge">Hirarki Bersarang: {isProvinsi ? 'Pulau ➔ Provinsi' : 'Pulau ➔ Provinsi ➔ Kab/Kota'}</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Menyajikan dekomposisi data berhierarki secara spasial proporsional di mana struktur wilayah bersarang dikelompokkan ke dalam kotak-kotak bertingkat untuk membandingkan kontribusi volume dan performa kualitas.
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-vector-square"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Ukuran Luas Kotak (Volume: {sizeVar?.toUpperCase()})</div>
+            <div className="viz-legend-item-desc">Luas area kotak proporsional terhadap besaran peubah <strong>{sizeVar}</strong> (misal Pengeluaran Riil atau TPAK). Semakin besar kotak, semakin dominan kontribusi volume daerah tersebut.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-palette"></i></div>
+          <div style={{ width: '100%' }}>
+            <div className="viz-legend-item-title">Warna Kotak (Kinerja: {colorVar?.toUpperCase()})</div>
+            <div className="viz-legend-ramp-container">
+              <div className="viz-legend-ramp-bar" style={{ background: 'linear-gradient(to right, #440154, #31688e, #35b779, #fde725)' }}></div>
+              <div className="viz-legend-ramp-labels">
+                <span>Rendah (Ungu Gelap)</span>
+                <span>Tinggi (Kuning Terang)</span>
+              </div>
+            </div>
+            <div className="viz-legend-item-desc">Mengkodekan mutu capaian <strong>{colorVar}</strong> (misal % Parlemen atau Skor Keputusan).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item full-width">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-sitemap"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Cara Navigasi Hirarki (Drill-Down &amp; Zoom-Out)</div>
+            <div className="viz-legend-item-desc">
+              <strong>Klik Kotak:</strong> Memperbesar (*zoom-in / drill-down*) ke dalam struktur pulau atau provinsi yang dipilih.<br/>
+              <strong>Klik Bilah Judul Atas:</strong> Kembali (*zoom-out*) ke tingkat hirarki agregat di atasnya hingga seluruh Indonesia.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendSunburst({ isProvinsi, sizeVar, colorVar }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Interactive Sunburst Chart</span>
+        </div>
+        <span className="viz-legend-badge">Hirarki Radial Konsentris</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Memvisualisasikan hirarki bertingkat dalam bentuk diagram cincin radial konsentris untuk mengamati proporsi pembagian dari tingkat nasional (pusat), pulau (cincin dalam), provinsi (cincin tengah), hingga kab/kota (cincin terluar).
+      </div>
+      <div className="viz-legend-grid">
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-circle-notch"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Lebar Sudut Busur (Volume: {sizeVar?.toUpperCase()})</div>
+            <div className="viz-legend-item-desc">Sudut busur lingkaran proporsional terhadap besaran variabel ukuran terpilih <strong>{sizeVar}</strong>. Semakin lebar irisan, semakin besar proporsi wilayahnya.</div>
+          </div>
+        </div>
+        <div className="viz-legend-item">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-palette"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Gradien Warna Irisan (Kinerja: {colorVar?.toUpperCase()})</div>
+            <div className="viz-legend-item-desc">Warna irisan lingkaran mengkodekan capaian peubah <strong>{colorVar}</strong> dengan palet Viridis kontinu dari ungu (rendah) ke kuning (tinggi).</div>
+          </div>
+        </div>
+        <div className="viz-legend-item full-width">
+          <div className="viz-legend-icon-box"><i className="fa-solid fa-hand-pointer"></i></div>
+          <div>
+            <div className="viz-legend-item-title">Navigasi Radial Interaktif</div>
+            <div className="viz-legend-item-desc">
+              <strong>Klik Irisan:</strong> Memfokuskan tampilan dan memperbesar sektor wilayah tersebut.<br/>
+              <strong>Klik Lingkaran Pusat:</strong> Kembali satu tingkat ke atas (*zoom-out*).
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function VizLegendIslandSummary({ isProvinsi }) {
+  return (
+    <div className="viz-legend">
+      <div className="viz-legend-header">
+        <div className="viz-legend-title">
+          <i className="fa-solid fa-circle-question"></i>
+          <span>Panduan &amp; Legenda Rangkuman Hierarki per Wilayah Pulau</span>
+        </div>
+        <span className="viz-legend-badge">Rekapitulasi Agregat Makro Kepulauan</span>
+      </div>
+      <div className="viz-legend-desc">
+        <strong>Tujuan &amp; Fungsi:</strong> Menghitung nilai agregat rata-rata indikator gender BPS 2024 dan indeks komposit (Keputusan, Ekonomi, IKPP) untuk 6 gugus pulau utama di Indonesia guna mengevaluasi disparitas makro antar-region secara cepat dan terukur ({isProvinsi ? 'berdasarkan 38 provinsi' : 'berdasarkan 514 kabupaten/kota'}).
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -1052,8 +1570,16 @@ export default function Home() {
     trace.values.push(0);
 
     const layout = {
-      title: { text: `<b>Interactive Treemap (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
-      margin: { l: 10, r: 10, t: 40, b: 10 },
+      title: {
+        text: `<b>Interactive Treemap (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
+        font: { size: 13.5 },
+        y: 0.99,
+        x: 0.01,
+        xanchor: 'left',
+        yanchor: 'top',
+        pad: { t: 0, b: 0, l: 0, r: 0 }
+      },
+      margin: { l: 10, r: 10, t: 10, b: 10 },
       height: 560,
       paper_bgcolor: 'transparent'
     };
@@ -1095,8 +1621,16 @@ export default function Home() {
     });
 
     const layout = {
-      title: { text: `<b>Interactive Sunburst Chart (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
-      margin: { l: 10, r: 10, t: 40, b: 10 },
+      title: {
+        text: `<b>Interactive Sunburst Chart (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
+        font: { size: 13.5 },
+        y: 0.99,
+        x: 0.01,
+        xanchor: 'left',
+        yanchor: 'top',
+        pad: { t: 0, b: 0, l: 0, r: 0 }
+      },
+      margin: { l: 10, r: 10, t: 10, b: 10 },
       height: 580,
       paper_bgcolor: 'transparent'
     };
@@ -1419,6 +1953,7 @@ export default function Home() {
               </div>
             </div>
             <div id="quadrant-chart" className="chart-box"></div>
+            <VizLegendQuadrant />
             <DataSourceBadge vars={['parlemen', 'pendapatan']} />
           </div>
 
@@ -1598,6 +2133,7 @@ export default function Home() {
                   <p>Watermark <em>&quot;API KEY REQUIRED&quot;</em> pada tile basemap CartoDB telah dieliminasi sepenuhnya dengan beralih ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap yang 100% bebas token dan bebas biaya. Poligon GeoJSON disimpan dan dirender secara mandiri di sisi klien (*client-side*).</p>
                 </div>
               </div>
+              <VizLegendBoundaryMap isProvinsi={isProvinsi} varName={kabkotaChoroplethVar} paletteName={selectedPalette} />
               <DataSourceBadge vars={[kabkotaChoroplethVar]} />
             </div>
           )}
@@ -1695,6 +2231,7 @@ export default function Home() {
                   <p>Dengan mengaktifkan centang <em>&quot;Overlay Garis Batas Poligon SHP&quot;</em>, batas administratif hasil ekstraksi shapefile ditumpangkan secara presisi di atas permukaan heatmap kontinu. Hal ini memudahkan pengambil kebijakan untuk mengidentifikasi batas yurisdiksi kab/kota mana yang berada di pusat hotspot maupun coldspot.</p>
                 </div>
               </div>
+              <VizLegendHeatmap varName={heatmapVar} />
               <DataSourceBadge vars={[heatmapVar]} />
             </div>
           )}
@@ -1722,6 +2259,7 @@ export default function Home() {
                 </div>
               </div>
               <div id="leaflet-map"></div>
+              <VizLegendProportional sizeVar={geoSizeVar} colorVar={geoColorVar} />
               <DataSourceBadge vars={[geoSizeVar, geoColorVar]} />
             </div>
           )}
@@ -1745,6 +2283,7 @@ export default function Home() {
                 </div>
               </div>
               <div id="choropleth-map"></div>
+              <VizLegendChoropleth varName={choroplethVar} />
               <DataSourceBadge vars={[choroplethVar]} />
             </div>
           )}
@@ -1764,6 +2303,7 @@ export default function Home() {
                 </div>
               </div>
               <div id="lisa-map"></div>
+              <VizLegendLISA clusterVar={lisaClusterVar} />
               <DataSourceBadge vars={[lisaClusterVar]} />
             </div>
           )}
@@ -1794,6 +2334,7 @@ export default function Home() {
                 </div>
               </div>
               <div id="pca-biplot-chart" className="chart-box"></div>
+              <VizLegendPCA varPC1={pcaMeta?.var_exp_pc1 || '42.4'} varPC2={pcaMeta?.var_exp_pc2 || '24.5'} />
               <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
@@ -1804,6 +2345,7 @@ export default function Home() {
                 <div className="card-title"><i className="fa-solid fa-sliders"></i> Diagram Koordinat Paralel (Parallel Coordinates)</div>
               </div>
               <div id="parallel-coords-chart" className="chart-box"></div>
+              <VizLegendParcoords />
               <DataSourceBadge vars={['parlemen', 'pendapatan', 'tpak', 'profesional', 'pengeluaran']} />
             </div>
           )}
@@ -1814,6 +2356,7 @@ export default function Home() {
                 <div className="card-title"><i className="fa-solid fa-temperature-half"></i> Clustered Heatmap: Matriks Korelasi Hierarkis</div>
               </div>
               <div id="heatmap-chart" className="chart-box"></div>
+              <VizLegendCorrHeatmap />
               <DataSourceBadge vars={['parlemen', 'pendapatan', 'tpak', 'profesional', 'pengeluaran', 'ahh', 'hls', 'rls']} />
             </div>
           )}
@@ -1824,6 +2367,7 @@ export default function Home() {
                 <div className="card-title"><i className="fa-solid fa-circle-notch"></i> Radar Chart: Perbandingan Profil Multidimensi Antar Wilayah</div>
               </div>
               <div id="radar-chart" className="chart-box"></div>
+              <VizLegendRadar />
               <DataSourceBadge vars={['pengeluaran', 'ahh', 'hls', 'rls', 'tpak', 'pendapatan', 'parlemen', 'profesional']} />
             </div>
           )}
@@ -1858,15 +2402,17 @@ export default function Home() {
           </div>
 
           {activeHierSubtab === 'hier-subtab-treemap' && (
-            <div className="card">
+            <div className="card hierarchical-card">
               <div id="treemap-chart" className="chart-box"></div>
+              <VizLegendTreemap isProvinsi={isProvinsi} sizeVar={hierSizeVar} colorVar={hierColorVar} />
               <DataSourceBadge vars={[hierSizeVar, hierColorVar]} />
             </div>
           )}
 
           {activeHierSubtab === 'hier-subtab-sunburst' && (
-            <div className="card">
+            <div className="card hierarchical-card">
               <div id="sunburst-chart" className="chart-box"></div>
+              <VizLegendSunburst isProvinsi={isProvinsi} sizeVar={hierSizeVar} colorVar={hierColorVar} />
               <DataSourceBadge vars={[hierSizeVar, hierColorVar]} />
             </div>
           )}
@@ -1907,6 +2453,7 @@ export default function Home() {
                   </tbody>
                 </table>
               </div>
+              <VizLegendIslandSummary isProvinsi={isProvinsi} />
               <DataSourceBadge vars={['parlemen', 'pendapatan', 'profesional', 'tpak', 'pengeluaran']} />
             </div>
           )}
