@@ -2573,8 +2573,8 @@ export default function Home() {
     },
     {
       id: "tab-method",
-      label: "Metodologi & AI",
-      desc: "Sumber data resmi BPS RI 2024, pra-pemrosesan, imputasi, & deklarasi AI",
+      label: "Metodologi & Sumber Data",
+      desc: "Sumber data resmi BPS RI 2024, pra-pemrosesan, imputasi, & justifikasi desain",
       icon: "fa-book-open",
     },
   ];
@@ -2652,7 +2652,7 @@ export default function Home() {
                   {isProvinsi ? "38 Provinsi" : "514 Kab/Kota"})
                 </option>
                 <option value="tab-method">
-                  6. Metodologi &amp; Integritas AI
+                  6. Metodologi &amp; Sumber Data
                 </option>
               </select>
             </div>
@@ -4316,30 +4316,6 @@ export default function Home() {
                 <strong>Ukuran Simbol:</strong> Mengkodekan besaran absolut
                 taraf hidup (pengeluaran riil per kapita) dengan batas radius
                 proporsional untuk mencegah oklusi visual.
-              </li>
-            </ul>
-          </div>
-
-          <div className="method-box">
-            <h3>4. Deklarasi Integritas Akademik & Penggunaan AI</h3>
-            <p>
-              Sesuai dengan ketentuan Petunjuk Nomor 7 Soal UAS Visualisasi Data
-              dan Informasi TA. 2025/2026:
-            </p>
-            <ul>
-              <li>
-                <strong>Alat Bantu AI yang Digunakan:</strong> Large Language
-                Model (Google DeepMind Antigravity) digunakan sebatas alat bantu
-                asistensi pemrograman (<em>pair programming</em>), penulisan
-                skrip otomasi ekstraksi data, dan perancangan tata letak
-                antarmuka web.
-              </li>
-              <li>
-                <strong>Orisinalitas &amp; Verifikasi:</strong> Konseptualisasi
-                penelitian, seleksi indikator BPS, justifikasi visual encoding,
-                validasi statistik autokorelasi spasial, serta perumusan naskah
-                analisis dikerjakan dan dipertanggungjawabkan sepenuhnya oleh
-                penyusun.
               </li>
             </ul>
           </div>
