@@ -1573,14 +1573,14 @@ export default function Home() {
     const layout = {
       title: {
         text: `<b>Interactive Treemap (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
-        font: { size: 13.5 },
-        y: 0.99,
+        font: { size: 13.5, color: '#0f172a' },
+        y: 0.985,
         x: 0.01,
         xanchor: 'left',
         yanchor: 'top',
-        pad: { t: 0, b: 0, l: 0, r: 0 }
+        pad: { t: 0, b: 6, l: 0, r: 0 }
       },
-      margin: { l: 10, r: 10, t: 10, b: 10 },
+      margin: { l: 10, r: 10, t: 42, b: 10 },
       height: 560,
       paper_bgcolor: 'transparent'
     };
@@ -1624,14 +1624,14 @@ export default function Home() {
     const layout = {
       title: {
         text: `<b>Interactive Sunburst Chart (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
-        font: { size: 13.5 },
-        y: 0.99,
+        font: { size: 13.5, color: '#0f172a' },
+        y: 0.985,
         x: 0.01,
         xanchor: 'left',
         yanchor: 'top',
-        pad: { t: 0, b: 0, l: 0, r: 0 }
+        pad: { t: 0, b: 6, l: 0, r: 0 }
       },
-      margin: { l: 10, r: 10, t: 10, b: 10 },
+      margin: { l: 10, r: 10, t: 42, b: 10 },
       height: 580,
       paper_bgcolor: 'transparent'
     };

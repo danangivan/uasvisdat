@@ -1664,13 +1664,13 @@ table.data-table tr:hover {
   font-weight: 600;
 }
 
-/* Card hierarchy adjustments to shift title up 75% */
+/* Card hierarchy adjustments */
 .hierarchical-card {
-  padding-top: 6px !important;
+  padding-top: 14px;
 }
 
 .hierarchical-card .chart-box {
-  margin-top: -6px;
+  margin-top: 0;
 }
 
 /* ==========================================================================
