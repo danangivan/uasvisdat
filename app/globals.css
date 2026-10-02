@@ -555,22 +555,9 @@ body {
   min-width: 0;
 }
 
-.institution-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  color: #1e40af;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
-}
-
-.institution-pill i {
-  color: #1d4ed8;
+.institution-pill,
+.badges-row {
+  display: none !important;
 }
 
 .header-title-box {
@@ -614,13 +601,6 @@ body {
   border-radius: var(--radius-sm);
   font-size: 0.74rem;
   font-weight: 700;
-}
-
-.badges-row {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  align-items: center;
 }
 
 .badge {
@@ -1509,10 +1489,6 @@ table.data-table tr:hover {
     font-size: 0.78rem;
   }
 
-  .badges-row {
-    gap: 6px;
-  }
-
   .badge {
     padding: 4px 9px;
     font-size: 0.68rem;
@@ -1614,11 +1590,6 @@ table.data-table tr:hover {
 @media (max-width: 480px) {
   .header-title h1 {
     font-size: 1.05rem;
-  }
-
-  .institution-pill {
-    font-size: 0.68rem;
-    padding: 2px 8px;
   }
 
   .kpi-grid {
