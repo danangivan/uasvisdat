@@ -733,6 +733,13 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [activeTab, activeGeoSubtab, activeMultiSubtab, activeHierSubtab]);
 
+  // Otomatis kunci tingkat ke Provinsi saat modul Analisis Berhierarki aktif
+  useEffect(() => {
+    if (activeTab === 'tab-hierarchical') {
+      setSelectedTipe('Provinsi');
+    }
+  }, [activeTab]);
+
   // Prepare enriched provinces dataset with composite scores and coordinates
   const enrichedProvinsi = allProvinsi.map(pr => {
     const kabsInProv = allKabkota.filter(d => d.provinsi === pr.provinsi);
@@ -1634,7 +1641,7 @@ export default function Home() {
   }
 
   function renderTreemap() {
-    const dataObj = buildHierarchyData(filteredKabkota, isProvinsi, hierSizeVar, hierColorVar);
+    const dataObj = buildHierarchyData(filteredKabkota, true, hierSizeVar, hierColorVar);
 
     const trace = {
       type: 'treemap',
@@ -1654,7 +1661,7 @@ export default function Home() {
 
     const layout = {
       title: {
-        text: `<b>Interactive Treemap (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
+        text: `<b>Interactive Treemap (Tingkat Provinsi): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
         font: { size: 13.5, color: '#0f172a' },
         y: 0.985,
         x: 0.01,
@@ -1671,7 +1678,7 @@ export default function Home() {
   }
 
   function renderSunburst() {
-    const dataObj = buildHierarchyData(filteredKabkota, isProvinsi, hierSizeVar, hierColorVar);
+    const dataObj = buildHierarchyData(filteredKabkota, true, hierSizeVar, hierColorVar);
 
     const trace = {
       type: 'sunburst',
@@ -1691,7 +1698,7 @@ export default function Home() {
 
     const layout = {
       title: {
-        text: `<b>Interactive Sunburst Chart (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
+        text: `<b>Interactive Sunburst Chart (Tingkat Provinsi): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`,
         font: { size: 13.5, color: '#0f172a' },
         y: 0.985,
         x: 0.01,
@@ -1829,7 +1836,11 @@ export default function Home() {
                 className="module-dropdown-select"
                 value={activeTab}
                 onChange={e => {
-                  setActiveTab(e.target.value);
+                  const val = e.target.value;
+                  setActiveTab(val);
+                  if (val === 'tab-hierarchical') {
+                    setSelectedTipe('Provinsi');
+                  }
                   setMobileMenuOpen(false);
                 }}
               >
@@ -1869,23 +1880,25 @@ export default function Home() {
             </select>
           </div>
 
-          <div className="filter-group">
-            <label><i className="fa-solid fa-sitemap"></i> Tingkat Wilayah (Hirarki)</label>
-            <div className="radio-pills">
-              {['Provinsi', 'Kab/Kota'].map(t => (
-                <label key={t}>
-                  <input
-                    type="radio"
-                    name="tipe_hirarki"
-                    value={t}
-                    checked={selectedTipe === t}
-                    onChange={() => setSelectedTipe(t)}
-                  />
-                  <span>{t}</span>
-                </label>
-              ))}
+          {activeTab !== 'tab-hierarchical' && (
+            <div className="filter-group">
+              <label><i className="fa-solid fa-sitemap"></i> Tingkat Wilayah (Hirarki)</label>
+              <div className="radio-pills">
+                {['Provinsi', 'Kab/Kota'].map(t => (
+                  <label key={t}>
+                    <input
+                      type="radio"
+                      name="tipe_hirarki"
+                      value={t}
+                      checked={selectedTipe === t}
+                      onChange={() => setSelectedTipe(t)}
+                    />
+                    <span>{t}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="filter-group">
             <label><i className="fa-solid fa-shapes"></i> Kuadran Tipologi</label>
