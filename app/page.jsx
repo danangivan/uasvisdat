@@ -115,7 +115,7 @@ export default function Home() {
   // Filters
   const [selectedPulau, setSelectedPulau] = useState('Semua Pulau');
   const [selectedProv, setSelectedProv] = useState('Semua Provinsi');
-  const [selectedTipe, setSelectedTipe] = useState('Semua');
+  const [selectedTipe, setSelectedTipe] = useState('Kab/Kota');
   const [selectedKuadran, setSelectedKuadran] = useState('Semua Kuadran');
   const [selectedPalette, setSelectedPalette] = useState('Viridis');
 
@@ -215,11 +215,64 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [activeTab, activeGeoSubtab, activeMultiSubtab, activeHierSubtab]);
 
+  // Prepare enriched provinces dataset with composite scores and coordinates
+  const enrichedProvinsi = allProvinsi.map(pr => {
+    const kabsInProv = allKabkota.filter(d => d.provinsi === pr.provinsi);
+    const count = kabsInProv.length || 1;
+    const lats = kabsInProv.filter(d => d.lat).map(d => d.lat);
+    const lons = kabsInProv.filter(d => d.lon).map(d => d.lon);
+    const avgLat = lats.length ? lats.reduce((a, b) => a + b, 0) / lats.length : 0;
+    const avgLon = lons.length ? lons.reduce((a, b) => a + b, 0) / lons.length : 0;
+    const kode = kabsInProv[0] ? Math.floor(kabsInProv[0].kode_wilayah / 100) : 99;
+
+    const skor_eko = +(kabsInProv.reduce((a, b) => a + b.skor_ekonomi, 0) / count).toFixed(2);
+    const skor_kep = +(kabsInProv.reduce((a, b) => a + b.skor_keputusan, 0) / count).toFixed(2);
+    const skor_sos = +(kabsInProv.reduce((a, b) => a + b.skor_kapasitas_sosial, 0) / count).toFixed(2);
+    const ikpp = +(kabsInProv.reduce((a, b) => a + b.ikpp_komposit, 0) / count).toFixed(2);
+    const pc1 = +(kabsInProv.reduce((a, b) => a + (b.pc1 || 0), 0) / count).toFixed(3);
+    const pc2 = +(kabsInProv.reduce((a, b) => a + (b.pc2 || 0), 0) / count).toFixed(3);
+
+    let kuadran = 'Kuadran III (Ekonomi Rendah, Keputusan Rendah)';
+    if (skor_eko >= 34.5 && skor_kep >= 47.6) kuadran = 'Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)';
+    else if (skor_eko < 34.5 && skor_kep >= 47.6) kuadran = 'Kuadran II (Ekonomi Rendah, Keputusan Tinggi)';
+    else if (skor_eko >= 34.5 && skor_kep < 47.6) kuadran = 'Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)';
+
+    return {
+      kode_wilayah: kode,
+      nama_resmi: 'Provinsi ' + pr.provinsi,
+      wilayah: pr.wilayah || pr.provinsi.toUpperCase(),
+      tipe: 'Provinsi',
+      provinsi: pr.provinsi,
+      pulau: pr.pulau,
+      lat: +avgLat.toFixed(3),
+      lon: +avgLon.toFixed(3),
+      parlemen: pr.parlemen,
+      pendapatan: pr.pendapatan,
+      pengeluaran: pr.pengeluaran,
+      ahh: pr.ahh,
+      profesional: pr.profesional,
+      tpak: pr.tpak,
+      rls: pr.rls,
+      hls: pr.hls,
+      skor_ekonomi: skor_eko,
+      skor_keputusan: skor_kep,
+      skor_kapasitas_sosial: skor_sos,
+      ikpp_komposit: ikpp,
+      kuadran: kuadran,
+      lisa_cluster_keputusan: 'Not Significant',
+      lisa_cluster_ekonomi: 'Not Significant',
+      pc1: pc1,
+      pc2: pc2
+    };
+  });
+
+  const isProvinsi = selectedTipe === 'Provinsi';
+  const baseData = isProvinsi ? enrichedProvinsi : allKabkota;
+
   // Filter Data
-  const filteredKabkota = allKabkota.filter(d => {
+  const filteredKabkota = baseData.filter(d => {
     if (selectedPulau !== 'Semua Pulau' && d.pulau !== selectedPulau) return false;
     if (selectedProv !== 'Semua Provinsi' && d.provinsi !== selectedProv) return false;
-    if (selectedTipe !== 'Semua' && d.tipe !== selectedTipe) return false;
     if (selectedKuadran !== 'Semua Kuadran' && d.kuadran !== selectedKuadran) return false;
     return true;
   });
@@ -228,7 +281,7 @@ export default function Home() {
   const availableProvs = [
     'Semua Provinsi',
     ...new Set(
-      (selectedPulau === 'Semua Pulau' ? allKabkota : allKabkota.filter(d => d.pulau === selectedPulau))
+      (selectedPulau === 'Semua Pulau' ? allProvinsi : allProvinsi.filter(d => d.pulau === selectedPulau))
         .map(d => d.provinsi)
     )
   ].sort();
@@ -378,8 +431,9 @@ export default function Home() {
     let maxVal = 100;
 
     if (!isCategorical) {
-      const vals = activeGeo.features
-        .map(f => f.properties[kabkotaChoroplethVar])
+      const sourceList = isProvinsi ? enrichedProvinsi : activeGeo.features.map(f => f.properties);
+      const vals = sourceList
+        .map(f => f[kabkotaChoroplethVar])
         .filter(v => v !== undefined && v !== null && !isNaN(v));
       if (vals.length > 0) {
         minVal = Math.min(...vals);
@@ -388,7 +442,11 @@ export default function Home() {
     }
 
     function getPolygonColor(props) {
-      const val = props[kabkotaChoroplethVar];
+      let val = props[kabkotaChoroplethVar];
+      if (isProvinsi) {
+        const provItem = enrichedProvinsi.find(p => p.provinsi === props.provinsi);
+        if (provItem) val = provItem[kabkotaChoroplethVar];
+      }
       if (val === undefined || val === null) return '#cbd5e1';
 
       if (kabkotaChoroplethVar === 'kuadran') {
@@ -435,20 +493,22 @@ export default function Home() {
       },
       onEachFeature: (feature, layer) => {
         const p = feature.properties;
-        const val = p[kabkotaChoroplethVar];
+        const provItem = isProvinsi ? enrichedProvinsi.find(pr => pr.provinsi === p.provinsi) : null;
+        const activeItem = provItem || p;
+        const val = activeItem[kabkotaChoroplethVar];
         const displayVal = typeof val === 'number'
           ? (kabkotaChoroplethVar === 'pengeluaran' ? `Rp${Number(val).toLocaleString('id-ID')}` : `${val.toFixed(2)}%`)
           : (val || 'N/A');
 
         layer.bindTooltip(`
           <div style="font-family: sans-serif; font-size: 12px; line-height: 1.4;">
-            <strong style="color: #0f172a; font-size: 13px;">${p.nama_resmi || p.WADMKK}</strong><br/>
-            <span style="color: #64748b;">${p.provinsi || p.WADMPR} (${p.tipe || 'Kab/Kota'})</span>
+            <strong style="color: #0f172a; font-size: 13px;">${isProvinsi ? `Provinsi ${p.provinsi}` : (p.nama_resmi || p.WADMKK)}</strong><br/>
+            <span style="color: #64748b;">${isProvinsi ? `Agregat Tingkat I &bull; ${p.pulau}` : `${p.provinsi} (${p.tipe || 'Kab/Kota'})`}</span>
             <div style="margin-top: 5px; padding-top: 5px; border-top: 1px solid #e2e8f0; font-weight: 600;">
               ${kabkotaChoroplethVar.toUpperCase()}: <span style="color: #2563eb; font-weight: 800;">${displayVal}</span>
             </div>
             <div style="font-size: 11px; color: #059669; font-weight: 600; margin-top: 2px;">
-              ${p.kuadran ? p.kuadran.split('(')[0] : ''}
+              ${activeItem.kuadran ? activeItem.kuadran.split('(')[0] : ''}
             </div>
           </div>
         `, { sticky: true });
@@ -468,7 +528,7 @@ export default function Home() {
             geoLayer.resetStyle(e.target);
           },
           click: (e) => {
-            setSelectedKabDetail(p);
+            setSelectedKabDetail(activeItem);
             kabkotaBoundaryMapRef.current.fitBounds(e.target.getBounds(), { padding: [35, 35] });
           }
         });
@@ -958,9 +1018,9 @@ export default function Home() {
     const trace = {
       type: 'treemap',
       labels: filteredKabkota.map(d => d.nama_resmi),
-      parents: filteredKabkota.map(d => d.provinsi),
+      parents: isProvinsi ? filteredKabkota.map(d => d.pulau) : filteredKabkota.map(d => d.provinsi),
       values: filteredKabkota.map(d => d[hierSizeVar]),
-      text: filteredKabkota.map(d => `${d.nama_resmi}<br>Prov: ${d.provinsi}<br>${hierColorVar}: ${d[hierColorVar]}`),
+      text: filteredKabkota.map(d => `${d.nama_resmi}<br>${isProvinsi ? `Pulau: ${d.pulau}` : `Prov: ${d.provinsi}`}<br>${hierColorVar}: ${d[hierColorVar]}`),
       hoverinfo: 'text',
       marker: {
         colors: filteredKabkota.map(d => d[hierColorVar]),
@@ -971,17 +1031,19 @@ export default function Home() {
     };
 
     const pulauSet = [...new Set(filteredKabkota.map(d => d.pulau))];
-    const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
+
+    if (!isProvinsi) {
+      const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
+      provSet.forEach(p => {
+        trace.labels.push(p.prov);
+        trace.parents.push(p.pulau);
+        trace.values.push(0);
+      });
+    }
 
     pulauSet.forEach(pulau => {
       trace.labels.push(pulau);
       trace.parents.push('Indonesia');
-      trace.values.push(0);
-    });
-
-    provSet.forEach(p => {
-      trace.labels.push(p.prov);
-      trace.parents.push(p.pulau);
       trace.values.push(0);
     });
 
@@ -990,7 +1052,7 @@ export default function Home() {
     trace.values.push(0);
 
     const layout = {
-      title: { text: `<b>Interactive Treemap: Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
+      title: { text: `<b>Interactive Treemap (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
       margin: { l: 10, r: 10, t: 40, b: 10 },
       height: 560,
       paper_bgcolor: 'transparent'
@@ -1003,7 +1065,7 @@ export default function Home() {
     const trace = {
       type: 'sunburst',
       labels: filteredKabkota.map(d => d.nama_resmi),
-      parents: filteredKabkota.map(d => d.provinsi),
+      parents: isProvinsi ? filteredKabkota.map(d => d.pulau) : filteredKabkota.map(d => d.provinsi),
       values: filteredKabkota.map(d => d[hierSizeVar]),
       text: filteredKabkota.map(d => `${d.nama_resmi}<br>${hierColorVar}: ${d[hierColorVar]}`),
       hoverinfo: 'text',
@@ -1016,7 +1078,15 @@ export default function Home() {
     };
 
     const pulauSet = [...new Set(filteredKabkota.map(d => d.pulau))];
-    const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
+
+    if (!isProvinsi) {
+      const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
+      provSet.forEach(p => {
+        trace.labels.push(p.prov);
+        trace.parents.push(p.pulau);
+        trace.values.push(0);
+      });
+    }
 
     pulauSet.forEach(pulau => {
       trace.labels.push(pulau);
@@ -1024,14 +1094,8 @@ export default function Home() {
       trace.values.push(0);
     });
 
-    provSet.forEach(p => {
-      trace.labels.push(p.prov);
-      trace.parents.push(p.pulau);
-      trace.values.push(0);
-    });
-
     const layout = {
-      title: { text: `<b>Interactive Sunburst Chart: Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
+      title: { text: `<b>Interactive Sunburst Chart (${isProvinsi ? 'Tingkat Provinsi' : 'Tingkat Kab/Kota'}): Ukuran = ${hierSizeVar.toUpperCase()} | Warna = ${hierColorVar.toUpperCase()}</b>`, font: { size: 13.5 } },
       margin: { l: 10, r: 10, t: 40, b: 10 },
       height: 580,
       paper_bgcolor: 'transparent'
@@ -1095,7 +1159,7 @@ export default function Home() {
     });
     const link = document.createElement('a');
     link.href = encodeURI(csvContent);
-    link.download = 'disparitas_perempuan_514_kabkota_2024.csv';
+    link.download = `disparitas_perempuan_${isProvinsi ? '38_provinsi' : '514_kabkota'}_2024.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1106,14 +1170,14 @@ export default function Home() {
   const avgProfesional = filteredKabkota.length ? filteredKabkota.reduce((a, b) => a + b.profesional, 0) / filteredKabkota.length : 0;
   const avgTPAK = filteredKabkota.length ? filteredKabkota.reduce((a, b) => a + b.tpak, 0) / filteredKabkota.length : 0;
 
-  const hasActiveFilter = selectedPulau !== 'Semua Pulau' || selectedProv !== 'Semua Provinsi' || selectedTipe !== 'Semua' || selectedKuadran !== 'Semua Kuadran';
+  const hasActiveFilter = selectedPulau !== 'Semua Pulau' || selectedProv !== 'Semua Provinsi' || selectedTipe !== 'Kab/Kota' || selectedKuadran !== 'Semua Kuadran';
 
   const MODULES = [
     { id: 'tab-overview', label: 'Ringkasan & Storytelling', desc: 'Tipologi kuadran disparitas ekonomi vs keputusan & narasi analitik', icon: 'fa-chart-line' },
     { id: 'tab-geospatial', label: 'Analisis Geospasial', desc: 'Peta batas kab/kota poligon SHP, heatmap spasial, choropleth, & LISA cluster', icon: 'fa-map' },
     { id: 'tab-multivariate', label: 'Dimensi Tinggi (Multivariat)', desc: 'PCA biplot 8 indikator, koordinat paralel, korelasi matriks, & profil radar', icon: 'fa-project-diagram' },
     { id: 'tab-hierarchical', label: 'Analisis Berhierarki', desc: 'Treemap & sunburst interaktif agregasi pulau hingga kabupaten/kota', icon: 'fa-sitemap' },
-    { id: 'tab-data', label: 'Eksplorasi Data', desc: 'Pangkalan data tabular 514 kabupaten/kota dengan pencarian & ekspor CSV', icon: 'fa-table' },
+    { id: 'tab-data', label: 'Eksplorasi Data', desc: `Pangkalan data tabular ${isProvinsi ? '38 provinsi' : '514 kabupaten/kota'} dengan pencarian & ekspor CSV`, icon: 'fa-table' },
     { id: 'tab-method', label: 'Metodologi & AI', desc: 'Sumber data resmi BPS RI 2024, pra-pemrosesan, imputasi, & deklarasi AI', icon: 'fa-book-open' }
   ];
 
@@ -1170,7 +1234,7 @@ export default function Home() {
                 <option value="tab-geospatial">2. Analisis Geospasial (Peta &amp; Heatmap)</option>
                 <option value="tab-multivariate">3. Dimensi Tinggi (Multivariat &amp; PCA)</option>
                 <option value="tab-hierarchical">4. Analisis Berhierarki (Treemap &amp; Sunburst)</option>
-                <option value="tab-data">5. Eksplorasi Data (Pangkalan 514 Kab/Kota)</option>
+                <option value="tab-data">5. Eksplorasi Data (Pangkalan {isProvinsi ? '38 Provinsi' : '514 Kab/Kota'})</option>
                 <option value="tab-method">6. Metodologi &amp; Integritas AI</option>
               </select>
               <i className="fa-solid fa-chevron-down select-arrow-icon"></i>
@@ -1203,12 +1267,18 @@ export default function Home() {
           </div>
 
           <div className="filter-group">
-            <label><i className="fa-solid fa-city"></i> Tipe Wilayah</label>
+            <label><i className="fa-solid fa-sitemap"></i> Tingkat Wilayah (Hirarki)</label>
             <div className="radio-pills">
-              {['Semua', 'Kabupaten', 'Kota'].map(t => (
+              {['Provinsi', 'Kab/Kota'].map(t => (
                 <label key={t}>
-                  <input type="radio" name="tipe" value={t} checked={selectedTipe === t} onChange={() => setSelectedTipe(t)} />
-                  <span>{t === 'Kabupaten' ? 'Kab' : t}</span>
+                  <input
+                    type="radio"
+                    name="tipe_hirarki"
+                    value={t}
+                    checked={selectedTipe === t}
+                    onChange={() => setSelectedTipe(t)}
+                  />
+                  <span>{t}</span>
                 </label>
               ))}
             </div>
@@ -1236,8 +1306,9 @@ export default function Home() {
           </div>
 
           <div className="sidebar-stats">
-            <div><strong>Wilayah Terpilih:</strong> {filteredKabkota.length} dari 514</div>
-            <div><strong>Provinsi:</strong> {new Set(filteredKabkota.map(d => d.provinsi)).size} dari 38</div>
+            <div><strong>Tingkat Hirarki:</strong> {isProvinsi ? 'Provinsi (Tingkat I)' : 'Kab/Kota (Tingkat II)'}</div>
+            <div><strong>Wilayah Terpilih:</strong> {filteredKabkota.length} dari {isProvinsi ? 38 : 514}</div>
+            <div><strong>Provinsi Terwakili:</strong> {new Set(filteredKabkota.map(d => d.provinsi)).size} dari 38</div>
             <div><strong>Sumber Data:</strong> BPS RI (2024)</div>
           </div>
 
@@ -1248,7 +1319,7 @@ export default function Home() {
             <button className="btn-reset" onClick={() => {
               setSelectedPulau('Semua Pulau');
               setSelectedProv('Semua Provinsi');
-              setSelectedTipe('Semua');
+              setSelectedTipe('Kab/Kota');
               setSelectedKuadran('Semua Kuadran');
               setSelectedPalette('Viridis');
             }}>
@@ -1343,8 +1414,8 @@ export default function Home() {
           <div className="card">
             <div className="card-header">
               <div>
-                <div className="card-title"><i className="fa-solid fa-crosshairs"></i> Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan</div>
-                <div className="card-caption">Memetakan 514 kabupaten/kota terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
+                <div className="card-title"><i className="fa-solid fa-crosshairs"></i> Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan ({isProvinsi ? '38 Provinsi' : '514 Kab/Kota'})</div>
+                <div className="card-caption">Memetakan {filteredKabkota.length} {isProvinsi ? 'provinsi' : 'kabupaten/kota'} terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
               </div>
             </div>
             <div id="quadrant-chart" className="chart-box"></div>
@@ -1393,15 +1464,17 @@ export default function Home() {
               <div className="card-header">
                 <div>
                   <div className="card-title">
-                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas &amp; Poligon Tematik Kabupaten/Kota (GeoJSON BPS 2024)
+                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas &amp; Poligon Tematik {isProvinsi ? 'Tingkat Provinsi' : 'Kabupaten/Kota'} (GeoJSON BPS 2024)
                   </div>
                   <div className="card-caption">
-                    Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark &amp; Tanpa API Key).
+                    {isProvinsi
+                      ? 'Batas administrasi poligon teragregasi 38 Provinsi di Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark & Tanpa API Key).'
+                      : 'Batas administrasi poligon 514 Kabupaten/Kota di 38 Provinsi Indonesia, terintegrasi indikator BPS 2024 dengan basemap ESRI Canvas (100% Bebas Watermark & Tanpa API Key).'}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span className="badge badge-success">
-                    <i className="fa-solid fa-check-double"></i> 514 Kab/Kota Indonesia
+                    <i className="fa-solid fa-check-double"></i> {isProvinsi ? '38 Provinsi Aktif' : '514 Kab/Kota Indonesia'}
                   </span>
 
                   <a
@@ -1535,7 +1608,7 @@ export default function Home() {
               <div className="card-header">
                 <div>
                   <div className="card-title">
-                    <i className="fa-solid fa-fire-flame-curved" style={{ color: '#ef4444' }}></i> Peta Heatmap Spasial Kabupaten/Kota (Kernel Density Estimation)
+                    <i className="fa-solid fa-fire-flame-curved" style={{ color: '#ef4444' }}></i> Peta Heatmap Spasial {isProvinsi ? 'Tingkat Provinsi' : 'Kabupaten/Kota'} (Kernel Density Estimation)
                   </div>
                   <div className="card-caption">
                     Visualisasi intensitas spasial bergradien halus menggunakan algoritma Kernel Density pada peramban (Client-side Canvas Heatmap), tanpa token/API eksternal.
@@ -1605,7 +1678,7 @@ export default function Home() {
                       checked={heatmapShowPoints}
                       onChange={e => setHeatmapShowPoints(e.target.checked)}
                     />
-                    <span>Titik Pusat Kab/Kota</span>
+                    <span>Titik Pusat {isProvinsi ? 'Provinsi' : 'Kab/Kota'}</span>
                   </label>
                 </div>
               </div>
@@ -1630,7 +1703,7 @@ export default function Home() {
             <div className="card">
               <div className="card-header">
                 <div>
-                  <div className="card-title"><i className="fa-solid fa-map-pin"></i> Peta Simbol Proporsional 514 Kabupaten/Kota</div>
+                  <div className="card-title"><i className="fa-solid fa-map-pin"></i> Peta Simbol Proporsional {isProvinsi ? '38 Provinsi' : '514 Kabupaten/Kota'}</div>
                   <div className="card-caption">Ukuran lingkaran mengkodekan intensitas volume, sedangkan warna mengkodekan performa indikator.</div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -1805,7 +1878,7 @@ export default function Home() {
                   <thead>
                     <tr>
                       <th>Wilayah Pulau</th>
-                      <th>Jumlah Daerah</th>
+                      <th>Jumlah {isProvinsi ? 'Provinsi' : 'Kab/Kota'}</th>
                       <th>Parlemen (%)</th>
                       <th>Pendapatan (%)</th>
                       <th>Profesional (%)</th>
@@ -1844,7 +1917,7 @@ export default function Home() {
           <div className="card">
             <div className="card-header">
               <div>
-                <div className="card-title"><i className="fa-solid fa-database"></i> Pangkalan Data 514 Kabupaten/Kota Indonesia (BPS 2024)</div>
+                <div className="card-title"><i className="fa-solid fa-database"></i> Pangkalan Data {isProvinsi ? '38 Provinsi Indonesia (Agregat BPS 2024)' : '514 Kabupaten/Kota Indonesia (BPS 2024)'}</div>
                 <div className="card-caption">Gunakan pencarian nama daerah atau klik pada tajuk kolom untuk mengurutkan data secara fleksibel.</div>
               </div>
               <button className="btn-download" onClick={downloadCSV}>
@@ -1856,12 +1929,12 @@ export default function Home() {
               <input
                 type="text"
                 className="search-input"
-                placeholder="Cari nama kabupaten, kota, atau provinsi..."
+                placeholder={isProvinsi ? "Cari nama provinsi..." : "Cari nama kabupaten, kota, atau provinsi..."}
                 value={tableSearch}
                 onChange={e => { setTableSearch(e.target.value); setCurrentPage(1); }}
               />
               <div style={{ fontSize: '12px', color: '#64748b' }}>
-                Menampilkan {tableRecords.length === 0 ? 0 : pageStart + 1} - {Math.min(pageStart + rowsPerPage, tableRecords.length)} dari {tableRecords.length} daerah
+                Menampilkan {tableRecords.length === 0 ? 0 : pageStart + 1} - {Math.min(pageStart + rowsPerPage, tableRecords.length)} dari {tableRecords.length} {isProvinsi ? 'provinsi' : 'daerah'}
               </div>
             </div>
 
@@ -1870,7 +1943,7 @@ export default function Home() {
                 <thead>
                   <tr>
                     <th onClick={() => handleSort('kode_wilayah')}>Kode</th>
-                    <th onClick={() => handleSort('nama_resmi')}>Nama Daerah</th>
+                    <th onClick={() => handleSort('nama_resmi')}>{isProvinsi ? 'Nama Provinsi' : 'Nama Daerah'}</th>
                     <th onClick={() => handleSort('tipe')}>Tipe</th>
                     <th onClick={() => handleSort('provinsi')}>Provinsi</th>
                     <th onClick={() => handleSort('pulau')}>Pulau</th>
