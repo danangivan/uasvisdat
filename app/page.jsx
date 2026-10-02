@@ -74,7 +74,6 @@ function DataSourceBadge({ vars = [] }) {
   return (
     <div className="data-source-footer">
       <div className="data-source-label">
-        <i className="fa-solid fa-database"></i>
         <span>Sumber Tabel BPS (Tahun 2024):</span>
       </div>
       <div className="data-source-items">
@@ -91,8 +90,7 @@ function DataSourceBadge({ vars = [] }) {
             >
               <span>{item.nama}</span>
               <span className="source-year">2024</span>
-              <i className="fa-solid fa-arrow-up-right-from-square"></i>
-            </a>
+              </a>
           );
         })}
       </div>
@@ -105,7 +103,6 @@ function VizLegendQuadrant() {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Tipologi Kuadran Disparitas</span>
         </div>
         <span className="viz-legend-badge">Klasifikasi Analitik 4 Kuadran</span>
@@ -143,7 +140,6 @@ function VizLegendQuadrant() {
           </div>
         </div>
         <div className="viz-legend-item full-width">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-shapes"></i></div>
           <div>
             <div className="viz-legend-item-title">Encoding Visual Sumbu &amp; Simbol</div>
             <div className="viz-legend-item-desc">
@@ -161,7 +157,6 @@ function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Peta Batas Poligon Tematik</span>
         </div>
         <span className="viz-legend-badge">{isProvinsi ? 'Tingkat Provinsi (38 Wilayah)' : 'Tingkat Kab/Kota (514 Wilayah)'}</span>
@@ -171,7 +166,6 @@ function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-palette"></i></div>
           <div style={{ width: '100%' }}>
             <div className="viz-legend-item-title">Skala Gradasi Warna ({paletteName})</div>
             <div className="viz-legend-ramp-container">
@@ -185,7 +179,6 @@ function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-hand-pointer"></i></div>
           <div>
             <div className="viz-legend-item-title">Panduan Interaksi Poligon</div>
             <div className="viz-legend-item-desc">
@@ -204,7 +197,6 @@ function VizLegendHeatmap({ varName }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Peta Heatmap Spasial (Kernel Density)</span>
         </div>
         <span className="viz-legend-badge">Client-Side Density Surface</span>
@@ -214,7 +206,6 @@ function VizLegendHeatmap({ varName }) {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-fire"></i></div>
           <div style={{ width: '100%' }}>
             <div className="viz-legend-item-title">Gradien Spektrum Intensitas Panas</div>
             <div className="viz-legend-ramp-container">
@@ -229,7 +220,6 @@ function VizLegendHeatmap({ varName }) {
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-sliders"></i></div>
           <div>
             <div className="viz-legend-item-title">Fitur Penyesuaian Analisis</div>
             <div className="viz-legend-item-desc">
@@ -247,7 +237,6 @@ function VizLegendProportional({ sizeVar, colorVar }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Peta Simbol Proporsional (Bivariate)</span>
         </div>
         <span className="viz-legend-badge">Encoding Dwipeubah: Ukuran &amp; Warna</span>
@@ -257,7 +246,6 @@ function VizLegendProportional({ sizeVar, colorVar }) {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-circle-dot"></i></div>
           <div>
             <div className="viz-legend-item-title">Ukuran Radius Lingkaran (Volume: {sizeVar?.toUpperCase()})</div>
             <div className="viz-legend-item-desc">
@@ -266,7 +254,6 @@ function VizLegendProportional({ sizeVar, colorVar }) {
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-droplet"></i></div>
           <div>
             <div className="viz-legend-item-title">Warna Lingkaran (Kinerja: {colorVar?.toUpperCase()})</div>
             <div className="viz-legend-item-desc">
@@ -284,7 +271,6 @@ function VizLegendChoropleth({ varName }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Peta Choropleth Rasio Provinsi</span>
         </div>
         <span className="viz-legend-badge">Agregat Makro 38 Provinsi</span>
@@ -294,7 +280,6 @@ function VizLegendChoropleth({ varName }) {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-layer-group"></i></div>
           <div style={{ width: '100%' }}>
             <div className="viz-legend-item-title">Interpretasi Pewarnaan Tematik</div>
             <div className="viz-legend-ramp-container">
@@ -318,7 +303,6 @@ function VizLegendLISA({ clusterVar }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Klaster Spasial LISA (Local Moran&apos;s I)</span>
         </div>
         <span className="viz-legend-badge">Signifikansi Spasial p &lt; 0.05</span>
@@ -372,7 +356,6 @@ function VizLegendPCA({ varPC1 = '42.4', varPC2 = '24.5' }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda PCA Biplot (Reduksi 8 Dimensi)</span>
         </div>
         <span className="viz-legend-badge">Total Variansi: {(+varPC1 + +varPC2).toFixed(1)}%</span>
@@ -382,21 +365,18 @@ function VizLegendPCA({ varPC1 = '42.4', varPC2 = '24.5' }) {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-arrows-left-right"></i></div>
           <div>
             <div className="viz-legend-item-title">Sumbu Horizontal (PC1: {varPC1}% Variansi)</div>
             <div className="viz-legend-item-desc">Dimensi Kapasitas Sosial &amp; Kesejahteraan Hidup Layak (Pengeluaran riil, AHH, RLS, HLS, dan Tenaga Profesional). Semakin ke kanan koordinat suatu wilayah, semakin tinggi kualitas pendidikan dan daya beli masyarakatnya.</div>
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-arrows-up-down"></i></div>
           <div>
             <div className="viz-legend-item-title">Sumbu Vertikal (PC2: {varPC2}% Variansi)</div>
             <div className="viz-legend-item-desc">Dimensi Partisipasi Politik Modern vs Keterpaksaan Kerja Fisik (Parlemen positif ke atas vs TPAK pertanian pedesaan negatif ke bawah). Menjelaskan paradoks kerja di kawasan timur.</div>
           </div>
         </div>
         <div className="viz-legend-item full-width">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-arrow-trend-up" style={{ color: '#dc2626' }}></i></div>
           <div>
             <div className="viz-legend-item-title">Vektor Panah Merah (Loading Peubah)</div>
             <div className="viz-legend-item-desc">
@@ -414,7 +394,6 @@ function VizLegendParcoords() {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Diagram Koordinat Paralel</span>
         </div>
         <span className="viz-legend-badge">Analisis Multivariat 8 Dimensi</span>
@@ -424,17 +403,15 @@ function VizLegendParcoords() {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-bars-staggered"></i></div>
           <div>
             <div className="viz-legend-item-title">8 Sumbu Vertikal Sejajar</div>
             <div className="viz-legend-item-desc">Masing-masing sumbu memetakan rentang nilai asli indikator BPS (Parlemen, Pendapatan, Pengeluaran, AHH, Profesional, TPAK, RLS, dan HLS). Setiap garis melintang mewakili 1 wilayah amatan.</div>
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-hand-pointer"></i></div>
           <div>
             <div className="viz-legend-item-title">Interaktivitas Brushing &amp; Warna Garis</div>
-            <div className="viz-legend-item-desc">Warna garis dikodekan berdasarkan Skor Pengambilan Keputusan (Ungu: Rendah ➔ Kuning: Tinggi). Klik dan tarik vertikal pada sumbu manapun (*brushing*) untuk memfilter wilayah tertentu secara interaktif.</div>
+            <div className="viz-legend-item-desc">Warna garis dikodekan berdasarkan Skor Pengambilan Keputusan (Ungu: Rendah hingga Kuning: Tinggi). Klik dan tarik vertikal pada sumbu manapun (*brushing*) untuk memfilter wilayah tertentu secara interaktif.</div>
           </div>
         </div>
       </div>
@@ -447,7 +424,6 @@ function VizLegendCorrHeatmap() {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Matriks Korelasi Asosiasi Peubah</span>
         </div>
         <span className="viz-legend-badge">Koefisien Pearson (r: -1.0 s.d. +1.0)</span>
@@ -487,7 +463,6 @@ function VizLegendRadar() {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Radar Profil Multidimensi</span>
         </div>
         <span className="viz-legend-badge">Skala Relatif Ternormalisasi (0-100)</span>
@@ -497,7 +472,6 @@ function VizLegendRadar() {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-spider"></i></div>
           <div>
             <div className="viz-legend-item-title">Bentuk &amp; Luas Poligon Spasial</div>
             <div className="viz-legend-item-desc">Poligon yang merekah keluar mendekati batas terluar (skor 100) mengindikasikan capaian pembangunan gender yang menyeluruh dan merata. Cekungan ke arah pusat menandakan dimensi yang menjadi kelemahan mendesak.</div>
@@ -513,24 +487,21 @@ function VizLegendTreemap({ isProvinsi, sizeVar, colorVar }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Interactive Treemap</span>
         </div>
-        <span className="viz-legend-badge">Hirarki Bersarang: {isProvinsi ? 'Pulau ➔ Provinsi' : 'Pulau ➔ Provinsi ➔ Kab/Kota'}</span>
+        <span className="viz-legend-badge">Hirarki Bersarang: {isProvinsi ? 'Pulau -> Provinsi' : 'Pulau -> Provinsi -> Kab/Kota'}</span>
       </div>
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Menyajikan dekomposisi data berhierarki secara spasial proporsional di mana struktur wilayah bersarang dikelompokkan ke dalam kotak-kotak bertingkat untuk membandingkan kontribusi volume dan performa kualitas.
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-vector-square"></i></div>
           <div>
             <div className="viz-legend-item-title">Ukuran Luas Kotak (Volume: {sizeVar?.toUpperCase()})</div>
             <div className="viz-legend-item-desc">Luas area kotak proporsional terhadap besaran peubah <strong>{sizeVar}</strong> (misal Pengeluaran Riil atau TPAK). Semakin besar kotak, semakin dominan kontribusi volume daerah tersebut.</div>
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-palette"></i></div>
           <div style={{ width: '100%' }}>
             <div className="viz-legend-item-title">Warna Kotak (Kinerja: {colorVar?.toUpperCase()})</div>
             <div className="viz-legend-ramp-container">
@@ -544,7 +515,6 @@ function VizLegendTreemap({ isProvinsi, sizeVar, colorVar }) {
           </div>
         </div>
         <div className="viz-legend-item full-width">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-sitemap"></i></div>
           <div>
             <div className="viz-legend-item-title">Cara Navigasi Hirarki (Drill-Down &amp; Zoom-Out)</div>
             <div className="viz-legend-item-desc">
@@ -563,7 +533,6 @@ function VizLegendSunburst({ isProvinsi, sizeVar, colorVar }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Interactive Sunburst Chart</span>
         </div>
         <span className="viz-legend-badge">Hirarki Radial Konsentris</span>
@@ -573,21 +542,18 @@ function VizLegendSunburst({ isProvinsi, sizeVar, colorVar }) {
       </div>
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-circle-notch"></i></div>
           <div>
             <div className="viz-legend-item-title">Lebar Sudut Busur (Volume: {sizeVar?.toUpperCase()})</div>
             <div className="viz-legend-item-desc">Sudut busur lingkaran proporsional terhadap besaran variabel ukuran terpilih <strong>{sizeVar}</strong>. Semakin lebar irisan, semakin besar proporsi wilayahnya.</div>
           </div>
         </div>
         <div className="viz-legend-item">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-palette"></i></div>
           <div>
             <div className="viz-legend-item-title">Gradien Warna Irisan (Kinerja: {colorVar?.toUpperCase()})</div>
             <div className="viz-legend-item-desc">Warna irisan lingkaran mengkodekan capaian peubah <strong>{colorVar}</strong> dengan palet Viridis kontinu dari ungu (rendah) ke kuning (tinggi).</div>
           </div>
         </div>
         <div className="viz-legend-item full-width">
-          <div className="viz-legend-icon-box"><i className="fa-solid fa-hand-pointer"></i></div>
           <div>
             <div className="viz-legend-item-title">Navigasi Radial Interaktif</div>
             <div className="viz-legend-item-desc">
@@ -606,7 +572,6 @@ function VizLegendIslandSummary({ isProvinsi }) {
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
-          <i className="fa-solid fa-circle-question"></i>
           <span>Panduan &amp; Legenda Rangkuman Hierarki per Wilayah Pulau</span>
         </div>
         <span className="viz-legend-badge">Rekapitulasi Agregat Makro Kepulauan</span>
@@ -892,10 +857,10 @@ export default function Home() {
         { type: 'line', x0: 0, x1: 100, y0: medY, y1: medY, line: { dash: 'dash', color: '#64748b', width: 1.5 } }
       ],
       annotations: [
-        { x: medX + 22, y: medY + 28, text: '<b>KUADRAN I</b><br>Maju & Seimbang<br>(Ekonomi ↑, Keputusan ↑)', showarrow: false, font: { color: '#16a34a', size: 10.5 }, bgcolor: 'rgba(22, 163, 74, 0.1)' },
-        { x: medX - 22, y: medY + 28, text: '<b>KUADRAN II</b><br>Representasi Kuat<br>(Ekonomi ↓, Keputusan ↑)', showarrow: false, font: { color: '#2563eb', size: 10.5 }, bgcolor: 'rgba(37, 99, 235, 0.1)' },
-        { x: medX - 22, y: medY - 28, text: '<b>KUADRAN III</b><br>Tertinggal Ganda<br>(Ekonomi ↓, Keputusan ↓)', showarrow: false, font: { color: '#dc2626', size: 10.5 }, bgcolor: 'rgba(220, 38, 38, 0.1)' },
-        { x: medX + 22, y: medY - 28, text: '<b>KUADRAN IV</b><br>Pekerja Keras Kurang Kuasa<br>(Ekonomi ↑, Keputusan ↓)', showarrow: false, font: { color: '#d97706', size: 10.5 }, bgcolor: 'rgba(217, 119, 6, 0.1)' }
+        { x: medX + 22, y: medY + 28, text: '<b>KUADRAN I</b><br>Maju & Seimbang<br>(Ekonomi Tinggi, Keputusan Tinggi)', showarrow: false, font: { color: '#16a34a', size: 10.5 }, bgcolor: 'rgba(22, 163, 74, 0.1)' },
+        { x: medX - 22, y: medY + 28, text: '<b>KUADRAN II</b><br>Representasi Kuat<br>(Ekonomi Rendah, Keputusan Tinggi)', showarrow: false, font: { color: '#2563eb', size: 10.5 }, bgcolor: 'rgba(37, 99, 235, 0.1)' },
+        { x: medX - 22, y: medY - 28, text: '<b>KUADRAN III</b><br>Tertinggal Ganda<br>(Ekonomi Rendah, Keputusan Rendah)', showarrow: false, font: { color: '#dc2626', size: 10.5 }, bgcolor: 'rgba(220, 38, 38, 0.1)' },
+        { x: medX + 22, y: medY - 28, text: '<b>KUADRAN IV</b><br>Pekerja Keras Kurang Kuasa<br>(Ekonomi Tinggi, Keputusan Rendah)', showarrow: false, font: { color: '#d97706', size: 10.5 }, bgcolor: 'rgba(217, 119, 6, 0.1)' }
       ],
       legend: { orientation: 'h', y: -0.18, x: 0.5, xanchor: 'center' },
       margin: { l: 50, r: 20, t: 50, b: 60 },
@@ -1812,13 +1777,7 @@ export default function Home() {
               <p>Visualisasi Data &amp; Informasi (2026)</p>
             </div>
           </div>
-          <button
-            className="sidebar-close-btn"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Tutup Menu Filter"
-          >
-            <i className="fa-solid fa-xmark"></i>
-          </button>
+          <button className="sidebar-close-btn" onClick={() => setMobileMenuOpen(false)} aria-label="Tutup Menu Filter">&times;</button>
         </div>
 
         <div className="sidebar-content">
@@ -1826,9 +1785,9 @@ export default function Home() {
           <div className="module-dropdown-card">
             <div className="module-dropdown-header">
               <label htmlFor="module-select" className="module-dropdown-label">
-                <i className="fa-solid fa-compass"></i> Navigasi Modul Analitik
+                Navigasi Modul Analitik
               </label>
-              <span className="badge-active-dot">• Aktif</span>
+              <span className="badge-active-dot">Aktif</span>
             </div>
             <div className="module-select-container">
               <select
@@ -1851,18 +1810,18 @@ export default function Home() {
                 <option value="tab-data">5. Eksplorasi Data (Pangkalan {isProvinsi ? '38 Provinsi' : '514 Kab/Kota'})</option>
                 <option value="tab-method">6. Metodologi &amp; Integritas AI</option>
               </select>
-              <i className="fa-solid fa-chevron-down select-arrow-icon"></i>
+              
             </div>
           </div>
 
           <div className="sidebar-divider"></div>
 
           <div className="sidebar-section-label">
-            <i className="fa-solid fa-filter"></i> Parameter &amp; Filter Data
+            Parameter &amp; Filter Data
           </div>
 
           <div className="filter-group">
-            <label><i className="fa-solid fa-earth-asia"></i> Filter Pulau / Region</label>
+            <label>Filter Pulau / Region</label>
             <select value={selectedPulau} onChange={e => { setSelectedPulau(e.target.value); setSelectedProv('Semua Provinsi'); }}>
               <option value="Semua Pulau">Semua Pulau</option>
               {[...new Set(allKabkota.map(d => d.pulau))].map(p => (
@@ -1872,7 +1831,7 @@ export default function Home() {
           </div>
 
           <div className="filter-group">
-            <label><i className="fa-solid fa-map-location-dot"></i> Filter Provinsi</label>
+            <label>Filter Provinsi</label>
             <select value={selectedProv} onChange={e => setSelectedProv(e.target.value)}>
               {availableProvs.map(p => (
                 <option key={p} value={p}>{p}</option>
@@ -1882,7 +1841,7 @@ export default function Home() {
 
           {activeTab !== 'tab-hierarchical' && (
             <div className="filter-group">
-              <label><i className="fa-solid fa-sitemap"></i> Tingkat Wilayah (Hirarki)</label>
+              <label>Tingkat Wilayah (Hirarki)</label>
               <div className="radio-pills">
                 {['Provinsi', 'Kab/Kota'].map(t => (
                   <label key={t}>
@@ -1901,7 +1860,7 @@ export default function Home() {
           )}
 
           <div className="filter-group">
-            <label><i className="fa-solid fa-shapes"></i> Kuadran Tipologi</label>
+            <label>Kuadran Tipologi</label>
             <select value={selectedKuadran} onChange={e => setSelectedKuadran(e.target.value)}>
               <option value="Semua Kuadran">Semua Kuadran</option>
               <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">Kuadran I (Maju Seimbang)</option>
@@ -1912,7 +1871,7 @@ export default function Home() {
           </div>
 
           <div className="filter-group">
-            <label><i className="fa-solid fa-palette"></i> Palet Warna (Colorblind-Safe)</label>
+            <label>Palet Warna (Colorblind-Safe)</label>
             <select value={selectedPalette} onChange={e => setSelectedPalette(e.target.value)}>
               <option value="Viridis">Viridis (Perseptual Seragam)</option>
               <option value="Cividis">Cividis (Optimasi Buta Warna)</option>
@@ -1930,7 +1889,7 @@ export default function Home() {
 
           <div className="sidebar-actions">
             <button className="btn-apply-drawer mobile-only" onClick={() => setMobileMenuOpen(false)}>
-              <i className="fa-solid fa-check"></i> Terapkan &amp; Tutup
+              Terapkan &amp; Tutup
             </button>
             <button className="btn-reset" onClick={() => {
               setSelectedPulau('Semua Pulau');
@@ -1939,7 +1898,7 @@ export default function Home() {
               setSelectedKuadran('Semua Kuadran');
               setSelectedPalette('Viridis');
             }}>
-              <i className="fa-solid fa-arrows-rotate"></i> Reset Filter Global
+              Reset Filter Global
             </button>
           </div>
         </div>
@@ -1956,7 +1915,6 @@ export default function Home() {
               aria-label="Menu Filter & Navigasi"
               aria-expanded={mobileMenuOpen}
             >
-              <i className={mobileMenuOpen ? "fa-solid fa-xmark" : "fa-solid fa-bars"}></i>
               <span className="hamburger-text">{mobileMenuOpen ? "Tutup" : "Filter & Menu"}</span>
               {hasActiveFilter && <span className="active-filter-dot" title="Filter Aktif"></span>}
             </button>
@@ -1969,17 +1927,16 @@ export default function Home() {
           <div className="header-meta">
             <div className="header-title">
               <div className="institution-pill">
-                <i className="fa-solid fa-building-columns"></i>
                 <span>Badan Pusat Statistik RI &bull; Politeknik Statistika STIS</span>
               </div>
               <h1>Eksplorasi Disparitas Spasial Partisipasi Ekonomi &amp; Pengambilan Keputusan Perempuan di Indonesia</h1>
               <p>Visualisasi Analitik Komprehensif Berbasis 514 Kabupaten/Kota &amp; 38 Provinsi (Framework Next.js / BPS 2024)</p>
             </div>
             <div className="badges-row">
-              <span className="badge badge-bps"><i className="fa-solid fa-landmark"></i> BPS RI 2024</span>
-              <span className="badge badge-primary"><i className="fa-solid fa-shield-halved"></i> Bebas API Key</span>
-              <span className="badge badge-accent"><i className="fa-solid fa-draw-polygon"></i> 514 Kab/Kota SHP</span>
-              <span className="badge badge-success"><i className="fa-solid fa-mobile-screen"></i> Multi-Device</span>
+              <span className="badge badge-bps">BPS RI 2024</span>
+              <span className="badge badge-primary">Bebas API Key</span>
+              <span className="badge badge-accent">514 Kab/Kota SHP</span>
+              <span className="badge badge-success">Multi-Device</span>
             </div>
           </div>
         </header>
@@ -1988,8 +1945,7 @@ export default function Home() {
         <div className="active-module-bar">
           <div className="active-module-content">
             <div className="active-module-badge">
-              <i className={`fa-solid ${currentModule.icon}`}></i>
-            </div>
+              </div>
             <div>
               <div className="active-module-title">{currentModule.label}</div>
               <div className="active-module-desc">{currentModule.desc}</div>
@@ -2001,27 +1957,27 @@ export default function Home() {
         <section className={`tab-pane ${activeTab === 'tab-overview' ? 'active' : ''}`}>
           <div className="kpi-grid">
             <div className="kpi-card">
-              <span className="kpi-label"><i className="fa-solid fa-landmark"></i> Parlemen Perempuan</span>
+              <span className="kpi-label">Parlemen Perempuan</span>
               <span className="kpi-value">{avgParlemen.toFixed(2)}%</span>
               <span className="kpi-delta neg">{(avgParlemen - 30.0).toFixed(1)}% vs Kuota 30%</span>
             </div>
             <div className="kpi-card">
-              <span className="kpi-label"><i className="fa-solid fa-user-tie"></i> Tenaga Profesional</span>
+              <span className="kpi-label">Tenaga Profesional</span>
               <span className="kpi-value">{avgProfesional.toFixed(2)}%</span>
               <span className="kpi-delta neu">Mendekati Paritas 50%</span>
             </div>
             <div className="kpi-card">
-              <span className="kpi-label"><i className="fa-solid fa-hand-holding-dollar"></i> Sumbangan Pendapatan</span>
+              <span className="kpi-label">Sumbangan Pendapatan</span>
               <span className="kpi-value">{avgPendapatan.toFixed(2)}%</span>
               <span className="kpi-delta neg">{(avgPendapatan - 50.0).toFixed(1)}% vs Paritas</span>
             </div>
             <div className="kpi-card">
-              <span className="kpi-label"><i className="fa-solid fa-briefcase"></i> TPAK Perempuan</span>
+              <span className="kpi-label">TPAK Perempuan</span>
               <span className="kpi-value">{avgTPAK.toFixed(2)}%</span>
               <span className="kpi-delta pos">Partisipasi Kerja Aktif</span>
             </div>
             <div className="kpi-card">
-              <span className="kpi-label"><i className="fa-solid fa-globe"></i> Autokorelasi Moran&apos;s I</span>
+              <span className="kpi-label">Autokorelasi Moran&apos;s I</span>
               <span className="kpi-value">0.354 | 0.450</span>
               <span className="kpi-delta pos">p = 0.001 (Signifikan)</span>
             </div>
@@ -2030,7 +1986,7 @@ export default function Home() {
           <div className="card">
             <div className="card-header">
               <div>
-                <div className="card-title"><i className="fa-solid fa-crosshairs"></i> Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan ({isProvinsi ? '38 Provinsi' : '514 Kab/Kota'})</div>
+                <div className="card-title">Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan Keputusan ({isProvinsi ? '38 Provinsi' : '514 Kab/Kota'})</div>
                 <div className="card-caption">Memetakan {filteredKabkota.length} {isProvinsi ? 'provinsi' : 'kabupaten/kota'} terhadap median nasional untuk mendeteksi kesenjangan antara kemandirian ekonomi dan agensi politik.</div>
               </div>
             </div>
@@ -2047,15 +2003,15 @@ export default function Home() {
 
           <div className="story-grid">
             <div className="story-card green">
-              <h4><i className="fa-solid fa-fire"></i> 1. Hotspot Sulawesi Utara vs Defisit Parlemen</h4>
+              <h4>1. Hotspot Sulawesi Utara vs Defisit Parlemen</h4>
               <p>Sulawesi Utara membentuk klaster <em>High-High Hotspot</em> terkuat nasional dengan keterwakilan DPRD perempuan &gt; 40% dan tenaga profesional &gt; 55% berkat kultur egaliter Minahasa. Sebaliknya, lebih dari 85% kabupaten/kota di Indonesia masih gagal mencapai kuota afirmasi 30%.</p>
             </div>
             <div className="story-card amber">
-              <h4><i className="fa-solid fa-person-digging"></i> 2. Paradoks Kerja Wilayah Timur (Sticky Floor)</h4>
+              <h4>2. Paradoks Kerja Wilayah Timur (Sticky Floor)</h4>
               <p>Daerah pedalaman Papua dan NTT mencatatkan TPAK perempuan sangat tinggi (70% - 95%), namun sumbangan pendapatan riil mereka tertekan rendah. Beban kerja fisik perempuan di sektor pertanian tradisional belum terkonversi menjadi kemandirian ekonomi formal.</p>
             </div>
             <div className="story-card purple">
-              <h4><i className="fa-solid fa-building-flag"></i> 3. Keunggulan Perkotaan (Urban Advantage)</h4>
+              <h4>3. Keunggulan Perkotaan (Urban Advantage)</h4>
               <p>Entitas Kota secara konsisten mengungguli Kabupaten pada proporsi Tenaga Profesional (52.4% vs 42.1%) dan pengeluaran riil per kapita, ditopang oleh akses pendidikan tinggi dan terbukanya sektor jasa modern.</p>
             </div>
           </div>
@@ -2065,19 +2021,19 @@ export default function Home() {
         <section className={`tab-pane ${activeTab === 'tab-geospatial' ? 'active' : ''}`}>
           <div className="subtabs-nav">
             <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-kabkota-boundary' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-kabkota-boundary')}>
-              <i className="fa-solid fa-draw-polygon"></i> Peta Batas Kab/Kota (Shapefile GeoJSON)
+              Peta Batas Kab/Kota (Shapefile GeoJSON)
             </button>
             <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-heatmap' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-heatmap')}>
-              <i className="fa-solid fa-fire-flame-curved" style={{ color: '#ef4444' }}></i> Peta Heatmap Spasial (No API)
+              Peta Heatmap Spasial (No API)
             </button>
             <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-choropleth' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-choropleth')}>
-              <i className="fa-solid fa-map-location"></i> Peta Choropleth Provinsi (34/38 Prov)
+              Peta Choropleth Provinsi (34/38 Prov)
             </button>
             <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-proportional' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-proportional')}>
-              <i className="fa-solid fa-circle-dot"></i> Peta Simbol Proporsional (514 Kab/Kota)
+              Peta Simbol Proporsional (514 Kab/Kota)
             </button>
             <button className={`subtab-btn ${activeGeoSubtab === 'geo-subtab-lisa' ? 'active' : ''}`} onClick={() => setActiveGeoSubtab('geo-subtab-lisa')}>
-              <i className="fa-solid fa-network-wired"></i> Peta Klaster Spasial LISA (Moran&apos;s I)
+              Peta Klaster Spasial LISA (Moran&apos;s I)
             </button>
           </div>
 
@@ -2087,7 +2043,7 @@ export default function Home() {
               <div className="card-header">
                 <div>
                   <div className="card-title">
-                    <i className="fa-solid fa-draw-polygon"></i> Peta Batas &amp; Poligon Tematik {isProvinsi ? 'Tingkat Provinsi' : 'Kabupaten/Kota'} (GeoJSON BPS 2024)
+                    Peta Batas &amp; Poligon Tematik {isProvinsi ? 'Tingkat Provinsi' : 'Kabupaten/Kota'} (GeoJSON BPS 2024)
                   </div>
                   <div className="card-caption">
                     {isProvinsi
@@ -2097,7 +2053,7 @@ export default function Home() {
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span className="badge badge-success">
-                    <i className="fa-solid fa-check-double"></i> {isProvinsi ? '38 Provinsi Aktif' : '514 Kab/Kota Indonesia'}
+                    {isProvinsi ? '38 Provinsi Aktif' : '514 Kab/Kota Indonesia'}
                   </span>
 
                   <a
@@ -2106,7 +2062,7 @@ export default function Home() {
                     className="btn-export"
                     title={isProvinsi ? "Unduh berkas GeoJSON Batas 38 Provinsi" : "Unduh berkas GeoJSON Batas 514 Kab/Kota"}
                   >
-                    <i className="fa-solid fa-file-arrow-down"></i> Unduh GeoJSON ({isProvinsi ? '0.22 MB' : '0.79 MB'})
+                    Unduh GeoJSON ({isProvinsi ? '0.22 MB' : '0.79 MB'})
                   </a>
 
                   <select
@@ -2151,7 +2107,6 @@ export default function Home() {
                   <div className="kab-detail-header">
                     <div>
                       <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>
-                        <i className="fa-solid fa-location-dot" style={{ color: '#2563eb', marginRight: '6px' }}></i>
                         {selectedKabDetail.nama_resmi}
                       </h3>
                       <p style={{ margin: 0, fontSize: '0.8rem', color: '#64748b' }}>
@@ -2167,7 +2122,7 @@ export default function Home() {
                         onClick={() => setSelectedKabDetail(null)}
                         style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}
                       >
-                        <i className="fa-solid fa-xmark"></i> Tutup Detail
+                        Tutup Detail
                       </button>
                     </div>
                   </div>
@@ -2216,18 +2171,17 @@ export default function Home() {
                 </div>
               ) : (
                 <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px dashed #cbd5e1', fontSize: '0.85rem', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fa-solid fa-circle-info" style={{ color: '#2563eb' }}></i>
                   <span><strong>Tip Eksplorasi:</strong> Klik salah satu wilayah poligon pada peta untuk membuka rincian lengkap 8 indikator gender BPS 2024 dan kuadran daerah tersebut. Gunakan filter di sidebar kiri untuk zoom instan ke provinsi atau pulau target.</span>
                 </div>
               )}
 
               <div className="story-grid">
                 <div className="story-card green">
-                  <h4><i className="fa-solid fa-earth-asia"></i> Cakupan Spasial 514 Kabupaten/Kota Seluruh Indonesia</h4>
+                  <h4>Cakupan Spasial 514 Kabupaten/Kota Seluruh Indonesia</h4>
                   <p>Aplikasi ini memadankan batas poligon digital 514 kabupaten/kota dari 38 provinsi di Indonesia dengan 8 indikator gender BPS 2024. Melalui dasbor ini, disparitas antara wilayah barat (Jawa &amp; Sumatera) dan timur (Nusa Tenggara, Maluku, Papua) dapat diinspeksi secara detail tanpa batasan wilayah tunggal.</p>
                 </div>
                 <div className="story-card purple">
-                  <h4><i className="fa-solid fa-shield-halved"></i> Solusi Zero-API &amp; Bebas Watermark</h4>
+                  <h4>Solusi Zero-API &amp; Bebas Watermark</h4>
                   <p>Watermark <em>&quot;API KEY REQUIRED&quot;</em> pada tile basemap CartoDB telah dieliminasi sepenuhnya dengan beralih ke <strong>ESRI World Gray Canvas</strong> dan OpenStreetMap yang 100% bebas token dan bebas biaya. Poligon GeoJSON disimpan dan dirender secara mandiri di sisi klien (*client-side*).</p>
                 </div>
               </div>
@@ -2241,7 +2195,7 @@ export default function Home() {
               <div className="card-header">
                 <div>
                   <div className="card-title">
-                    <i className="fa-solid fa-fire-flame-curved" style={{ color: '#ef4444' }}></i> Peta Heatmap Spasial {isProvinsi ? 'Tingkat Provinsi' : 'Kabupaten/Kota'} (Kernel Density Estimation)
+                    Peta Heatmap Spasial {isProvinsi ? 'Tingkat Provinsi' : 'Kabupaten/Kota'} (Kernel Density Estimation)
                   </div>
                   <div className="card-caption">
                     Visualisasi intensitas spasial bergradien halus menggunakan algoritma Kernel Density pada peramban (Client-side Canvas Heatmap), tanpa token/API eksternal.
@@ -2249,7 +2203,7 @@ export default function Home() {
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
                   <span className="badge badge-success">
-                    <i className="fa-solid fa-bolt"></i> Client-Side Heatmap (No API Required)
+                    Client-Side Heatmap (No API Required)
                   </span>
                   <select
                     value={heatmapVar}
@@ -2271,7 +2225,7 @@ export default function Home() {
               {/* Heatmap Parameter Controls */}
               <div className="heatmap-toolbar">
                 <div className="heatmap-control-group">
-                  <label htmlFor="radius-slider"><i className="fa-solid fa-circle-notch"></i> Radius Heat ({heatmapRadius}px):</label>
+                  <label htmlFor="radius-slider">Radius Heat ({heatmapRadius}px):</label>
                   <input
                     id="radius-slider"
                     type="range"
@@ -2283,7 +2237,7 @@ export default function Home() {
                   />
                 </div>
                 <div className="heatmap-control-group">
-                  <label htmlFor="blur-slider"><i className="fa-solid fa-wand-magic-sparkles"></i> Blur ({heatmapBlur}px):</label>
+                  <label htmlFor="blur-slider">Blur ({heatmapBlur}px):</label>
                   <input
                     id="blur-slider"
                     type="range"
@@ -2327,11 +2281,11 @@ export default function Home() {
 
               <div className="story-grid">
                 <div className="story-card green">
-                  <h4><i className="fa-solid fa-temperature-arrow-up"></i> Interpretasi Hotspot Spasial</h4>
+                  <h4>Interpretasi Hotspot Spasial</h4>
                   <p>Heatmap spasial menampilkan konsentrasi peubah secara kontinu. Warna merah menunjukkan zona konsentrasi tertinggi (Hotspot), sedangkan warna biru menunjukkan zona intensitas rendah (Coldspot). Pada indikator Parlemen, zona hotspot terkonsentrasi di sejumlah kota metropolitan dan ibu kota provinsi, sedangkan wilayah 3T dan pedalaman menunjukkan intensitas dingin yang mengindikasikan defisit keterwakilan politik perempuan.</p>
                 </div>
                 <div className="story-card amber">
-                  <h4><i className="fa-solid fa-layer-group"></i> Sinergi Heatmap &amp; Batas Administrasi</h4>
+                  <h4>Sinergi Heatmap &amp; Batas Administrasi</h4>
                   <p>Dengan mengaktifkan centang <em>&quot;Overlay Garis Batas Poligon SHP&quot;</em>, batas administratif hasil ekstraksi shapefile ditumpangkan secara presisi di atas permukaan heatmap kontinu. Hal ini memudahkan pengambil kebijakan untuk mengidentifikasi batas yurisdiksi kab/kota mana yang berada di pusat hotspot maupun coldspot.</p>
                 </div>
               </div>
@@ -2343,7 +2297,7 @@ export default function Home() {
             <div className="card">
               <div className="card-header">
                 <div>
-                  <div className="card-title"><i className="fa-solid fa-map-pin"></i> Peta Simbol Proporsional {isProvinsi ? '38 Provinsi' : '514 Kabupaten/Kota'}</div>
+                  <div className="card-title">Peta Simbol Proporsional {isProvinsi ? '38 Provinsi' : '514 Kabupaten/Kota'}</div>
                   <div className="card-caption">Ukuran lingkaran mengkodekan intensitas volume, sedangkan warna mengkodekan performa indikator.</div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -2377,7 +2331,7 @@ export default function Home() {
             <div className="card">
               <div className="card-header">
                 <div>
-                  <div className="card-title"><i className="fa-solid fa-layer-group"></i> Peta Choropleth Rasio Tingkat Provinsi</div>
+                  <div className="card-title">Peta Choropleth Rasio Tingkat Provinsi</div>
                   <div className="card-caption">Pewarnaan tematik poligon provinsi menggunakan palet warna ramah buta warna (*colorblind-safe*).</div>
                 </div>
                 <div>
@@ -2407,7 +2361,7 @@ export default function Home() {
             <div className="card">
               <div className="card-header">
                 <div>
-                  <div className="card-title"><i className="fa-solid fa-chart-pie"></i> Peta Klaster Spasial LISA (Local Moran&apos;s I, p &lt; 0.05)</div>
+                  <div className="card-title">Peta Klaster Spasial LISA (Local Moran&apos;s I, p &lt; 0.05)</div>
                   <div className="card-caption">Mendeteksi aglomerasi Hotspot (High-High), Coldspot (Low-Low), dan Pencilan Spasial (High-Low / Low-High).</div>
                 </div>
                 <div>
@@ -2433,17 +2387,17 @@ export default function Home() {
         {/* Tab 3: Multivariate */}
         <section className={`tab-pane ${activeTab === 'tab-multivariate' ? 'active' : ''}`}>
           <div className="subtabs-nav">
-            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-pca' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-pca')}><i className="fa-solid fa-compass"></i> PCA Biplot (Reduksi Dimensi)</button>
-            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-parcoords' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-parcoords')}><i className="fa-solid fa-bars-staggered"></i> Parallel Coordinates (Brushing)</button>
-            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-heatmap' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-heatmap')}><i className="fa-solid fa-border-all"></i> Clustered Correlation Heatmap</button>
-            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-radar' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-radar')}><i className="fa-solid fa-spider"></i> Radar Profile Chart</button>
+            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-pca' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-pca')}>PCA Biplot (Reduksi Dimensi)</button>
+            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-parcoords' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-parcoords')}>Parallel Coordinates (Brushing)</button>
+            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-heatmap' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-heatmap')}>Clustered Correlation Heatmap</button>
+            <button className={`subtab-btn ${activeMultiSubtab === 'multi-subtab-radar' ? 'active' : ''}`} onClick={() => setActiveMultiSubtab('multi-subtab-radar')}>Radar Profile Chart</button>
           </div>
 
           {activeMultiSubtab === 'multi-subtab-pca' && (
             <div className="card">
               <div className="card-header">
                 <div>
-                  <div className="card-title"><i className="fa-solid fa-vector-square"></i> PCA Biplot: Proyeksi 8 Indikator BPS ke 2 Dimensi Laten</div>
+                  <div className="card-title">PCA Biplot: Proyeksi 8 Indikator BPS ke 2 Dimensi Laten</div>
                   <div className="card-caption">Menerangkan 66.9% total variansi data. Panah merah merepresentasikan vektor loading dari masing-masing peubah.</div>
                 </div>
                 <div>
@@ -2469,7 +2423,7 @@ export default function Home() {
           {activeMultiSubtab === 'multi-subtab-parcoords' && (
             <div className="card">
               <div className="card-header">
-                <div className="card-title"><i className="fa-solid fa-sliders"></i> Diagram Koordinat Paralel (Parallel Coordinates)</div>
+                <div className="card-title">Diagram Koordinat Paralel (Parallel Coordinates)</div>
               </div>
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
@@ -2486,7 +2440,7 @@ export default function Home() {
           {activeMultiSubtab === 'multi-subtab-heatmap' && (
             <div className="card">
               <div className="card-header">
-                <div className="card-title"><i className="fa-solid fa-temperature-half"></i> Clustered Heatmap: Matriks Korelasi Hierarkis</div>
+                <div className="card-title">Clustered Heatmap: Matriks Korelasi Hierarkis</div>
               </div>
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
@@ -2503,7 +2457,7 @@ export default function Home() {
           {activeMultiSubtab === 'multi-subtab-radar' && (
             <div className="card">
               <div className="card-header">
-                <div className="card-title"><i className="fa-solid fa-circle-notch"></i> Radar Chart: Perbandingan Profil Multidimensi Antar Wilayah</div>
+                <div className="card-title">Radar Chart: Perbandingan Profil Multidimensi Antar Wilayah</div>
               </div>
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
@@ -2521,9 +2475,9 @@ export default function Home() {
         {/* Tab 4: Hierarchical */}
         <section className={`tab-pane ${activeTab === 'tab-hierarchical' ? 'active' : ''}`}>
           <div className="subtabs-nav">
-            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-treemap' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-treemap')}><i className="fa-solid fa-tree"></i> Treemap Interaktif</button>
-            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-sunburst' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-sunburst')}><i className="fa-solid fa-sun"></i> Sunburst Chart</button>
-            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-summary' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-summary')}><i className="fa-solid fa-list-check"></i> Rangkuman Hierarki per Pulau</button>
+            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-treemap' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-treemap')}>Treemap Interaktif</button>
+            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-sunburst' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-sunburst')}>Sunburst Chart</button>
+            <button className={`subtab-btn ${activeHierSubtab === 'hier-subtab-summary' ? 'active' : ''}`} onClick={() => setActiveHierSubtab('hier-subtab-summary')}>Rangkuman Hierarki per Pulau</button>
           </div>
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '12px', flexWrap: 'wrap' }}>
@@ -2621,11 +2575,11 @@ export default function Home() {
           <div className="card">
             <div className="card-header">
               <div>
-                <div className="card-title"><i className="fa-solid fa-database"></i> Pangkalan Data {isProvinsi ? '38 Provinsi Indonesia (Agregat BPS 2024)' : '514 Kabupaten/Kota Indonesia (BPS 2024)'}</div>
+                <div className="card-title">Pangkalan Data {isProvinsi ? '38 Provinsi Indonesia (Agregat BPS 2024)' : '514 Kabupaten/Kota Indonesia (BPS 2024)'}</div>
                 <div className="card-caption">Gunakan pencarian nama daerah atau klik pada tajuk kolom untuk mengurutkan data secara fleksibel.</div>
               </div>
               <button className="btn-download" onClick={downloadCSV}>
-                <i className="fa-solid fa-file-arrow-down"></i> Unduh Data CSV Terfilter
+                Unduh Data CSV Terfilter
               </button>
             </div>
 
@@ -2689,11 +2643,11 @@ export default function Home() {
               <div>Gunakan tombol navigasi untuk berpindah halaman amatan</div>
               <div className="pagination-btns">
                 <button className="page-btn" disabled={currentPage === 1} onClick={() => setCurrentPage(currentPage - 1)}>
-                  <i className="fa-solid fa-chevron-left"></i>
+                  &laquo; Prev
                 </button>
                 <span style={{ padding: '4px 8px', fontWeight: '600' }}>Hal {currentPage} / {totalPages}</span>
                 <button className="page-btn" disabled={currentPage === totalPages} onClick={() => setCurrentPage(currentPage + 1)}>
-                  <i className="fa-solid fa-chevron-right"></i>
+                  Next &raquo;
                 </button>
               </div>
             </div>
@@ -2704,63 +2658,55 @@ export default function Home() {
         {/* Tab 6: Methodology */}
         <section className={`tab-pane ${activeTab === 'tab-method' ? 'active' : ''}`}>
           <div className="method-box">
-            <h3><i className="fa-solid fa-book-bookmark"></i> 1. Sumber Data Resmi BPS (Tahun 2024)</h3>
+            <h3>1. Sumber Data Resmi BPS (Tahun 2024)</h3>
             <p>Seluruh indikator dalam proyek visualisasi ini bersumber secara sah dari publikasi tabel statistik resmi Badan Pusat Statistik (BPS) Republik Indonesia (Tahun 2024):</p>
             <ul>
               <li>
                 <strong>Pengeluaran per Kapita Disesuaikan:</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDE2IzI=/-metode-baru--pengeluaran-per-kapita-disesuaikan.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  [Metode Baru] Pengeluaran per Kapita Disesuaikan (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  [Metode Baru] Pengeluaran per Kapita Disesuaikan (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Angka Harapan Hidup (AHH):</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDU1IzI=/angkaharapan-hidup--ahh--menurut-kabupaten-kota-dan-jenis-kelamin.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  Angka Harapan Hidup (AHH) Menurut Kabupaten/Kota dan Jenis Kelamin (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  Angka Harapan Hidup (AHH) Menurut Kabupaten/Kota dan Jenis Kelamin (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Harapan Lama Sekolah (HLS):</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDE3IzI=/-new-method--expected-years-of-schooling.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  [Metode Baru] Harapan Lama Sekolah (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  [Metode Baru] Harapan Lama Sekolah (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Rata-rata Lama Sekolah (RLS):</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDE1IzI=/-metode-baru--rata-rata-lama-sekolah.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  [Metode Baru] Rata-rata Lama Sekolah (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  [Metode Baru] Rata-rata Lama Sekolah (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Tingkat Partisipasi Angkatan Kerja (TPAK):</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/MjIwMCMy/tingkat-partisipasi-angkatan-kerja-menurut-jenis-kelamin.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  Tingkat Partisipasi Angkatan Kerja Menurut Jenis Kelamin (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  Tingkat Partisipasi Angkatan Kerja Menurut Jenis Kelamin (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Sumbangan Pendapatan Perempuan:</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDY3IzI=/revenue-contribution-of-women.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  Sumbangan Pendapatan Perempuan (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  Sumbangan Pendapatan Perempuan (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Keterlibatan Perempuan di Parlemen:</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDY0IzI=/the-involvement-of-women-in-parliament.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  Keterlibatan Perempuan di Parlemen (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  Keterlibatan Perempuan di Parlemen (Tahun 2024) </a>
               </li>
               <li>
                 <strong>Perempuan sebagai Tenaga Profesional:</strong>{' '}
                 <a href="https://www.bps.go.id/id/statistics-table/2/NDY1IzI=/the-percentage-of-female-professional-staff.html" target="_blank" rel="noopener noreferrer" style={{ color: '#2563eb', textDecoration: 'underline' }}>
-                  Tenaga Profesional Perempuan (Tahun 2024) <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: '0.72rem' }}></i>
-                </a>
+                  Tenaga Profesional Perempuan (Tahun 2024) </a>
               </li>
               <li><strong>Atribusi Wajib:</strong> Sumber: BPS (Badan Pusat Statistik Republik Indonesia).</li>
             </ul>
           </div>
 
           <div className="method-box">
-            <h3><i className="fa-solid fa-gears"></i> 2. Pra-pemrosesan Data & Penanganan Nilai Hilang</h3>
+            <h3>2. Pra-pemrosesan Data & Penanganan Nilai Hilang</h3>
             <ul>
               <li><strong>Rekonsiliasi Wilayah:</strong> Sinkronisasi struktur administratif pasca-pemekaran 4 DOB Papua dan pemisahan Kaltara dari Kaltim hingga mencakup persis 514 kabupaten/kota dan 38 provinsi.</li>
               <li><strong>Penanganan Missing Values:</strong> 14 kabupaten di pedalaman Papua diimputasi menggunakan <em>K-Nearest Neighbors</em> (KNN, k=5, distance-weighted) pada matriks fitur terstandarisasi. Seluruh indikator politik, pendapatan, dan profesionalitas tetap menggunakan data observasi riil 100%.</li>
@@ -2769,7 +2715,7 @@ export default function Home() {
           </div>
 
           <div className="method-box">
-            <h3><i className="fa-solid fa-eye"></i> 3. Justifikasi Desain & Visual Encoding</h3>
+            <h3>3. Justifikasi Desain & Visual Encoding</h3>
             <ul>
               <li><strong>Posisi Spasial:</strong> Dimanfaatkan pada scatter plot dan peta koordinat geografis sebagai saluran perseptual dengan akurasi tertinggi (Cleveland &amp; McGill, 1984).</li>
               <li><strong>Pewarnaan (Colorblind-Safe):</strong> Menggunakan skala warna perseptual seragam (<em>Viridis, Cividis, Plasma</em>) yang menjamin aksesibilitas bagi penderita buta warna (protanopia, deuteranopia).</li>
@@ -2778,7 +2724,7 @@ export default function Home() {
           </div>
 
           <div className="method-box">
-            <h3><i className="fa-solid fa-shield-halved"></i> 4. Deklarasi Integritas Akademik & Penggunaan AI</h3>
+            <h3>4. Deklarasi Integritas Akademik & Penggunaan AI</h3>
             <p>Sesuai dengan ketentuan Petunjuk Nomor 7 Soal UAS Visualisasi Data dan Informasi TA. 2025/2026:</p>
             <ul>
               <li><strong>Alat Bantu AI yang Digunakan:</strong> Large Language Model (Google DeepMind Antigravity) digunakan sebatas alat bantu asistensi pemrograman (<em>pair programming</em>), penulisan skrip otomasi ekstraksi data, dan perancangan tata letak antarmuka web.</li>
