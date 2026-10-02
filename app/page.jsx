@@ -1533,42 +1533,124 @@ export default function Home() {
     }
   }
 
+  function buildHierarchyData(dataset, isProv, sizeVar, colorVar) {
+    const ids = [];
+    const labels = [];
+    const parents = [];
+    const values = [];
+    const colors = [];
+    const customTexts = [];
+
+    const provAgg = {};
+    const islandAggMap = {};
+    const allVals = [];
+
+    dataset.forEach(d => {
+      const cVal = typeof d[colorVar] === 'number' ? d[colorVar] : 0;
+      allVals.push(cVal);
+
+      if (!provAgg[d.provinsi]) provAgg[d.provinsi] = { count: 0, sumColor: 0, sumSize: 0, pulau: d.pulau };
+      provAgg[d.provinsi].count += 1;
+      provAgg[d.provinsi].sumColor += cVal;
+      provAgg[d.provinsi].sumSize += (typeof d[sizeVar] === 'number' ? d[sizeVar] : 0);
+
+      if (!islandAggMap[d.pulau]) islandAggMap[d.pulau] = { count: 0, sumColor: 0, sumSize: 0 };
+      islandAggMap[d.pulau].count += 1;
+      islandAggMap[d.pulau].sumColor += cVal;
+      islandAggMap[d.pulau].sumSize += (typeof d[sizeVar] === 'number' ? d[sizeVar] : 0);
+    });
+
+    const natAvgColor = allVals.length ? +(allVals.reduce((a, b) => a + b, 0) / allVals.length).toFixed(2) : 0;
+
+    // 1. Root: Indonesia
+    ids.push('id-root-indonesia');
+    labels.push('Indonesia');
+    parents.push('');
+    values.push(0);
+    colors.push(natAvgColor);
+    customTexts.push(`<b>Republik Indonesia</b><br>Rata-rata ${colorVar.toUpperCase()}: ${natAvgColor}`);
+
+    // 2. Islands (Gugus Pulau)
+    const islands = [...new Set(dataset.map(d => d.pulau))];
+    islands.forEach(pulau => {
+      const agg = islandAggMap[pulau] || { count: 1, sumColor: 0 };
+      const avgColor = +(agg.sumColor / (agg.count || 1)).toFixed(2);
+      ids.push(`pulau-${pulau}`);
+      labels.push(pulau);
+      parents.push('id-root-indonesia');
+      values.push(0);
+      colors.push(avgColor);
+      customTexts.push(`<b>Gugus Pulau ${pulau}</b><br>Jumlah Wilayah: ${agg.count}<br>Rata-rata ${colorVar.toUpperCase()}: ${avgColor}`);
+    });
+
+    if (isProv) {
+      // 3a. Provinces as Leaf Nodes
+      dataset.forEach((d, idx) => {
+        const id = `prov-${d.provinsi}`;
+        const sVal = Math.max(1, typeof d[sizeVar] === 'number' ? d[sizeVar] : 1);
+        const cVal = typeof d[colorVar] === 'number' ? d[colorVar] : 0;
+        const displayVal = sizeVar === 'pengeluaran' ? `Rp${Number(sVal).toLocaleString('id-ID')}` : `${sVal.toFixed(2)}%`;
+        const displayColor = colorVar === 'pengeluaran' ? `Rp${Number(cVal).toLocaleString('id-ID')}` : `${cVal.toFixed(2)}%`;
+
+        ids.push(id);
+        labels.push(d.nama_resmi || `Provinsi ${d.provinsi}`);
+        parents.push(`pulau-${d.pulau}`);
+        values.push(sVal);
+        colors.push(cVal);
+        customTexts.push(`<b>${d.nama_resmi || d.provinsi}</b><br>Pulau: ${d.pulau}<br>Ukuran (${sizeVar.toUpperCase()}): ${displayVal}<br>Warna (${colorVar.toUpperCase()}): ${displayColor}<br>Tipologi: ${d.kuadran || 'N/A'}`);
+      });
+    } else {
+      // 3b. Provinces as Intermediate Containers
+      const provEntries = Object.keys(provAgg);
+      provEntries.forEach(prov => {
+        const agg = provAgg[prov];
+        const avgColor = +(agg.sumColor / (agg.count || 1)).toFixed(2);
+        ids.push(`prov-${prov}`);
+        labels.push(`Prov. ${prov}`);
+        parents.push(`pulau-${agg.pulau}`);
+        values.push(0);
+        colors.push(avgColor);
+        customTexts.push(`<b>Provinsi ${prov}</b><br>Gugus: ${agg.pulau}<br>Jumlah Kab/Kota: ${agg.count}<br>Rata-rata ${colorVar.toUpperCase()}: ${avgColor}`);
+      });
+
+      // 4. Kab/Kota as Leaf Nodes
+      dataset.forEach((d, idx) => {
+        const id = `kab-${d.kode_wilayah || idx}-${idx}`;
+        const sVal = Math.max(1, typeof d[sizeVar] === 'number' ? d[sizeVar] : 1);
+        const cVal = typeof d[colorVar] === 'number' ? d[colorVar] : 0;
+        const displayVal = sizeVar === 'pengeluaran' ? `Rp${Number(sVal).toLocaleString('id-ID')}` : `${sVal.toFixed(2)}%`;
+        const displayColor = colorVar === 'pengeluaran' ? `Rp${Number(cVal).toLocaleString('id-ID')}` : `${cVal.toFixed(2)}%`;
+
+        ids.push(id);
+        labels.push(d.nama_resmi || d.wilayah);
+        parents.push(`prov-${d.provinsi}`);
+        values.push(sVal);
+        colors.push(cVal);
+        customTexts.push(`<b>${d.nama_resmi || d.wilayah}</b><br>Provinsi: ${d.provinsi} (${d.pulau})<br>Ukuran (${sizeVar.toUpperCase()}): ${displayVal}<br>Warna (${colorVar.toUpperCase()}): ${displayColor}<br>Tipologi: ${d.kuadran || 'N/A'}`);
+      });
+    }
+
+    return { ids, labels, parents, values, colors, customTexts };
+  }
+
   function renderTreemap() {
+    const dataObj = buildHierarchyData(filteredKabkota, isProvinsi, hierSizeVar, hierColorVar);
+
     const trace = {
       type: 'treemap',
-      labels: filteredKabkota.map(d => d.nama_resmi),
-      parents: isProvinsi ? filteredKabkota.map(d => d.pulau) : filteredKabkota.map(d => d.provinsi),
-      values: filteredKabkota.map(d => d[hierSizeVar]),
-      text: filteredKabkota.map(d => `${d.nama_resmi}<br>${isProvinsi ? `Pulau: ${d.pulau}` : `Prov: ${d.provinsi}`}<br>${hierColorVar}: ${d[hierColorVar]}`),
+      ids: dataObj.ids,
+      labels: dataObj.labels,
+      parents: dataObj.parents,
+      values: dataObj.values,
+      text: dataObj.customTexts,
       hoverinfo: 'text',
       marker: {
-        colors: filteredKabkota.map(d => d[hierColorVar]),
+        colors: dataObj.colors,
         colorscale: 'Viridis',
         showscale: true,
         colorbar: { title: hierColorVar.toUpperCase() }
       }
     };
-
-    const pulauSet = [...new Set(filteredKabkota.map(d => d.pulau))];
-
-    if (!isProvinsi) {
-      const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
-      provSet.forEach(p => {
-        trace.labels.push(p.prov);
-        trace.parents.push(p.pulau);
-        trace.values.push(0);
-      });
-    }
-
-    pulauSet.forEach(pulau => {
-      trace.labels.push(pulau);
-      trace.parents.push('Indonesia');
-      trace.values.push(0);
-    });
-
-    trace.labels.push('Indonesia');
-    trace.parents.push('');
-    trace.values.push(0);
 
     const layout = {
       title: {
@@ -1589,37 +1671,23 @@ export default function Home() {
   }
 
   function renderSunburst() {
+    const dataObj = buildHierarchyData(filteredKabkota, isProvinsi, hierSizeVar, hierColorVar);
+
     const trace = {
       type: 'sunburst',
-      labels: filteredKabkota.map(d => d.nama_resmi),
-      parents: isProvinsi ? filteredKabkota.map(d => d.pulau) : filteredKabkota.map(d => d.provinsi),
-      values: filteredKabkota.map(d => d[hierSizeVar]),
-      text: filteredKabkota.map(d => `${d.nama_resmi}<br>${hierColorVar}: ${d[hierColorVar]}`),
+      ids: dataObj.ids,
+      labels: dataObj.labels,
+      parents: dataObj.parents,
+      values: dataObj.values,
+      text: dataObj.customTexts,
       hoverinfo: 'text',
       marker: {
-        colors: filteredKabkota.map(d => d[hierColorVar]),
+        colors: dataObj.colors,
         colorscale: 'Viridis',
         showscale: true,
         colorbar: { title: hierColorVar.toUpperCase() }
       }
     };
-
-    const pulauSet = [...new Set(filteredKabkota.map(d => d.pulau))];
-
-    if (!isProvinsi) {
-      const provSet = [...new Set(filteredKabkota.map(d => JSON.stringify({ prov: d.provinsi, pulau: d.pulau })))].map(s => JSON.parse(s));
-      provSet.forEach(p => {
-        trace.labels.push(p.prov);
-        trace.parents.push(p.pulau);
-        trace.values.push(0);
-      });
-    }
-
-    pulauSet.forEach(pulau => {
-      trace.labels.push(pulau);
-      trace.parents.push('');
-      trace.values.push(0);
-    });
 
     const layout = {
       title: {
