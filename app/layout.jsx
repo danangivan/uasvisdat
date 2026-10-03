@@ -5,7 +5,7 @@ export const metadata = {
   title: 'Disparitas Gender 514 Kab/Kota Indonesia — Visualisasi Analitik (Next.js)',
   description: 'Eksplorasi Disparitas Spasial Partisipasi Ekonomi dan Pengambilan Keputusan Perempuan di 514 Kabupaten/Kota Indonesia Melalui Visualisasi Analitik (BPS 2024)',
   icons: {
-    icon: 'https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png',
+    icon: '/logo_stis.webp',
   },
 };
 

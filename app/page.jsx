@@ -3902,8 +3902,8 @@ export default function Home() {
       <aside className={`sidebar ${mobileMenuOpen ? "open" : ""}`}>
         <div className="sidebar-brand-box">
           <img
-            src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png"
-            alt="Lambang Politeknik Statistika STIS"
+            src="/logo_stis.webp"
+            alt="Logo Politeknik Statistika STIS"
             className="sidebar-logo"
           />
           <div className="sidebar-brand-text">
@@ -3952,8 +3952,8 @@ export default function Home() {
         </div>
 
         <div className="sidebar-footer">
-          <span className="sidebar-footer-inst">Badan Pusat Statistik RI &bull; STIS</span>
-          <span>Sistem Informasi Statistik 2024</span>
+          <span className="sidebar-footer-inst">Danang Ivan Pangestu</span>
+          <span>222313036 (3SD2)</span>
         </div>
       </aside>
 
@@ -6197,7 +6197,7 @@ export default function Home() {
             <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
               <div style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
                 gap: "16px"
               }}>
                 <div className="kpi-card accent-blue">
@@ -6206,6 +6206,17 @@ export default function Home() {
                   </h4>
                   <p style={{ fontSize: "12.5px", color: "#475569", lineHeight: "1.6", margin: 0 }}>
                     Politeknik Statistika STIS adalah Perguruan Tinggi Kedinasan di bawah naungan Badan Pusat Statistik (BPS) Republik Indonesia yang bertugas menghasilkan tenaga ahli statistik dan komputasi statistik yang profesional, berintegritas, dan berwawasan teknologi informasi mutakhir.
+                  </p>
+                </div>
+
+                <div className="kpi-card accent-blue">
+                  <h4 style={{ fontSize: "14.5px", fontWeight: "700", color: "#0B2F63", margin: "0 0 8px 0" }}>
+                    Pengembang Dasbor
+                  </h4>
+                  <p style={{ fontSize: "12.5px", color: "#475569", lineHeight: "1.6", margin: 0 }}>
+                    <strong style={{ color: "#0B2F63" }}>Danang Ivan Pangestu</strong><br />
+                    <span>NIM: 222313036 &bull; Kelas: 3SD2</span><br />
+                    <span style={{ fontSize: "11.5px", color: "#64748B" }}>Program Studi Komputasi Statistik, Politeknik Statistika STIS</span>
                   </p>
                 </div>
 
