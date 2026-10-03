@@ -104,100 +104,105 @@ function DataSourceBadge({ vars = [] }) {
   );
 }
 
-function VizLegendQuadrant() {
+function VizLegendQuadrant({ filteredKabkota = [] }) {
+  const total = filteredKabkota.length || 1;
+  const countQ1 = filteredKabkota.filter(
+    (d) => d.kuadran && d.kuadran.includes("Kuadran I"),
+  ).length;
+  const countQ2 = filteredKabkota.filter(
+    (d) => d.kuadran && d.kuadran.includes("Kuadran II"),
+  ).length;
+  const countQ3 = filteredKabkota.filter(
+    (d) => d.kuadran && d.kuadran.includes("Kuadran III"),
+  ).length;
+  const countQ4 = filteredKabkota.filter(
+    (d) => d.kuadran && d.kuadran.includes("Kuadran IV"),
+  ).length;
+
+  const pctQ1 = ((countQ1 / total) * 100).toFixed(1);
+  const pctQ2 = ((countQ2 / total) * 100).toFixed(1);
+  const pctQ3 = ((countQ3 / total) * 100).toFixed(1);
+  const pctQ4 = ((countQ4 / total) * 100).toFixed(1);
+
   return (
-    <div className="viz-legend">
-      <div className="viz-legend-header">
-        <div className="viz-legend-title">
-          <span>Panduan &amp; Legenda Tipologi Kuadran Disparitas</span>
+    <div className="insight-panel-container">
+      <div className="panel-header-box">
+        <div className="panel-heading">
+          <i className="fa-solid fa-shapes" style={{ color: "#1F5FCC" }}></i>
+          <span>Tipologi 4 Kuadran</span>
         </div>
-        <span className="viz-legend-badge">Klasifikasi Analitik 4 Kuadran</span>
+        <span className="panel-badge">{filteredKabkota.length} Wilayah Aktif</span>
       </div>
-      <div className="viz-legend-desc">
-        <strong>Tujuan &amp; Fungsi:</strong> Mengelompokkan wilayah berdasarkan
-        keterkaitan antara kemandirian ekonomi perempuan terhadap agensi
-        pengambilan keputusan publik mengacu pada garis median nasional.
+
+      {/* Kuadran I */}
+      <div className="kuadran-card q1">
+        <div className="kuadran-card-top">
+          <div className="kuadran-card-title">Kuadran I: Maju &amp; Seimbang</div>
+          <span className="kuadran-metric-badge">
+            {countQ1} Wilayah ({pctQ1}%)
+          </span>
+        </div>
+        <div className="kuadran-card-formula">
+          <i className="fa-solid fa-crosshairs" style={{ fontSize: "10px" }}></i>
+          <span>Ekonomi ≥ 34.5 &bull; Keputusan ≥ 47.6</span>
+        </div>
+        <div className="kuadran-card-desc">
+          Wilayah ideal di mana partisipasi ekonomi perempuan terkonversi nyata
+          menjadi kepemimpinan politik dan jabatan profesional.
+        </div>
       </div>
-      <div className="viz-legend-grid">
-        <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#16a34a" }}
-          ></div>
-          <div>
-            <div className="viz-legend-item-title" style={{ color: "#16a34a" }}>
-              Kuadran I: Maju &amp; Seimbang
-            </div>
-            <div className="viz-legend-item-desc">
-              Ekonomi Tinggi (≥45.8) &amp; Keputusan Tinggi (≥38.2). Wilayah
-              ideal di mana partisipasi ekonomi perempuan terkonversi nyata
-              menjadi kepemimpinan politik dan profesional.
-            </div>
-          </div>
+
+      {/* Kuadran II */}
+      <div className="kuadran-card q2">
+        <div className="kuadran-card-top">
+          <div className="kuadran-card-title">Kuadran II: Representasi Kuat</div>
+          <span className="kuadran-metric-badge">
+            {countQ2} Wilayah ({pctQ2}%)
+          </span>
         </div>
-        <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#2563eb" }}
-          ></div>
-          <div>
-            <div className="viz-legend-item-title" style={{ color: "#2563eb" }}>
-              Kuadran II: Representasi Kuat
-            </div>
-            <div className="viz-legend-item-desc">
-              Ekonomi Rendah (&lt;45.8) &amp; Keputusan Tinggi (≥38.2).
-              Keterwakilan perempuan di legislatif kuat meskipun tingkat
-              pendapatan daerah masih relatif terbatas.
-            </div>
-          </div>
+        <div className="kuadran-card-formula">
+          <i className="fa-solid fa-crosshairs" style={{ fontSize: "10px" }}></i>
+          <span>Ekonomi &lt; 34.5 &bull; Keputusan ≥ 47.6</span>
         </div>
-        <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#dc2626" }}
-          ></div>
-          <div>
-            <div className="viz-legend-item-title" style={{ color: "#dc2626" }}>
-              Kuadran III: Tertinggal Ganda
-            </div>
-            <div className="viz-legend-item-desc">
-              Ekonomi Rendah (&lt;45.8) &amp; Keputusan Rendah (&lt;38.2).
-              Wilayah yang mengalami ketertinggalan di kedua ranah sekaligus;
-              sasaran prioritas intervensi afirmasi.
-            </div>
-          </div>
+        <div className="kuadran-card-desc">
+          Keterwakilan perempuan di legislatif dan ruang publik relatif kuat
+          meskipun taraf pendapatan daerah masih terbatas.
         </div>
-        <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#d97706" }}
-          ></div>
-          <div>
-            <div className="viz-legend-item-title" style={{ color: "#d97706" }}>
-              Kuadran IV: Pekerja Tanpa Kuasa
-            </div>
-            <div className="viz-legend-item-desc">
-              Ekonomi Tinggi (≥45.8) &amp; Keputusan Rendah (&lt;38.2). Indikasi{" "}
-              <em>sticky floor</em>: partisipasi kerja tinggi namun minim akses
-              dalam pengambilan keputusan publik.
-            </div>
-          </div>
+      </div>
+
+      {/* Kuadran III */}
+      <div className="kuadran-card q3">
+        <div className="kuadran-card-top">
+          <div className="kuadran-card-title">Kuadran III: Tertinggal Ganda</div>
+          <span className="kuadran-metric-badge">
+            {countQ3} Wilayah ({pctQ3}%)
+          </span>
         </div>
-        <div className="viz-legend-item full-width">
-          <div>
-            <div className="viz-legend-item-title">
-              Encoding Visual Sumbu &amp; Simbol
-            </div>
-            <div className="viz-legend-item-desc">
-              <strong>Sumbu X:</strong> Indeks Partisipasi Ekonomi (0–100)
-              &bull; <strong>Sumbu Y:</strong> Indeks Pengambilan Keputusan
-              (0–100) &bull; <strong>Garis Putus-Putus:</strong> Ambang Median
-              Nasional (X=45.8, Y=38.2) &bull;{" "}
-              <strong>Ukuran Lingkaran:</strong> Pengeluaran Riil per Kapita
-              (skala taraf hidup) &bull; <strong>Warna Titik:</strong> Gugus
-              Kepulauan Indonesia.
-            </div>
-          </div>
+        <div className="kuadran-card-formula">
+          <i className="fa-solid fa-crosshairs" style={{ fontSize: "10px" }}></i>
+          <span>Ekonomi &lt; 34.5 &bull; Keputusan &lt; 47.6</span>
+        </div>
+        <div className="kuadran-card-desc">
+          Mengalami ketertinggalan ganda pada akses ekonomi dan representasi
+          politik; merupakan sasaran prioritas afirmasi.
+        </div>
+      </div>
+
+      {/* Kuadran IV */}
+      <div className="kuadran-card q4">
+        <div className="kuadran-card-top">
+          <div className="kuadran-card-title">Kuadran IV: Pekerja Tanpa Kuasa</div>
+          <span className="kuadran-metric-badge">
+            {countQ4} Wilayah ({pctQ4}%)
+          </span>
+        </div>
+        <div className="kuadran-card-formula">
+          <i className="fa-solid fa-crosshairs" style={{ fontSize: "10px" }}></i>
+          <span>Ekonomi ≥ 34.5 &bull; Keputusan &lt; 47.6</span>
+        </div>
+        <div className="kuadran-card-desc">
+          TPAK perempuan tinggi di pasar kerja fisik namun minim representasi
+          dalam pengambilan keputusan publik (indikasi <em>sticky floor</em>).
         </div>
       </div>
     </div>
@@ -929,6 +934,42 @@ export default function Home() {
   const [selectedKuadran, setSelectedKuadran] = useState("Semua Kuadran");
   const [selectedPalette, setSelectedPalette] = useState("Viridis");
 
+  // Institutional UI States
+  const [helpModalOpen, setHelpModalOpen] = useState(false);
+  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [fullscreenId, setFullscreenId] = useState(null);
+
+  // Fullscreen Handler
+  const toggleFullscreen = (elementId) => {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen().catch(() => {});
+      setFullscreenId(elementId);
+    } else {
+      document.exitFullscreen().catch(() => {});
+      setFullscreenId(null);
+    }
+  };
+
+  // Export GeoJSON Handler
+  const downloadGeoJSON = () => {
+    const geo = isProvinsi ? geojsonData : kabkotaGeojson;
+    if (!geo) return;
+    const blob = new Blob([JSON.stringify(geo, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = isProvinsi
+      ? "provinsi_38_indonesia.geojson"
+      : "kabkota_514_indonesia.geojson";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Tabs
   const [activeTab, setActiveTab] = useState("tab-overview");
   const [activeGeoSubtab, setActiveGeoSubtab] = useState(
@@ -1262,8 +1303,8 @@ export default function Home() {
 
   // 1. Quadrant Scatter
   function renderQuadrantScatter() {
-    const medX = 45.8;
-    const medY = 38.2;
+    const medX = 34.5;
+    const medY = 47.6;
     const islands = [...new Set(filteredKabkota.map((d) => d.pulau))];
 
     const traces = islands.map((pulau) => {
@@ -1297,11 +1338,13 @@ export default function Home() {
         title: "Indeks Partisipasi Ekonomi Perempuan (0 - 100)",
         gridcolor: "#f1f5f9",
         zeroline: false,
+        range: [10, 88],
       },
       yaxis: {
         title: "Indeks Pengambilan Keputusan Perempuan (0 - 100)",
         gridcolor: "#f1f5f9",
         zeroline: false,
+        range: [-2, 85],
       },
       shapes: [
         {
@@ -1324,23 +1367,23 @@ export default function Home() {
       annotations: [
         {
           x: medX + 22,
-          y: medY + 28,
+          y: medY + 22,
           text: "<b>KUADRAN I</b><br>Maju & Seimbang<br>(Ekonomi Tinggi, Keputusan Tinggi)",
           showarrow: false,
           font: { color: "#16a34a", size: 10.5 },
           bgcolor: "rgba(22, 163, 74, 0.1)",
         },
         {
-          x: medX - 22,
-          y: medY + 28,
+          x: medX - 14,
+          y: medY + 22,
           text: "<b>KUADRAN II</b><br>Representasi Kuat<br>(Ekonomi Rendah, Keputusan Tinggi)",
           showarrow: false,
           font: { color: "#2563eb", size: 10.5 },
           bgcolor: "rgba(37, 99, 235, 0.1)",
         },
         {
-          x: medX - 22,
-          y: medY - 28,
+          x: medX - 14,
+          y: medY - 24,
           text: "<b>KUADRAN III</b><br>Tertinggal Ganda<br>(Ekonomi Rendah, Keputusan Rendah)",
           showarrow: false,
           font: { color: "#dc2626", size: 10.5 },
@@ -1348,7 +1391,7 @@ export default function Home() {
         },
         {
           x: medX + 22,
-          y: medY - 28,
+          y: medY - 24,
           text: "<b>KUADRAN IV</b><br>Pekerja Keras Kurang Kuasa<br>(Ekonomi Tinggi, Keputusan Rendah)",
           showarrow: false,
           font: { color: "#d97706", size: 10.5 },
@@ -2518,6 +2561,56 @@ export default function Home() {
     document.body.removeChild(link);
   }
 
+  function downloadDatasetJSON(data, filename) {
+    if (!data || !data.length) return;
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function downloadProvinsiCSV() {
+    if (!enrichedProvinsi || !enrichedProvinsi.length) return;
+    const cols = [
+      "kode_wilayah",
+      "nama_resmi",
+      "provinsi",
+      "pulau",
+      "parlemen",
+      "pendapatan",
+      "profesional",
+      "tpak",
+      "pengeluaran",
+      "ahh",
+      "rls",
+      "hls",
+      "skor_keputusan",
+      "skor_ekonomi",
+      "ikpp_komposit",
+      "kuadran",
+    ];
+    let csvContent = "data:text/csv;charset=utf-8," + cols.join(",") + "\r\n";
+    enrichedProvinsi.forEach((row) => {
+      const values = cols.map((c) =>
+        typeof row[c] === "string" && row[c].includes(",")
+          ? `"${row[c]}"`
+          : row[c],
+      );
+      csvContent += values.join(",") + "\r\n";
+    });
+    const link = document.createElement("a");
+    link.href = encodeURI(csvContent);
+    link.download = "disparitas_perempuan_38_provinsi_2024.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   const avgParlemen = filteredKabkota.length
     ? filteredKabkota.reduce((a, b) => a + b.parlemen, 0) /
       filteredKabkota.length
@@ -2534,48 +2627,96 @@ export default function Home() {
     ? filteredKabkota.reduce((a, b) => a + b.tpak, 0) / filteredKabkota.length
     : 0;
 
+  // Dynamic Factual Analytics for Storytelling
+  const totalCount = filteredKabkota.length || 1;
+  const countAfirmasi = filteredKabkota.filter((d) => d.parlemen >= 30).length;
+  const pctAfirmasi = ((countAfirmasi / totalCount) * 100).toFixed(1);
+  const sortedByParlemen = [...filteredKabkota].sort((a, b) => b.parlemen - a.parlemen);
+  const topParlemen = sortedByParlemen[0];
+  const bottomParlemen = sortedByParlemen[sortedByParlemen.length - 1];
+  const sortedSticky = [...filteredKabkota].sort(
+    (a, b) => (b.tpak - b.pendapatan) - (a.tpak - a.pendapatan),
+  );
+  const topSticky = sortedSticky[0];
+
   const hasActiveFilter =
     selectedPulau !== "Semua Pulau" ||
     selectedProv !== "Semua Provinsi" ||
     selectedTipe !== "Kab/Kota" ||
-    selectedKuadran !== "Semua Kuadran";
+    selectedKuadran !== "Semua Kuadran" ||
+    selectedPalette !== "Viridis";
+
+  const resetFilters = () => {
+    setSelectedPulau("Semua Pulau");
+    setSelectedProv("Semua Provinsi");
+    setSelectedTipe("Kab/Kota");
+    setSelectedKuadran("Semua Kuadran");
+    setSelectedPalette("Viridis");
+  };
 
   const MODULES = [
     {
       id: "tab-overview",
       label: "Ringkasan & Storytelling",
       desc: "Tipologi kuadran disparitas ekonomi vs keputusan & narasi analitik",
-      icon: "fa-chart-line",
+      icon: "fa-chart-pie",
+      group: "ANALISIS & VISUALISASI",
     },
     {
       id: "tab-geospatial",
       label: "Analisis Geospasial",
       desc: "Peta batas kab/kota poligon SHP, heatmap spasial, choropleth, & LISA cluster",
-      icon: "fa-map",
+      icon: "fa-map-location-dot",
+      group: "ANALISIS & VISUALISASI",
     },
     {
       id: "tab-multivariate",
       label: "Dimensi Tinggi (Multivariat)",
       desc: "PCA biplot 8 indikator, koordinat paralel, korelasi matriks, & profil radar",
-      icon: "fa-project-diagram",
+      icon: "fa-diagram-project",
+      group: "ANALISIS & VISUALISASI",
     },
     {
       id: "tab-hierarchical",
       label: "Analisis Berhierarki",
       desc: "Treemap & sunburst interaktif agregasi pulau hingga kabupaten/kota",
       icon: "fa-sitemap",
+      group: "ANALISIS & VISUALISASI",
     },
     {
       id: "tab-data",
-      label: "Eksplorasi Data",
+      label: "Tabel Data",
       desc: `Pangkalan data tabular ${isProvinsi ? "38 provinsi" : "514 kabupaten/kota"} dengan pencarian & ekspor CSV`,
-      icon: "fa-table",
+      icon: "fa-table-list",
+      group: "DATA & DOKUMENTASI",
     },
     {
       id: "tab-method",
-      label: "Metodologi & Sumber Data",
+      label: "Metodologi Analisis",
       desc: "Sumber data resmi BPS RI 2024, pra-pemrosesan, imputasi, & justifikasi desain",
-      icon: "fa-book-open",
+      icon: "fa-book-bookmark",
+      group: "DATA & DOKUMENTASI",
+    },
+    {
+      id: "tab-download",
+      label: "Unduh Data",
+      desc: "Pusat unduhan dataset terbuka CSV, JSON, & GeoJSON BPS 2024",
+      icon: "fa-cloud-arrow-down",
+      group: "DATA & DOKUMENTASI",
+    },
+    {
+      id: "tab-sources",
+      label: "Sumber Data BPS",
+      desc: "Katalog publikasi tabel statistik resmi BPS RI 2024",
+      icon: "fa-database",
+      group: "DATA & DOKUMENTASI",
+    },
+    {
+      id: "tab-about",
+      label: "Tentang Dashboard",
+      desc: "Profil institusional Politeknik Statistika STIS & tim pengembang",
+      icon: "fa-circle-info",
+      group: "DATA & DOKUMENTASI",
     },
   ];
 
@@ -2590,365 +2731,418 @@ export default function Home() {
         aria-hidden="true"
       />
 
-      {/* Sidebar Drawer */}
+      {/* Persistent Left Sidebar (240px wide) */}
       <aside className={`sidebar ${mobileMenuOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-brand">
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png"
-              alt="STIS"
-            />
-            <div className="sidebar-title">
-              <h2>Politeknik Statistika STIS</h2>
-              <p>Visualisasi Data &amp; Informasi (2026)</p>
-            </div>
+        <div className="sidebar-brand-box">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png"
+            alt="Lambang Politeknik Statistika STIS"
+            className="sidebar-logo"
+          />
+          <div className="sidebar-brand-text">
+            <span className="sidebar-brand-title">Politeknik Statistika STIS</span>
+            <span className="sidebar-brand-sub">Visualisasi Data &amp; Informasi</span>
           </div>
-          <button
-            className="sidebar-close-btn"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-label="Tutup Menu Filter"
-          >
-            &times;
-          </button>
         </div>
 
-        <div className="sidebar-content">
-          {/* Navigasi Modul Analitik (Single Dropdown Menu) */}
-          <div className="module-dropdown-card">
-            <div className="module-dropdown-header">
-              <label htmlFor="module-select" className="module-dropdown-label">
-                Navigasi Modul Analitik
-              </label>
-              <span className="badge-active-dot">Aktif</span>
-            </div>
-            <div className="module-select-container">
-              <select
-                id="module-select"
-                className="module-dropdown-select"
-                value={activeTab}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setActiveTab(val);
-                  if (val === "tab-hierarchical") {
-                    setSelectedTipe("Provinsi");
-                  }
+        <div className="sidebar-nav-container">
+          {/* Kelompok 1: ANALISIS & VISUALISASI */}
+          <div className="sidebar-nav-group">
+            <span className="sidebar-group-title">Analisis &amp; Visualisasi</span>
+            {MODULES.filter((m) => m.group === "ANALISIS & VISUALISASI").map((m) => (
+              <button
+                key={m.id}
+                className={`sidebar-nav-btn ${activeTab === m.id ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTab(m.id);
+                  if (m.id === "tab-hierarchical") setSelectedTipe("Provinsi");
                   setMobileMenuOpen(false);
                 }}
               >
-                <option value="tab-overview">
-                  1. Ringkasan &amp; Storytelling
+                <i className={`sidebar-nav-icon fa-solid ${m.icon}`}></i>
+                <span className="sidebar-nav-text">{m.label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Kelompok 2: DATA & DOKUMENTASI */}
+          <div className="sidebar-nav-group">
+            <span className="sidebar-group-title">Data &amp; Dokumentasi</span>
+            {MODULES.filter((m) => m.group === "DATA & DOKUMENTASI").map((m) => (
+              <button
+                key={m.id}
+                className={`sidebar-nav-btn ${activeTab === m.id ? "active" : ""}`}
+                onClick={() => {
+                  setActiveTab(m.id);
+                  setMobileMenuOpen(false);
+                }}
+              >
+                <i className={`sidebar-nav-icon fa-solid ${m.icon}`}></i>
+                <span className="sidebar-nav-text">{m.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="sidebar-footer">
+          <span className="sidebar-footer-inst">Badan Pusat Statistik RI &bull; STIS</span>
+          <span>Sistem Informasi Statistik 2024</span>
+        </div>
+      </aside>
+
+      {/* Main Viewport */}
+      <main className="main-viewport">
+        {/* Global Header */}
+        <header className="global-header">
+          <div className="header-top-row">
+            <div className="header-breadcrumb">
+              <i className="fa-solid fa-house" style={{ fontSize: "11px" }}></i>
+              <span>Portal Analitik STIS</span>
+              <span className="breadcrumb-separator">/</span>
+              <span>Disparitas Gender 2024</span>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-active">{currentModule.label}</span>
+            </div>
+
+            <div className="header-right-meta">
+              <span className="meta-chip primary">
+                <i className="fa-regular fa-calendar" style={{ fontSize: "11px" }}></i>
+                Tahun Data: 2024
+              </span>
+              <span className="meta-chip">
+                <i className="fa-solid fa-map-pin" style={{ fontSize: "11px" }}></i>
+                514 Kab/Kota &bull; 38 Provinsi
+              </span>
+              <button
+                className="header-icon-btn"
+                title="Panduan &amp; Bantuan"
+                onClick={() => setHelpModalOpen(true)}
+                aria-label="Buka Panduan"
+              >
+                <i className="fa-solid fa-circle-question"></i>
+              </button>
+              <button
+                className="header-icon-btn mobile-only"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Buka Menu"
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="header-title-block">
+            <h1 className="header-title-main">
+              Eksplorasi Disparitas Spasial Partisipasi Ekonomi &amp; Pengambilan Keputusan Perempuan di Indonesia
+            </h1>
+            <p className="header-title-sub">
+              Platform Analitik Komprehensif Berbasis Data Resmi BPS RI 2024 pada 514 Kabupaten/Kota dan 38 Provinsi
+            </p>
+          </div>
+        </header>
+
+        {/* Sticky Horizontal Filter Bar */}
+        <div className="filter-bar-sticky">
+          <div className="filter-bar-left">
+            {/* Filter Pulau */}
+            <div className="filter-item">
+              <span className="filter-label">Pulau:</span>
+              <select
+                className="filter-select"
+                value={selectedPulau}
+                onChange={(e) => {
+                  setSelectedPulau(e.target.value);
+                  setSelectedProv("Semua Provinsi");
+                }}
+              >
+                <option value="Semua Pulau">Semua Pulau</option>
+                {[...new Set(allKabkota.map((d) => d.pulau))].map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Filter Provinsi */}
+            <div className="filter-item">
+              <span className="filter-label">Provinsi:</span>
+              <select
+                className="filter-select"
+                value={selectedProv}
+                onChange={(e) => setSelectedProv(e.target.value)}
+              >
+                {availableProvs.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Segmented Control Tingkat Wilayah */}
+            {activeTab !== "tab-hierarchical" && (
+              <div className="filter-item">
+                <span className="filter-label">Tingkat:</span>
+                <div className="segmented-control">
+                  <button
+                    className={`segmented-btn ${selectedTipe === "Kab/Kota" ? "active" : ""}`}
+                    onClick={() => setSelectedTipe("Kab/Kota")}
+                  >
+                    Kab/Kota (514)
+                  </button>
+                  <button
+                    className={`segmented-btn ${selectedTipe === "Provinsi" ? "active" : ""}`}
+                    onClick={() => setSelectedTipe("Provinsi")}
+                  >
+                    Provinsi (38)
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Filter Kuadran Tipologi */}
+            <div className="filter-item">
+              <span className="filter-label">Kuadran:</span>
+              <select
+                className="filter-select"
+                value={selectedKuadran}
+                onChange={(e) => setSelectedKuadran(e.target.value)}
+              >
+                <option value="Semua Kuadran">Semua Kuadran</option>
+                <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">
+                  Kuadran I (Maju &amp; Seimbang)
                 </option>
-                <option value="tab-geospatial">
-                  2. Analisis Geospasial (Peta &amp; Heatmap)
+                <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">
+                  Kuadran II (Representasi Kuat)
                 </option>
-                <option value="tab-multivariate">
-                  3. Dimensi Tinggi (Multivariat &amp; PCA)
+                <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">
+                  Kuadran III (Tertinggal Ganda)
                 </option>
-                <option value="tab-hierarchical">
-                  4. Analisis Berhierarki (Treemap &amp; Sunburst)
+                <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">
+                  Kuadran IV (Pekerja Tanpa Kuasa)
                 </option>
-                <option value="tab-data">
-                  5. Eksplorasi Data (Pangkalan{" "}
-                  {isProvinsi ? "38 Provinsi" : "514 Kab/Kota"})
-                </option>
-                <option value="tab-method">
-                  6. Metodologi &amp; Sumber Data
-                </option>
+              </select>
+            </div>
+
+            {/* Palet Warna */}
+            <div className="filter-item">
+              <span className="filter-label">Palet:</span>
+              <select
+                className="filter-select"
+                value={selectedPalette}
+                onChange={(e) => setSelectedPalette(e.target.value)}
+              >
+                <option value="Viridis">Viridis (Perseptual)</option>
+                <option value="Cividis">Cividis (Colorblind-Safe)</option>
+                <option value="Plasma">Plasma (Kontras)</option>
+                <option value="Turbo">Turbo (Spektrum)</option>
               </select>
             </div>
           </div>
 
-          <div className="sidebar-divider"></div>
-
-          <div className="sidebar-section-label">
-            Parameter &amp; Filter Data
-          </div>
-
-          <div className="filter-group">
-            <label>Filter Pulau / Region</label>
-            <select
-              value={selectedPulau}
-              onChange={(e) => {
-                setSelectedPulau(e.target.value);
-                setSelectedProv("Semua Provinsi");
-              }}
-            >
-              <option value="Semua Pulau">Semua Pulau</option>
-              {[...new Set(allKabkota.map((d) => d.pulau))].map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label>Filter Provinsi</label>
-            <select
-              value={selectedProv}
-              onChange={(e) => setSelectedProv(e.target.value)}
-            >
-              {availableProvs.map((p) => (
-                <option key={p} value={p}>
-                  {p}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {activeTab !== "tab-hierarchical" && (
-            <div className="filter-group">
-              <label>Tingkat Wilayah (Hirarki)</label>
-              <div className="radio-pills">
-                {["Provinsi", "Kab/Kota"].map((t) => (
-                  <label key={t}>
-                    <input
-                      type="radio"
-                      name="tipe_hirarki"
-                      value={t}
-                      checked={selectedTipe === t}
-                      onChange={() => setSelectedTipe(t)}
-                    />
-                    <span>{t}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="filter-group">
-            <label>Kuadran Tipologi</label>
-            <select
-              value={selectedKuadran}
-              onChange={(e) => setSelectedKuadran(e.target.value)}
-            >
-              <option value="Semua Kuadran">Semua Kuadran</option>
-              <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">
-                Kuadran I (Maju Seimbang)
-              </option>
-              <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">
-                Kuadran II (Representasi Kuat)
-              </option>
-              <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">
-                Kuadran III (Tertinggal Ganda)
-              </option>
-              <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">
-                Kuadran IV (Kerja Tanpa Kuasa)
-              </option>
-            </select>
-          </div>
-
-          <div className="filter-group">
-            <label>Palet Warna (Colorblind-Safe)</label>
-            <select
-              value={selectedPalette}
-              onChange={(e) => setSelectedPalette(e.target.value)}
-            >
-              <option value="Viridis">Viridis (Perseptual Seragam)</option>
-              <option value="Cividis">Cividis (Optimasi Buta Warna)</option>
-              <option value="Plasma">Plasma (Kontras Tinggi)</option>
-              <option value="Turbo">Turbo (Spektrum Luas)</option>
-            </select>
-          </div>
-
-          <div className="sidebar-stats">
-            <div>
-              <strong>Tingkat Hirarki:</strong>{" "}
-              {isProvinsi ? "Provinsi (Tingkat I)" : "Kab/Kota (Tingkat II)"}
-            </div>
-            <div>
-              <strong>Wilayah Terpilih:</strong> {filteredKabkota.length} dari{" "}
-              {isProvinsi ? 38 : 514}
-            </div>
-            <div>
-              <strong>Provinsi Terwakili:</strong>{" "}
-              {new Set(filteredKabkota.map((d) => d.provinsi)).size} dari 38
-            </div>
-            <div>
-              <strong>Sumber Data:</strong> BPS RI (2024)
-            </div>
-          </div>
-
-          <div className="sidebar-actions">
+          <div className="filter-bar-right">
+            {hasActiveFilter && (
+              <span className="filter-badge-counter">
+                Filter Aktif
+              </span>
+            )}
             <button
-              className="btn-apply-drawer mobile-only"
-              onClick={() => setMobileMenuOpen(false)}
+              className="btn-secondary"
+              onClick={() => setAdvancedFilterOpen(true)}
+              title="Lihat status dan kriteria filter lengkap"
             >
-              Terapkan &amp; Tutup
+              <i className="fa-solid fa-sliders"></i>
+              <span>Filter Lanjutan</span>
             </button>
             <button
-              className="btn-reset"
-              onClick={() => {
-                setSelectedPulau("Semua Pulau");
-                setSelectedProv("Semua Provinsi");
-                setSelectedTipe("Kab/Kota");
-                setSelectedKuadran("Semua Kuadran");
-                setSelectedPalette("Viridis");
-              }}
+              className="btn-secondary"
+              onClick={resetFilters}
+              title="Reset semua filter ke kondisi awal"
             >
-              Reset Filter Global
+              <i className="fa-solid fa-arrow-rotate-left"></i>
+              <span>Reset</span>
             </button>
           </div>
         </div>
-      </aside>
 
-      {/* Main Content */}
-      <main className="main-content">
-        <header className="top-header">
-          {/* Mobile Bar: Hamburger & Institutional Identity */}
-          <div className="mobile-header-bar">
-            <button
-              className={`hamburger-btn ${mobileMenuOpen ? "active" : ""}`}
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Menu Filter & Navigasi"
-              aria-expanded={mobileMenuOpen}
-            >
-              <span className="hamburger-text">
-                {mobileMenuOpen ? "Tutup" : "Filter & Menu"}
-              </span>
-              {hasActiveFilter && (
-                <span className="active-filter-dot" title="Filter Aktif"></span>
-              )}
-            </button>
-            <div className="mobile-institution-badge">
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/2/28/Lambang_Politeknik_Statistika_STIS.png"
-                alt="STIS"
-              />
-              <span>Polstat STIS</span>
-            </div>
-          </div>
-
-          <div className="header-meta">
-            <div className="header-title">
-              <div className="institution-pill">
-                <span>
-                  Badan Pusat Statistik RI &bull; Politeknik Statistika STIS
-                </span>
+        {/* Tab 1: Ringkasan & Storytelling */}
+        {activeTab === "tab-overview" && (
+          <div className="page-content">
+            {/* KPI Grid (5 Cards in 1 Desktop Row) */}
+            <div className="kpi-grid-5">
+              {/* Card 1: Parlemen */}
+              <div className="kpi-card accent-red">
+                <div className="kpi-top-meta">
+                  <span className="kpi-label">Keterwakilan Parlemen</span>
+                  <i className="kpi-icon fa-solid fa-landmark"></i>
+                </div>
+                <div className="kpi-number-box">
+                  <span className="kpi-value">{avgParlemen.toFixed(2)}%</span>
+                </div>
+                <div className="kpi-delta-pill neg">
+                  <i className="fa-solid fa-arrow-trend-down"></i>
+                  <span>Defisit {(avgParlemen - 30.0).toFixed(1)}% vs Kuota 30%</span>
+                </div>
               </div>
-              <h1>
-                Eksplorasi Disparitas Spasial Partisipasi Ekonomi &amp;
-                Pengambilan Keputusan Perempuan di Indonesia
-              </h1>
-              <p>
-                Visualisasi Analitik Komprehensif Berbasis 514 Kabupaten/Kota
-                &amp; 38 Provinsi (Framework Next.js / BPS 2024)
-              </p>
-            </div>
-            <div className="badges-row">
-              <span className="badge badge-bps">BPS RI 2024</span>
-              <span className="badge badge-primary">Dashboard Analitik</span>
-              <span className="badge badge-accent">514 Kab/Kota SHP</span>
-              <span className="badge badge-success">Multi-Device</span>
-            </div>
-          </div>
-        </header>
 
-        {/* Penanda Modul Aktif Terpilih Saja */}
-        <div className="active-module-bar">
-          <div className="active-module-content">
-            <div className="active-module-badge"></div>
-            <div>
-              <div className="active-module-title">{currentModule.label}</div>
-              <div className="active-module-desc">{currentModule.desc}</div>
-            </div>
-          </div>
-        </div>
+              {/* Card 2: Profesional */}
+              <div className="kpi-card accent-green">
+                <div className="kpi-top-meta">
+                  <span className="kpi-label">Tenaga Profesional</span>
+                  <i className="kpi-icon fa-solid fa-user-tie"></i>
+                </div>
+                <div className="kpi-number-box">
+                  <span className="kpi-value">{avgProfesional.toFixed(2)}%</span>
+                </div>
+                <div className="kpi-delta-pill pos">
+                  <i className="fa-solid fa-check"></i>
+                  <span>Paritas Tercapai (&ge;50%)</span>
+                </div>
+              </div>
 
-        {/* Tab 1: Overview */}
-        <section
-          className={`tab-pane ${activeTab === "tab-overview" ? "active" : ""}`}
-        >
-          <div className="kpi-grid">
-            <div className="kpi-card">
-              <span className="kpi-label">Parlemen Perempuan</span>
-              <span className="kpi-value">{avgParlemen.toFixed(2)}%</span>
-              <span className="kpi-delta neg">
-                {(avgParlemen - 30.0).toFixed(1)}% vs Kuota 30%
-              </span>
-            </div>
-            <div className="kpi-card">
-              <span className="kpi-label">Tenaga Profesional</span>
-              <span className="kpi-value">{avgProfesional.toFixed(2)}%</span>
-              <span className="kpi-delta neu">Mendekati Paritas 50%</span>
-            </div>
-            <div className="kpi-card">
-              <span className="kpi-label">Sumbangan Pendapatan</span>
-              <span className="kpi-value">{avgPendapatan.toFixed(2)}%</span>
-              <span className="kpi-delta neg">
-                {(avgPendapatan - 50.0).toFixed(1)}% vs Paritas
-              </span>
-            </div>
-            <div className="kpi-card">
-              <span className="kpi-label">TPAK Perempuan</span>
-              <span className="kpi-value">{avgTPAK.toFixed(2)}%</span>
-              <span className="kpi-delta pos">Partisipasi Kerja Aktif</span>
-            </div>
-            <div className="kpi-card">
-              <span className="kpi-label">Autokorelasi Moran&apos;s I</span>
-              <span className="kpi-value">0.354 | 0.450</span>
-              <span className="kpi-delta pos">p = 0.001 (Signifikan)</span>
-            </div>
-          </div>
+              {/* Card 3: Pendapatan */}
+              <div className="kpi-card accent-amber">
+                <div className="kpi-top-meta">
+                  <span className="kpi-label">Sumbangan Pendapatan</span>
+                  <i className="kpi-icon fa-solid fa-coins"></i>
+                </div>
+                <div className="kpi-number-box">
+                  <span className="kpi-value">{avgPendapatan.toFixed(2)}%</span>
+                </div>
+                <div className="kpi-delta-pill warn">
+                  <i className="fa-solid fa-scale-unbalanced"></i>
+                  <span>Kesenjangan {(avgPendapatan - 50.0).toFixed(1)}% vs Paritas</span>
+                </div>
+              </div>
 
-          <div className="card">
-            <div className="card-header">
+              {/* Card 4: TPAK */}
+              <div className="kpi-card accent-blue">
+                <div className="kpi-top-meta">
+                  <span className="kpi-label">TPAK Perempuan</span>
+                  <i className="kpi-icon fa-solid fa-briefcase"></i>
+                </div>
+                <div className="kpi-number-box">
+                  <span className="kpi-value">{avgTPAK.toFixed(2)}%</span>
+                </div>
+                <div className="kpi-delta-pill neu">
+                  <i className="fa-solid fa-users-line"></i>
+                  <span>Partisipasi Kerja Aktif</span>
+                </div>
+              </div>
+
+              {/* Card 5: Moran's I */}
+              <div className="kpi-card accent-purple">
+                <div className="kpi-top-meta">
+                  <span className="kpi-label">Autokorelasi Moran&apos;s I</span>
+                  <i className="kpi-icon fa-solid fa-diagram-project"></i>
+                </div>
+                <div className="kpi-number-box">
+                  <span className="kpi-value" style={{ fontSize: "20px" }}>0.354 | 0.450</span>
+                </div>
+                <div className="kpi-delta-pill pos">
+                  <i className="fa-solid fa-circle-check"></i>
+                  <span>p = 0.001 (Signifikan)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Main Visual Layout Grid: Scatter Plot (72%) + Insight Panel (28%) */}
+            <div className="viz-layout-grid">
+              <div className="inst-card">
+                <div className="inst-card-header">
+                  <div className="inst-card-title-group">
+                    <div className="inst-card-title">
+                      <i className="fa-solid fa-chart-scatter" style={{ color: "#1F5FCC" }}></i>
+                      <span>Tipologi Kuadran Disparitas: Partisipasi Ekonomi vs Pengambilan Keputusan</span>
+                    </div>
+                    <div className="inst-card-caption">
+                      Memetakan {filteredKabkota.length} {isProvinsi ? "provinsi" : "kabupaten/kota"} terhadap garis median nasional (X = 34.5 &bull; Y = 47.6)
+                    </div>
+                  </div>
+                  <div className="inst-card-actions">
+                    <button
+                      className="btn-secondary"
+                      onClick={() => toggleFullscreen("quadrant-chart-card")}
+                      title="Tampilan Penuh"
+                    >
+                      <i className="fa-solid fa-expand"></i>
+                      <span>Penuh</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="inst-card-body" id="quadrant-chart-card">
+                  <div id="quadrant-chart" className="chart-box"></div>
+                </div>
+              </div>
+
+              {/* Right Insight Panel */}
+              <VizLegendQuadrant filteredKabkota={filteredKabkota} />
+            </div>
+
+            {/* Section: Temuan Utama (Analytical Storytelling) */}
+            <div className="storytelling-section">
+              <div className="section-header-title">
+                <i className="fa-solid fa-book-open-reader" style={{ color: "#0B2F63" }}></i>
+                <span>Temuan Utama &amp; Narasi Analitik Wilayah Terfilter</span>
+              </div>
+              <div className="storytelling-grid">
+                {/* Story 1 */}
+                <div className="story-card-inst emerald">
+                  <div className="story-card-top">
+                    <i className="fa-solid fa-landmark-flag" style={{ color: "#16A34A" }}></i>
+                    <span>Representasi Politik &amp; Kuota Afirmasi</span>
+                  </div>
+                  <div className="story-card-title">
+                    {pctAfirmasi}% Wilayah Memenuhi Kuota 30% Parlemen
+                  </div>
+                  <div className="story-card-body">
+                    Dari {filteredKabkota.length} wilayah aktif, sebanyak {countAfirmasi} daerah telah melampaui kuota afirmasi gender 30%. Wilayah dengan keterwakilan parlemen tertinggi tercatat di <strong>{topParlemen?.nama_resmi || "-"}</strong> ({topParlemen?.parlemen || 0}%), sementara terendah berada di <strong>{bottomParlemen?.nama_resmi || "-"}</strong> ({bottomParlemen?.parlemen || 0}%).
+                  </div>
+                </div>
+
+                {/* Story 2 */}
+                <div className="story-card-inst amber">
+                  <div className="story-card-top">
+                    <i className="fa-solid fa-scale-unbalanced-flip" style={{ color: "#D97706" }}></i>
+                    <span>Paradoks Ketenagakerjaan (Sticky Floor)</span>
+                  </div>
+                  <div className="story-card-title">
+                    Kesenjangan Partisipasi Kerja vs Kontribusi Finansial
+                  </div>
+                  <div className="story-card-body">
+                    Rata-rata TPAK perempuan ({avgTPAK.toFixed(1)}%) berjarak signifikan dengan sumbangan pendapatan riil ({avgPendapatan.toFixed(1)}%). Kesenjangan terbesar terpantau di <strong>{topSticky?.nama_resmi || "-"}</strong> (TPAK {topSticky?.tpak || 0}% vs Pendapatan {topSticky?.pendapatan || 0}%), mengindikasikan dominasi sektor informal dan kerja fisik tanpa kompensasi setara.
+                  </div>
+                </div>
+
+                {/* Story 3 */}
+                <div className="story-card-inst purple">
+                  <div className="story-card-top">
+                    <i className="fa-solid fa-circle-nodes" style={{ color: "#7C3AED" }}></i>
+                    <span>Aglomerasi Spasial Regional</span>
+                  </div>
+                  <div className="story-card-title">
+                    Ketergantungan Geografis Signifikan (p = 0.001)
+                  </div>
+                  <div className="story-card-body">
+                    Nilai Global Moran&apos;s I (0.354 untuk Keputusan dan 0.450 untuk Ekonomi) mengonfirmasi autokorelasi spasial positif kuat. Wilayah maju cenderung berkerumun membentuk klaster Hotspot di kota-kota besar dan koridor utara, sedangkan perangkap ketertinggalan ganda terkonsentrasi di pedalaman dan kepulauan terluar.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Metadata Footer */}
+            <div className="meta-footer-bar">
+              <div className="meta-footer-left">
+                <i className="fa-solid fa-database" style={{ color: "#1F5FCC" }}></i>
+                <span><strong>Sumber Data:</strong> Badan Pusat Statistik (BPS RI) &bull; Publikasi Statistik Gender 2024</span>
+              </div>
               <div>
-                <div className="card-title">
-                  Tipologi Kuadran: Hubungan Partisipasi Ekonomi vs Pengambilan
-                  Keputusan ({isProvinsi ? "38 Provinsi" : "514 Kab/Kota"})
-                </div>
-                <div className="card-caption">
-                  Memetakan {filteredKabkota.length}{" "}
-                  {isProvinsi ? "provinsi" : "kabupaten/kota"} terhadap median
-                  nasional untuk mendeteksi kesenjangan antara kemandirian
-                  ekonomi dan agensi politik.
-                </div>
+                <span>Cakupan Analisis: 514 Kabupaten/Kota &bull; 38 Provinsi Indonesia</span>
               </div>
-            </div>
-            <div className="viz-layout-row">
-              <div className="viz-layout-main">
-                <div id="quadrant-chart" className="chart-box"></div>
-              </div>
-              <div className="viz-layout-sidebar">
-                <VizLegendQuadrant />
-              </div>
-            </div>
-            <DataSourceBadge vars={["parlemen", "pendapatan"]} />
-          </div>
-
-          <div className="story-grid">
-            <div className="story-card green">
-              <h4>1. Hotspot Sulawesi Utara vs Defisit Parlemen</h4>
-              <p>
-                Sulawesi Utara membentuk klaster <em>High-High Hotspot</em>{" "}
-                terkuat nasional dengan keterwakilan DPRD perempuan &gt; 40% dan
-                tenaga profesional &gt; 55% berkat kultur egaliter Minahasa.
-                Sebaliknya, lebih dari 85% kabupaten/kota di Indonesia masih
-                gagal mencapai kuota afirmasi 30%.
-              </p>
-            </div>
-            <div className="story-card amber">
-              <h4>2. Paradoks Kerja Wilayah Timur (Sticky Floor)</h4>
-              <p>
-                Daerah pedalaman Papua dan NTT mencatatkan TPAK perempuan sangat
-                tinggi (70% - 95%), namun sumbangan pendapatan riil mereka
-                tertekan rendah. Beban kerja fisik perempuan di sektor pertanian
-                tradisional belum terkonversi menjadi kemandirian ekonomi
-                formal.
-              </p>
-            </div>
-            <div className="story-card purple">
-              <h4>3. Keunggulan Perkotaan (Urban Advantage)</h4>
-              <p>
-                Entitas Kota secara konsisten mengungguli Kabupaten pada
-                proporsi Tenaga Profesional (52.4% vs 42.1%) dan pengeluaran
-                riil per kapita, ditopang oleh akses pendidikan tinggi dan
-                terbukanya sektor jasa modern.
-              </p>
             </div>
           </div>
-        </section>
+        )}
 
         {/* Tab 2: Geospatial */}
         <section
@@ -4320,6 +4514,817 @@ export default function Home() {
             </ul>
           </div>
         </section>
+
+        {/* Tab 7: Unduh Data (Data Download Center) */}
+        <section
+          className={`tab-pane ${activeTab === "tab-download" ? "active" : ""}`}
+        >
+          <div className="card">
+            <div className="card-header">
+              <div>
+                <div className="card-title">
+                  <i className="fa-solid fa-cloud-arrow-down" style={{ color: "#1F5FCC" }}></i>
+                  Pusat Unduh Data &amp; Spesifikasi Teknis (Data Download Center)
+                </div>
+                <div className="card-caption">
+                  Unduh berkas data resmi BPS RI 2024 (514 Kabupaten/Kota dan 38 Provinsi) dalam format CSV, JSON, serta Shapefile GeoJSON batas spasial.
+                </div>
+              </div>
+              <span className="badge badge-bps">Akses Data Terbuka Resmi</span>
+            </div>
+
+            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{
+                background: "#F8FAFC",
+                border: "1px solid #DDE4EE",
+                borderRadius: "8px",
+                padding: "14px 18px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                flexWrap: "wrap",
+                gap: "12px",
+                fontSize: "12.5px",
+                color: "#475569"
+              }}>
+                <div>
+                  <strong style={{ color: "#0B2F63" }}>Ketentuan Atribusi Lisensi:</strong> Dataset disediakan di bawah lisensi resmi Badan Pusat Statistik (BPS RI) &amp; Politeknik Statistika STIS untuk keperluan riset akademik, advokasi kebijakan, dan jurnalisme data berbasis fakta.
+                </div>
+                <span className="badge badge-success">Standar Data Terbuka BPS 2024</span>
+              </div>
+
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                gap: "16px"
+              }}>
+                {/* Card 1: Kab/Kota CSV */}
+                <div className="kpi-card accent-blue" style={{ minHeight: "180px", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="badge badge-bps">CSV (RFC 4180)</span>
+                      <span style={{ fontSize: "11px", color: "#667085", fontWeight: "600" }}>514 Baris &bull; 84 KB</span>
+                    </div>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0B2F63", marginBottom: "4px" }}>
+                      Dataset 514 Kabupaten/Kota (CSV)
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#667085", lineHeight: "1.4" }}>
+                      Tabel terstruktur 17 kolom mencakup 8 indikator gender BPS 2024, indeks komposit IKPP, skor ekonomi, keputusan, dan tipologi kuadran.
+                    </div>
+                  </div>
+                  <button
+                    onClick={downloadCSV}
+                    className="btn-export"
+                    style={{ alignSelf: "flex-start", marginTop: "12px" }}
+                  >
+                    <i className="fa-solid fa-file-csv"></i>
+                    <span>Unduh CSV Kab/Kota</span>
+                  </button>
+                </div>
+
+                {/* Card 2: Kab/Kota JSON */}
+                <div className="kpi-card accent-green" style={{ minHeight: "180px", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="badge badge-success">JSON Array</span>
+                      <span style={{ fontSize: "11px", color: "#667085", fontWeight: "600" }}>514 Records &bull; 140 KB</span>
+                    </div>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0B2F63", marginBottom: "4px" }}>
+                      Dataset 514 Kabupaten/Kota (JSON)
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#667085", lineHeight: "1.4" }}>
+                      Format JSON terstruktur untuk konsumsi API web, pipeline Python/R, lengkap dengan koordinat centroid lintang/bujur dan status LISA cluster.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => downloadDatasetJSON(allKabkota, "bps_gender_514_kabkota_2024.json")}
+                    className="btn-export"
+                    style={{ alignSelf: "flex-start", marginTop: "12px" }}
+                  >
+                    <i className="fa-solid fa-file-code"></i>
+                    <span>Unduh JSON Kab/Kota</span>
+                  </button>
+                </div>
+
+                {/* Card 3: Provinsi CSV */}
+                <div className="kpi-card accent-purple" style={{ minHeight: "180px", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="badge badge-accent">CSV (RFC 4180)</span>
+                      <span style={{ fontSize: "11px", color: "#667085", fontWeight: "600" }}>38 Baris &bull; 8 KB</span>
+                    </div>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0B2F63", marginBottom: "4px" }}>
+                      Dataset Agregat 38 Provinsi (CSV)
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#667085", lineHeight: "1.4" }}>
+                      Rekapitulasi makro tingkat provinsi seluruh Indonesia pasca-pemekaran 4 DOB Papua dan pemisahan Kalimantan Utara.
+                    </div>
+                  </div>
+                  <button
+                    onClick={downloadProvinsiCSV}
+                    className="btn-export"
+                    style={{ alignSelf: "flex-start", marginTop: "12px" }}
+                  >
+                    <i className="fa-solid fa-file-csv"></i>
+                    <span>Unduh CSV 38 Provinsi</span>
+                  </button>
+                </div>
+
+                {/* Card 4: Provinsi JSON */}
+                <div className="kpi-card accent-amber" style={{ minHeight: "180px", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="badge" style={{ background: "#FEF3C7", color: "#D97706", borderColor: "#FDE68A" }}>JSON Array</span>
+                      <span style={{ fontSize: "11px", color: "#667085", fontWeight: "600" }}>38 Records &bull; 12 KB</span>
+                    </div>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0B2F63", marginBottom: "4px" }}>
+                      Dataset Agregat 38 Provinsi (JSON)
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#667085", lineHeight: "1.4" }}>
+                      Dataset agregat provinsi berformat JSON dengan skor komposit pembobotan rata-rata kabupaten/kota dan klasifikasi kuadran.
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => downloadDatasetJSON(enrichedProvinsi, "bps_gender_38_provinsi_2024.json")}
+                    className="btn-export"
+                    style={{ alignSelf: "flex-start", marginTop: "12px" }}
+                  >
+                    <i className="fa-solid fa-file-code"></i>
+                    <span>Unduh JSON 38 Provinsi</span>
+                  </button>
+                </div>
+
+                {/* Card 5: GeoJSON Kab/Kota */}
+                <div className="kpi-card accent-blue" style={{ minHeight: "180px", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="badge badge-bps">GeoJSON (WGS84)</span>
+                      <span style={{ fontSize: "11px", color: "#667085", fontWeight: "600" }}>0.79 MB &bull; Poligon 514 Kab/Kota</span>
+                    </div>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0B2F63", marginBottom: "4px" }}>
+                      Batas Administrasi Poligon Kab/Kota (GeoJSON)
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#667085", lineHeight: "1.4" }}>
+                      Lapisan poligon spasial EPSG:4326 terintegrasi dengan kode wilayah resmi BPS RI dan nama kabupaten/kota baku.
+                    </div>
+                  </div>
+                  <a
+                    href="/data/kabkota_indonesia.geojson"
+                    download="kabkota_indonesia.geojson"
+                    className="btn-export"
+                    style={{ alignSelf: "flex-start", marginTop: "12px" }}
+                  >
+                    <i className="fa-solid fa-map-location-dot"></i>
+                    <span>Unduh GeoJSON Kab/Kota</span>
+                  </a>
+                </div>
+
+                {/* Card 6: GeoJSON Provinsi */}
+                <div className="kpi-card accent-green" style={{ minHeight: "180px", justifyContent: "space-between" }}>
+                  <div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <span className="badge badge-success">GeoJSON (WGS84)</span>
+                      <span style={{ fontSize: "11px", color: "#667085", fontWeight: "600" }}>0.22 MB &bull; Poligon 38 Provinsi</span>
+                    </div>
+                    <div style={{ fontWeight: "700", fontSize: "14px", color: "#0B2F63", marginBottom: "4px" }}>
+                      Batas Administrasi Poligon Provinsi (GeoJSON)
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#667085", lineHeight: "1.4" }}>
+                      Lapisan spasial batas 38 provinsi di Indonesia teroptimasi untuk pemetaan choropleth dan analisis regional makro.
+                    </div>
+                  </div>
+                  <a
+                    href="/data/provinsi_indonesia.geojson"
+                    download="provinsi_indonesia.geojson"
+                    className="btn-export"
+                    style={{ alignSelf: "flex-start", marginTop: "12px" }}
+                  >
+                    <i className="fa-solid fa-map-location-dot"></i>
+                    <span>Unduh GeoJSON Provinsi</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Data Dictionary Preview */}
+              <div style={{ marginTop: "10px" }}>
+                <h4 style={{ fontSize: "14px", fontWeight: "700", color: "#0B2F63", marginBottom: "10px" }}>
+                  Kamus Peubah Data (Data Dictionary)
+                </h4>
+                <div className="table-responsive">
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Nama Kolom</th>
+                        <th>Tipe Data</th>
+                        <th>Satuan / Skala</th>
+                        <th>Definisi Operasional BPS RI</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><code>kode_wilayah</code></td>
+                        <td>Numerik (Integer)</td>
+                        <td>Kode Wilayah BPS</td>
+                        <td>Identifikator unik yurisdiksi administratif 2 digit provinsi + 2 digit kab/kota</td>
+                      </tr>
+                      <tr>
+                        <td><code>nama_resmi</code></td>
+                        <td>Teks (String)</td>
+                        <td>Nama Administrasi</td>
+                        <td>Nama resmi kabupaten, kota, atau provinsi sesuai standar nomenklatur BPS RI</td>
+                      </tr>
+                      <tr>
+                        <td><code>pulau</code></td>
+                        <td>Kategorikal</td>
+                        <td>Gugus Pulau</td>
+                        <td>Klasifikasi gugus pulau (Sumatera, Jawa, Bali &amp; Nusa Tenggara, Kalimantan, Sulawesi, Maluku &amp; Papua)</td>
+                      </tr>
+                      <tr>
+                        <td><code>parlemen</code></td>
+                        <td>Numerik (Float)</td>
+                        <td>Persentase (%)</td>
+                        <td>Keterwakilan perempuan di kursi legislatif parlemen daerah (target afirmasi: 30%)</td>
+                      </tr>
+                      <tr>
+                        <td><code>pendapatan</code></td>
+                        <td>Numerik (Float)</td>
+                        <td>Persentase (%)</td>
+                        <td>Sumbangan estimasi pendapatan kerja perempuan terhadap total pendapatan rumah tangga (paritas: 50%)</td>
+                      </tr>
+                      <tr>
+                        <td><code>profesional</code></td>
+                        <td>Numerik (Float)</td>
+                        <td>Persentase (%)</td>
+                        <td>Persentase perempuan yang bekerja sebagai tenaga profesional, teknisi, dan manajerial</td>
+                      </tr>
+                      <tr>
+                        <td><code>tpak</code></td>
+                        <td>Numerik (Float)</td>
+                        <td>Persentase (%)</td>
+                        <td>Tingkat Partisipasi Angkatan Kerja perempuan usia 15 tahun ke atas (Sakernas 2024)</td>
+                      </tr>
+                      <tr>
+                        <td><code>pengeluaran</code></td>
+                        <td>Numerik (Integer)</td>
+                        <td>Ribu Rupiah per Kapita / Thn</td>
+                        <td>Standar pengeluaran riil per kapita disesuaikan dengan paritas daya beli (Metode Baru 2024)</td>
+                      </tr>
+                      <tr>
+                        <td><code>skor_keputusan</code></td>
+                        <td>Numerik (Float)</td>
+                        <td>Skor 0 - 100</td>
+                        <td>Indeks sintesis agensi politik dan pengambilan keputusan (Median nasional: 47.60)</td>
+                      </tr>
+                      <tr>
+                        <td><code>skor_ekonomi</code></td>
+                        <td>Numerik (Float)</td>
+                        <td>Skor 0 - 100</td>
+                        <td>Indeks sintesis partisipasi pasar kerja dan kontribusi pendapatan (Median nasional: 34.50)</td>
+                      </tr>
+                      <tr>
+                        <td><code>kuadran</code></td>
+                        <td>Kategorikal</td>
+                        <td>Kuadran I - IV</td>
+                        <td>Tipologi 4 kuadran disparitas partisipasi vs representasi keputusan gender</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tab 8: Sumber Data Resmi BPS RI */}
+        <section
+          className={`tab-pane ${activeTab === "tab-sources" ? "active" : ""}`}
+        >
+          <div className="card">
+            <div className="card-header">
+              <div>
+                <div className="card-title">
+                  <i className="fa-solid fa-book-bookmark" style={{ color: "#1F5FCC" }}></i>
+                  Katalog &amp; Metadata Publikasi Sumber Data Resmi BPS RI 2024
+                </div>
+                <div className="card-caption">
+                  Daftar tabel statistik resmi rilis Badan Pusat Statistik Republik Indonesia yang digunakan sebagai landasan analisis spasial pada dasbor ini.
+                </div>
+              </div>
+              <span className="badge badge-bps">Publikasi Resmi BPS RI</span>
+            </div>
+
+            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div className="table-responsive">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: "60px" }}>No</th>
+                      <th>Indikator Resmi</th>
+                      <th>Nomor Tabel BPS</th>
+                      <th>Sumber Survei / Pendataan</th>
+                      <th>Periode Rilis</th>
+                      <th>Tautan Akses Resmi BPS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td><strong>Pengeluaran per Kapita Disesuaikan</strong></td>
+                      <td><code>Tabel 416/2</code></td>
+                      <td>SUSENAS (Metode Baru)</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDE2IzI=/-metode-baru--pengeluaran-per-kapita-disesuaikan.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td><strong>Angka Harapan Hidup (AHH) saat Lahir</strong></td>
+                      <td><code>Tabel 455/2</code></td>
+                      <td>Proyeksi Penduduk SP2020 / Susenas</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDU1IzI=/angkaharapan-hidup--ahh--menurut-kabupaten-kota-dan-jenis-kelamin.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <td><strong>Harapan Lama Sekolah (HLS)</strong></td>
+                      <td><code>Tabel 417/2</code></td>
+                      <td>SUSENAS Kor (Metode Baru)</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDE3IzI=/-new-method--expected-years-of-schooling.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <td><strong>Rata-rata Lama Sekolah (RLS)</strong></td>
+                      <td><code>Tabel 415/2</code></td>
+                      <td>SUSENAS Kor (Metode Baru)</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDE1IzI=/-metode-baru--rata-rata-lama-sekolah.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>5</td>
+                      <td><strong>Tingkat Partisipasi Angkatan Kerja (TPAK)</strong></td>
+                      <td><code>Tabel 2200/2</code></td>
+                      <td>SAKERNAS (Survei Angkatan Kerja)</td>
+                      <td>Agustus 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/MjIwMCMy/tingkat-partisipasi-angkatan-kerja-menurut-jenis-kelamin.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>6</td>
+                      <td><strong>Sumbangan Pendapatan Perempuan (%)</strong></td>
+                      <td><code>Tabel 467/2</code></td>
+                      <td>SAKERNAS &amp; SUSENAS Modul</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDY3IzI=/revenue-contribution-of-women.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>7</td>
+                      <td><strong>Keterlibatan Perempuan di Parlemen (%)</strong></td>
+                      <td><code>Tabel 464/2</code></td>
+                      <td>KPU &amp; Sekretariat DPRD Kab/Kota/Prov</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDY0IzI=/the-involvement-of-women-in-parliament.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td>8</td>
+                      <td><strong>Perempuan sebagai Tenaga Profesional (%)</strong></td>
+                      <td><code>Tabel 465/2</code></td>
+                      <td>SAKERNAS (Klasifikasi Baku Jabatan)</td>
+                      <td>Tahun 2024</td>
+                      <td>
+                        <a
+                          href="https://www.bps.go.id/id/statistics-table/2/NDY1IzI=/the-percentage-of-female-professional-staff.html"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#1F5FCC", fontWeight: "600", textDecoration: "underline" }}
+                        >
+                          Buka Portal BPS <i className="fa-solid fa-arrow-up-right-from-square" style={{ fontSize: "11px" }}></i>
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{
+                background: "#F8FAFC",
+                border: "1px solid #DDE4EE",
+                borderRadius: "8px",
+                padding: "16px 20px",
+                fontSize: "13px",
+                color: "#334155",
+                lineHeight: "1.6"
+              }}>
+                <h4 style={{ margin: "0 0 8px 0", fontSize: "14px", fontWeight: "700", color: "#0B2F63" }}>
+                  Integritas &amp; Otentisitas Metadata
+                </h4>
+                <p style={{ margin: 0 }}>
+                  Semua indikator pada sistem visualisasi ini mengacu langsung pada nilai data resmi terpublikasi oleh Badan Pusat Statistik (BPS) Republik Indonesia untuk periode tahun 2024 tanpa adanya pembobotan fiktif atau pengubahan nilai aktual. Untuk 14 daerah pedalaman di provinsi pemekaran Papua yang mengalami kekosongan data akibat keterbatasan akses survei lapangan, imputasi estimasi dilakukan dengan prosedur ilmiah terstandarisasi <em>K-Nearest Neighbors</em> (KNN, k=5) pada basis data spasial.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Tab 9: Tentang Dasbor & Institusi */}
+        <section
+          className={`tab-pane ${activeTab === "tab-about" ? "active" : ""}`}
+        >
+          <div className="card">
+            <div className="card-header">
+              <div>
+                <div className="card-title">
+                  <i className="fa-solid fa-circle-info" style={{ color: "#1F5FCC" }}></i>
+                  Tentang Dasbor &amp; Laboratorium Pengembang
+                </div>
+                <div className="card-caption">
+                  Informasi profil institusi pengembang, latar belakang penelitian, metodologi analitis, dan panduan sitasi resmi.
+                </div>
+              </div>
+              <span className="badge badge-bps">Politeknik Statistika STIS</span>
+            </div>
+
+            <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: "20px" }}>
+              <div style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))",
+                gap: "16px"
+              }}>
+                <div className="kpi-card accent-blue">
+                  <h4 style={{ fontSize: "14.5px", fontWeight: "700", color: "#0B2F63", margin: "0 0 8px 0" }}>
+                    Politeknik Statistika STIS
+                  </h4>
+                  <p style={{ fontSize: "12.5px", color: "#475569", lineHeight: "1.6", margin: 0 }}>
+                    Politeknik Statistika STIS adalah Perguruan Tinggi Kedinasan di bawah naungan Badan Pusat Statistik (BPS) Republik Indonesia yang bertugas menghasilkan tenaga ahli statistik dan komputasi statistik yang profesional, berintegritas, dan berwawasan teknologi informasi mutakhir.
+                  </p>
+                </div>
+
+                <div className="kpi-card accent-green">
+                  <h4 style={{ fontSize: "14.5px", fontWeight: "700", color: "#0B2F63", margin: "0 0 8px 0" }}>
+                    Tujuan &amp; Urgensi Penelitian
+                  </h4>
+                  <p style={{ fontSize: "12.5px", color: "#475569", lineHeight: "1.6", margin: 0 }}>
+                    Dasbor ini dibangun untuk menginvestigasi disparitas spasial antara partisipasi ekonomi dan peran perempuan dalam pengambilan keputusan publik di 514 kabupaten/kota dan 38 provinsi di Indonesia, guna memberikan bukti empiris bagi perumusan kebijakan afirmasi gender yang berbasis kewilayahan.
+                  </p>
+                </div>
+              </div>
+
+              <div style={{
+                background: "#F8FAFC",
+                border: "1px solid #DDE4EE",
+                borderRadius: "8px",
+                padding: "16px 20px"
+              }}>
+                <h4 style={{ fontSize: "14px", fontWeight: "700", color: "#0B2F63", margin: "0 0 10px 0" }}>
+                  Fondasi Metodologis &amp; Analisis Data
+                </h4>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "14px", fontSize: "12.5px", color: "#475569" }}>
+                  <div>
+                    <strong style={{ color: "#1F5FCC" }}>1. Tipologi Kuadran 4-Sektor:</strong> Memetakan wilayah berdasarkan ambang batas median nasional Skor Ekonomi (34.50) dan Skor Keputusan (47.60) untuk membedakan wilayah maju seimbang, representasi kuat, tertinggal ganda, dan fenomena <em>sticky floor</em>.
+                  </div>
+                  <div>
+                    <strong style={{ color: "#1F5FCC" }}>2. Autokorelasi Spasial (Moran&apos;s I &amp; LISA):</strong> Memvalidasi signifikansi pengelompokan geografis secara kuantitatif dengan indeks Moran&apos;s I (0.354 pada keputusan, 0.450 pada ekonomi, p = 0.001).
+                  </div>
+                  <div>
+                    <strong style={{ color: "#1F5FCC" }}>3. Reduksi Dimensi (PCA):</strong> Principal Component Analysis mereduksi 8 dimensi indikator gender ke dalam 2 komponen utama yang menerangkan 66.9% total variansi nasional.
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 style={{ fontSize: "14px", fontWeight: "700", color: "#0B2F63", margin: "0 0 10px 0" }}>
+                  Pedoman Sitasi Resmi (Citation Guide)
+                </h4>
+                <div style={{
+                  background: "#0B2F63",
+                  color: "#E2E8F0",
+                  padding: "14px 18px",
+                  borderRadius: "6px",
+                  fontFamily: "monospace",
+                  fontSize: "12px",
+                  lineHeight: "1.6",
+                  overflowX: "auto"
+                }}>
+                  Politeknik Statistika STIS &amp; Badan Pusat Statistik. (2024). <i>Eksplorasi Disparitas Spasial Partisipasi Ekonomi &amp; Pengambilan Keputusan Perempuan di Indonesia</i> [Interactive Institutional Analytics Dashboard]. BPS RI &amp; Politeknik Statistika STIS.
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Slide-over Detail Drawer for Selected District / Province */}
+        <aside
+          className={`detail-drawer ${selectedKabDetail ? "open" : ""}`}
+          aria-label="Panel Detail Wilayah"
+        >
+          {selectedKabDetail && (
+            <>
+              <div className="detail-drawer-header">
+                <div>
+                  <div style={{ fontSize: "11px", textTransform: "uppercase", letterSpacing: "0.5px", opacity: 0.85, fontWeight: "600" }}>
+                    {selectedKabDetail.tipe || (isProvinsi ? "Provinsi" : "Kabupaten/Kota")} &bull; Kode: {selectedKabDetail.kode_wilayah}
+                  </div>
+                  <h3 style={{ margin: "4px 0 2px 0", fontSize: "16px", fontWeight: "700", color: "#FFFFFF" }}>
+                    {selectedKabDetail.nama_resmi}
+                  </h3>
+                  <div style={{ fontSize: "12px", opacity: 0.85 }}>
+                    {selectedKabDetail.provinsi} &bull; Gugus: {selectedKabDetail.pulau}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedKabDetail(null)}
+                  style={{
+                    background: "rgba(255, 255, 255, 0.15)",
+                    border: "none",
+                    borderRadius: "4px",
+                    color: "#FFFFFF",
+                    width: "28px",
+                    height: "28px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "14px"
+                  }}
+                  title="Tutup Panel"
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <div className="detail-drawer-body">
+                {/* Kuadran Badge */}
+                <div style={{
+                  padding: "12px 14px",
+                  borderRadius: "6px",
+                  backgroundColor: selectedKabDetail.kuadran?.includes("I (") ? "#F0FDF4" :
+                                   selectedKabDetail.kuadran?.includes("II (") ? "#EFF6FF" :
+                                   selectedKabDetail.kuadran?.includes("III (") ? "#FEF2F2" : "#FFFBEB",
+                  border: `1px solid ${selectedKabDetail.kuadran?.includes("I (") ? "#BBF7D0" :
+                                       selectedKabDetail.kuadran?.includes("II (") ? "#BFDBFE" :
+                                       selectedKabDetail.kuadran?.includes("III (") ? "#FECACA" : "#FDE68A"}`
+                }}>
+                  <div style={{
+                    fontSize: "12px",
+                    fontWeight: "700",
+                    color: selectedKabDetail.kuadran?.includes("I (") ? "#16A34A" :
+                           selectedKabDetail.kuadran?.includes("II (") ? "#2563EB" :
+                           selectedKabDetail.kuadran?.includes("III (") ? "#DC2626" : "#D97706",
+                    marginBottom: "4px"
+                  }}>
+                    {selectedKabDetail.kuadran?.includes("I (") ? "KUADRAN I: Maju & Seimbang" :
+                     selectedKabDetail.kuadran?.includes("II (") ? "KUADRAN II: Representasi Kuat" :
+                     selectedKabDetail.kuadran?.includes("III (") ? "KUADRAN III: Tertinggal Ganda" :
+                     "KUADRAN IV: Pekerja Tanpa Kuasa"}
+                  </div>
+                  <div style={{ fontSize: "11.5px", color: "#475569", lineHeight: "1.45" }}>
+                    {selectedKabDetail.kuadran?.includes("I (") ? "Partisipasi ekonomi & keterwakilan keputusan publik berada di atas median nasional." :
+                     selectedKabDetail.kuadran?.includes("II (") ? "Keterwakilan publik tinggi meski kontribusi ekonomi pasar kerja masih di bawah median nasional." :
+                     selectedKabDetail.kuadran?.includes("III (") ? "Berada di bawah median nasional pada dimensi ekonomi maupun kepemimpinan publik." :
+                     "TPAK perempuan tinggi di pasar kerja namun minim representasi dalam pengambilan keputusan publik (sticky floor)."}
+                  </div>
+                </div>
+
+                {/* Skor Komposit */}
+                <div>
+                  <div style={{ fontSize: "11.5px", fontWeight: "700", textTransform: "uppercase", color: "#667085", letterSpacing: "0.4px", marginBottom: "8px" }}>
+                    Indeks Komposit &amp; Sintesis
+                  </div>
+                  <div className="detail-stat-row">
+                    <div className="detail-stat-box">
+                      <span className="detail-stat-label">IKPP Komposit</span>
+                      <span className="detail-stat-val" style={{ color: "#1F5FCC" }}>{selectedKabDetail.ikpp_komposit}</span>
+                    </div>
+                    <div className="detail-stat-box">
+                      <span className="detail-stat-label">Skor Keputusan</span>
+                      <span className="detail-stat-val" style={{ color: "#0B2F63" }}>{selectedKabDetail.skor_keputusan}</span>
+                    </div>
+                    <div className="detail-stat-box">
+                      <span className="detail-stat-label">Skor Ekonomi</span>
+                      <span className="detail-stat-val" style={{ color: "#16A34A" }}>{selectedKabDetail.skor_ekonomi}</span>
+                    </div>
+                    <div className="detail-stat-box">
+                      <span className="detail-stat-label">Pengeluaran Riil</span>
+                      <span className="detail-stat-val" style={{ fontSize: "13px" }}>Rp{Number(selectedKabDetail.pengeluaran).toLocaleString("id-ID")}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Indikator Gender BPS */}
+                <div>
+                  <div style={{ fontSize: "11.5px", fontWeight: "700", textTransform: "uppercase", color: "#667085", letterSpacing: "0.4px", marginBottom: "8px" }}>
+                    Indikator Gender Utama (BPS 2024)
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>Keterwakilan di Parlemen</span>
+                      <strong>{selectedKabDetail.parlemen}%</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>Sumbangan Pendapatan</span>
+                      <strong>{selectedKabDetail.pendapatan}%</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>Tenaga Profesional</span>
+                      <strong>{selectedKabDetail.profesional}%</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>TPAK Perempuan</span>
+                      <strong>{selectedKabDetail.tpak}%</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>Angka Harapan Hidup (AHH)</span>
+                      <strong>{selectedKabDetail.ahh} Tahun</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>Rata-rata Lama Sekolah (RLS)</span>
+                      <strong>{selectedKabDetail.rls} Tahun</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: "#F8FAFC", borderRadius: "4px", border: "1px solid #E2E8F0", fontSize: "12px" }}>
+                      <span>Harapan Lama Sekolah (HLS)</span>
+                      <strong>{selectedKabDetail.hls} Tahun</strong>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Filter shortcut button */}
+                <button
+                  className="btn-export"
+                  style={{ width: "100%", justifyContent: "center", height: "36px", marginTop: "4px" }}
+                  onClick={() => {
+                    setSelectedProv(selectedKabDetail.provinsi);
+                    setSelectedPulau(selectedKabDetail.pulau);
+                    setSelectedKabDetail(null);
+                  }}
+                >
+                  <i className="fa-solid fa-filter"></i>
+                  <span>Filter ke Provinsi {selectedKabDetail.provinsi}</span>
+                </button>
+              </div>
+            </>
+          )}
+        </aside>
+
+        {/* Help / Guidance Modal */}
+        {helpModalOpen && (
+          <div className="modal-backdrop" onClick={() => setHelpModalOpen(false)}>
+            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-title">
+                  <i className="fa-solid fa-circle-question" style={{ marginRight: "8px" }}></i>
+                  Panduan Penggunaan &amp; Kamus Analitik Dasbor
+                </div>
+                <button className="modal-close-btn" onClick={() => setHelpModalOpen(false)}>
+                  &times;
+                </button>
+              </div>
+              <div className="modal-body">
+                <div>
+                  <h4 style={{ margin: "0 0 4px 0", color: "#0B2F63", fontSize: "14px" }}>
+                    1. Struktur Modul Dasbor
+                  </h4>
+                  <p style={{ margin: 0, fontSize: "12.5px" }}>
+                    Gunakan sidebar navigasi di sisi kiri untuk berpindah modul analisis (Ringkasan &amp; Storytelling, Analisis Geospasial, Analisis Multivariat, Analisis Berhierarki, dan Pangkalan Data).
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ margin: "0 0 4px 0", color: "#0B2F63", fontSize: "14px" }}>
+                    2. Filter Wilayah &amp; Segmented Control
+                  </h4>
+                  <p style={{ margin: 0, fontSize: "12.5px" }}>
+                    Filter Bar horizontal di bawah header memungkinkan pemilahan berdasarkan Gugus Pulau, Provinsi, dan Kuadran. Tombol segmented control beralih secara instan antara tingkat <strong>Kab/Kota (514 wilayah)</strong> dan <strong>Provinsi (38 wilayah)</strong>.
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ margin: "0 0 4px 0", color: "#0B2F63", fontSize: "14px" }}>
+                    3. Matriks Tipologi Kuadran 4-Sektor
+                  </h4>
+                  <p style={{ margin: 0, fontSize: "12.5px" }}>
+                    Kuadran diklasifikasikan menggunakan garis median nasional: <strong>Skor Ekonomi = 34.50</strong> dan <strong>Skor Pengambilan Keputusan = 47.60</strong>. Kuadran I (Maju &amp; Seimbang), Kuadran II (Representasi Kuat), Kuadran III (Tertinggal Ganda), dan Kuadran IV (Pekerja Tanpa Kuasa / Sticky Floor).
+                  </p>
+                </div>
+                <div>
+                  <h4 style={{ margin: "0 0 4px 0", color: "#0B2F63", fontSize: "14px" }}>
+                    4. Interaksi Peta &amp; Slide-over Detail
+                  </h4>
+                  <p style={{ margin: 0, fontSize: "12.5px" }}>
+                    Arahkan kursor pada poligon peta untuk melihat nilai indikator. Klik pada poligon wilayah untuk membuka panel detail di sebelah kanan tanpa menutup peta.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Advanced Filter Modal */}
+        {advancedFilterOpen && (
+          <div className="modal-backdrop" onClick={() => setAdvancedFilterOpen(false)}>
+            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-title">
+                  <i className="fa-solid fa-sliders" style={{ marginRight: "8px" }}></i>
+                  Pengaturan Filter Lanjutan
+                </div>
+                <button className="modal-close-btn" onClick={() => setAdvancedFilterOpen(false)}>
+                  &times;
+                </button>
+              </div>
+              <div className="modal-body">
+                <div>
+                  <div style={{ fontSize: "12.5px", fontWeight: "700", color: "#0B2F63", marginBottom: "8px" }}>
+                    Status Filter Saat Ini:
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", background: "#F8FAFC", padding: "12px", borderRadius: "6px", border: "1px solid #DDE4EE" }}>
+                    <div>Tingkat Wilayah: <strong>{selectedTipe}</strong></div>
+                    <div>Gugus Pulau: <strong>{selectedPulau}</strong></div>
+                    <div>Provinsi: <strong>{selectedProv}</strong></div>
+                    <div>Kuadran: <strong>{selectedKuadran}</strong></div>
+                    <div>Palet Warna: <strong>{selectedPalette}</strong></div>
+                    <div>Data Terpilih: <strong>{filteredKabkota.length} dari {isProvinsi ? "38" : "514"} Wilayah</strong></div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", gap: "10px", marginTop: "10px", justifyContent: "flex-end" }}>
+                  <button
+                    className="btn-secondary"
+                    onClick={resetFilters}
+                  >
+                    <i className="fa-solid fa-rotate-left"></i>
+                    <span>Reset Filter ke Default</span>
+                  </button>
+                  <button
+                    className="btn-export"
+                    onClick={() => setAdvancedFilterOpen(false)}
+                  >
+                    <i className="fa-solid fa-check"></i>
+                    <span>Tutup &amp; Terapkan</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
