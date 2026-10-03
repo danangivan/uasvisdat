@@ -104,6 +104,271 @@ function DataSourceBadge({ vars = [] }) {
   );
 }
 
+// ============================================================================
+// Palet Warna & Spektrum Kontras Resmi BPS / Colorblind-Safe
+// ============================================================================
+const PALETTES = {
+  Viridis: [
+    "#440154",
+    "#482878",
+    "#3e4989",
+    "#31688e",
+    "#26828e",
+    "#1f9e89",
+    "#35b779",
+    "#6ece58",
+    "#b5de2b",
+    "#fde725",
+  ],
+  Cividis: [
+    "#00204d",
+    "#002c69",
+    "#003986",
+    "#26456e",
+    "#41525a",
+    "#5b6049",
+    "#797037",
+    "#998122",
+    "#bc930a",
+    "#e1a700",
+    "#ffd321",
+  ],
+  Plasma: [
+    "#0d0887",
+    "#46039f",
+    "#7201a8",
+    "#9c179e",
+    "#bd3786",
+    "#d8576b",
+    "#ed7953",
+    "#fb9f3a",
+    "#fdca26",
+    "#f0f921",
+  ],
+  Turbo: [
+    "#30123b",
+    "#4145ab",
+    "#4675ed",
+    "#39a2fc",
+    "#1bcfd4",
+    "#24eca6",
+    "#61fc6c",
+    "#a4fc3b",
+    "#d1e834",
+    "#f3c63a",
+    "#fe9b2d",
+    "#f36315",
+    "#d93806",
+    "#b11902",
+    "#7a0403",
+  ],
+};
+
+const PALETTE_GRADIENTS = {
+  Viridis:
+    "linear-gradient(to right, #440154, #482878, #3e4989, #31688e, #26828e, #1f9e89, #35b779, #6ece58, #b5de2b, #fde725)",
+  Plasma:
+    "linear-gradient(to right, #0d0887, #46039f, #7201a8, #9c179e, #bd3786, #d8576b, #ed7953, #fb9f3a, #fdca26, #f0f921)",
+  Cividis:
+    "linear-gradient(to right, #00204d, #002c69, #003986, #26456e, #41525a, #5b6049, #797037, #998122, #bc930a, #e1a700, #ffd321)",
+  Turbo:
+    "linear-gradient(to right, #30123b, #4145ab, #4675ed, #39a2fc, #1bcfd4, #24eca6, #61fc6c, #a4fc3b, #d1e834, #f3c63a, #fe9b2d, #f36315, #d93806, #b11902, #7a0403)",
+  Heatmap:
+    "linear-gradient(to right, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444)",
+  Correlation:
+    "linear-gradient(to right, #2563eb, #93c5fd, #ffffff, #fca5a5, #dc2626)",
+};
+
+// ============================================================================
+// Format & Statistik Helpers
+// ============================================================================
+function getVarLabel(varName) {
+  if (!varName) return "";
+  const map = {
+    parlemen: "Keterwakilan di Parlemen",
+    profesional: "Tenaga Profesional Perempuan",
+    pendapatan: "Sumbangan Pendapatan Perempuan",
+    tpak: "Tingkat Partisipasi Angkatan Kerja (TPAK)",
+    pengeluaran: "Pengeluaran per Kapita Disesuaikan",
+    ahh: "Angka Harapan Hidup (AHH)",
+    hls: "Harapan Lama Sekolah (HLS)",
+    rls: "Rata-rata Lama Sekolah (RLS)",
+    skor_keputusan: "Skor Pengambilan Keputusan",
+    skor_ekonomi: "Skor Partisipasi Ekonomi",
+    ikpp_komposit: "Indeks Komposit IKPP",
+    kuadran: "Tipologi 4 Kuadran",
+    lisa_cluster_keputusan: "Klaster LISA Keputusan",
+    lisa_cluster_ekonomi: "Klaster LISA Ekonomi",
+  };
+  return map[varName] || varName.toUpperCase();
+}
+
+function formatStatValue(val, varName = "") {
+  if (val === undefined || val === null || isNaN(val)) return "-";
+  const num = Number(val);
+  const v = String(varName).toLowerCase();
+  if (v.includes("pengeluaran")) {
+    return `Rp ${Math.round(num).toLocaleString("id-ID")}`;
+  }
+  if (v === "ahh" || v === "rls" || v === "hls") {
+    return `${num.toFixed(2)} Thn`;
+  }
+  if (v.includes("skor") || v.includes("ikpp")) {
+    return num.toFixed(1);
+  }
+  if (
+    ["parlemen", "profesional", "pendapatan", "tpak"].includes(v) ||
+    v.includes("pct") ||
+    v.includes("persen")
+  ) {
+    return `${num.toFixed(1)}%`;
+  }
+  return num % 1 === 0 ? num.toLocaleString("id-ID") : num.toFixed(1);
+}
+
+function getVariableStats(dataList = [], varName) {
+  if (!dataList || !dataList.length || !varName) {
+    return { min: 0, max: 100, avg: 50, median: 50, count: 0, total: 0 };
+  }
+  const vals = dataList
+    .map((d) => d && d[varName])
+    .filter((v) => v !== undefined && v !== null && !isNaN(Number(v)))
+    .map(Number);
+
+  if (vals.length === 0) {
+    return {
+      min: 0,
+      max: 100,
+      avg: 50,
+      median: 50,
+      count: 0,
+      total: dataList.length,
+    };
+  }
+
+  vals.sort((a, b) => a - b);
+  const min = vals[0];
+  const max = vals[vals.length - 1];
+  const sum = vals.reduce((a, b) => a + b, 0);
+  const avg = +(sum / vals.length).toFixed(2);
+  const mid = Math.floor(vals.length / 2);
+  const median = +(
+    vals.length % 2 !== 0 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2
+  ).toFixed(2);
+
+  return {
+    min,
+    max,
+    avg,
+    median,
+    count: vals.length,
+    total: dataList.length,
+  };
+}
+
+// Controller Floating Legenda pada Kanvas Leaflet
+function updateMapLegendControl(mapInstance, htmlContent) {
+  if (typeof window === "undefined" || !mapInstance || !window.L) return;
+  if (!mapInstance._legendControl) {
+    const legendCtrl = window.L.control({ position: "bottomright" });
+    legendCtrl.onAdd = function () {
+      const div = window.L.DomUtil.create("div", "leaflet-map-legend-card");
+      window.L.DomEvent.disableClickPropagation(div);
+      window.L.DomEvent.disableScrollPropagation(div);
+      div.innerHTML = htmlContent;
+      return div;
+    };
+    legendCtrl.addTo(mapInstance);
+    mapInstance._legendControl = legendCtrl;
+  } else {
+    const container = mapInstance._legendControl.getContainer();
+    if (container) {
+      container.innerHTML = htmlContent;
+    }
+  }
+}
+
+// Komponen Bar Kontras Warna Reusable (Min - Avg/Med - Max)
+function VizLegendContrastBar({
+  title,
+  varName = "",
+  min = 0,
+  mid,
+  max = 100,
+  avg = 50,
+  paletteName = "Viridis",
+  customGradient,
+  scopeBadge,
+  minLabel = "Min (Terendah)",
+  midLabel = "Rata-rata",
+  maxLabel = "Max (Tertinggi)",
+}) {
+  const grad =
+    customGradient ||
+    PALETTE_GRADIENTS[paletteName] ||
+    PALETTE_GRADIENTS.Viridis;
+  const displayTitle = title || getVarLabel(varName);
+
+  return (
+    <div className="viz-legend-contrast-card">
+      <div className="viz-legend-contrast-header">
+        <div className="viz-legend-contrast-title">
+          <i className="fa-solid fa-palette" style={{ color: "#1F5FCC" }}></i>
+          <span>{displayTitle}</span>
+        </div>
+        {scopeBadge && (
+          <span className="viz-legend-contrast-badge">{scopeBadge}</span>
+        )}
+      </div>
+
+      <div className="viz-legend-ramp-container">
+        <div className="viz-legend-ramp-bar" style={{ background: grad }}></div>
+        <div className="viz-legend-ramp-ticks">
+          <div className="viz-legend-tick">
+            <span className="viz-legend-tick-value">
+              {formatStatValue(min, varName)}
+            </span>
+            <span className="viz-legend-tick-label">{minLabel}</span>
+          </div>
+          <div className="viz-legend-tick">
+            <span className="viz-legend-tick-value">
+              {formatStatValue(mid !== undefined ? mid : avg, varName)}
+            </span>
+            <span className="viz-legend-tick-label">{midLabel}</span>
+          </div>
+          <div className="viz-legend-tick">
+            <span className="viz-legend-tick-value">
+              {formatStatValue(max, varName)}
+            </span>
+            <span className="viz-legend-tick-label">{maxLabel}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="viz-legend-stats-strip">
+        <div className="viz-legend-stat-box">
+          <div className="viz-legend-stat-label">Terendah</div>
+          <div className="viz-legend-stat-val">
+            {formatStatValue(min, varName)}
+          </div>
+        </div>
+        <div className="viz-legend-stat-box">
+          <div className="viz-legend-stat-label">{midLabel}</div>
+          <div className="viz-legend-stat-val">
+            {formatStatValue(mid !== undefined ? mid : avg, varName)}
+          </div>
+        </div>
+        <div className="viz-legend-stat-box">
+          <div className="viz-legend-stat-label">Tertinggi</div>
+          <div className="viz-legend-stat-val">
+            {formatStatValue(max, varName)}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function VizLegendQuadrant({ filteredKabkota = [] }) {
   const total = filteredKabkota.length || 1;
   const countQ1 = filteredKabkota.filter(
@@ -124,6 +389,9 @@ function VizLegendQuadrant({ filteredKabkota = [] }) {
   const pctQ3 = ((countQ3 / total) * 100).toFixed(1);
   const pctQ4 = ((countQ4 / total) * 100).toFixed(1);
 
+  const statsEkon = getVariableStats(filteredKabkota, "skor_ekonomi");
+  const statsKep = getVariableStats(filteredKabkota, "skor_keputusan");
+
   return (
     <div className="insight-panel-container">
       <div className="panel-header-box">
@@ -131,7 +399,112 @@ function VizLegendQuadrant({ filteredKabkota = [] }) {
           <i className="fa-solid fa-shapes" style={{ color: "#1F5FCC" }}></i>
           <span>Tipologi 4 Kuadran</span>
         </div>
-        <span className="panel-badge">{filteredKabkota.length} Wilayah Aktif</span>
+        <span className="panel-badge">
+          {filteredKabkota.length} Wilayah Aktif
+        </span>
+      </div>
+
+      {/* Threshold & Bar Kontras Ringkasan Kuadran */}
+      <div className="viz-legend-contrast-card" style={{ marginBottom: "12px" }}>
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i className="fa-solid fa-crosshairs" style={{ color: "#1F5FCC" }}></i>
+            <span>Batas Median Kuadran Nasional</span>
+          </div>
+          <span className="viz-legend-contrast-badge">Threshold</span>
+        </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "8px",
+            margin: "6px 0 10px 0",
+          }}
+        >
+          <div
+            className="viz-legend-stat-box"
+            style={{ textAlign: "left", padding: "6px 8px" }}
+          >
+            <div className="viz-legend-stat-label">
+              Sumbu X: Partisipasi Ekonomi
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+              }}
+            >
+              <span className="viz-legend-stat-val">34.50</span>
+              <span style={{ fontSize: "10px", color: "#64748B" }}>
+                Rentang: {statsEkon.min.toFixed(1)} - {statsEkon.max.toFixed(1)}
+              </span>
+            </div>
+          </div>
+          <div
+            className="viz-legend-stat-box"
+            style={{ textAlign: "left", padding: "6px 8px" }}
+          >
+            <div className="viz-legend-stat-label">
+              Sumbu Y: Pengambilan Keputusan
+            </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+              }}
+            >
+              <span className="viz-legend-stat-val">47.60</span>
+              <span style={{ fontSize: "10px", color: "#64748B" }}>
+                Rentang: {statsKep.min.toFixed(1)} - {statsKep.max.toFixed(1)}
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* Visual Bar Distribusi Multi-Warna */}
+        <div
+          style={{
+            width: "100%",
+            height: "12px",
+            borderRadius: "3px",
+            overflow: "hidden",
+            display: "flex",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.15)",
+          }}
+        >
+          <div
+            style={{ width: `${pctQ1}%`, background: "#16a34a" }}
+            title={`Kuadran I: ${countQ1} (${pctQ1}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctQ2}%`, background: "#2563eb" }}
+            title={`Kuadran II: ${countQ2} (${pctQ2}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctQ4}%`, background: "#d97706" }}
+            title={`Kuadran IV: ${countQ4} (${pctQ4}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctQ3}%`, background: "#dc2626" }}
+            title={`Kuadran III: ${countQ3} (${pctQ3}%)`}
+          ></div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: "9.5px",
+            color: "#64748B",
+            marginTop: "5px",
+            fontWeight: "700",
+          }}
+        >
+          <span style={{ color: "#16a34a" }}>● Q1: {pctQ1}%</span>
+          <span style={{ color: "#2563eb" }}>● Q2: {pctQ2}%</span>
+          <span style={{ color: "#d97706" }}>● Q4: {pctQ4}%</span>
+          <span style={{ color: "#dc2626" }}>● Q3: {pctQ3}%</span>
+        </div>
       </div>
 
       {/* Kuadran I */}
@@ -209,18 +582,30 @@ function VizLegendQuadrant({ filteredKabkota = [] }) {
   );
 }
 
-function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
+function VizLegendBoundaryMap({
+  dataset = [],
+  isProvinsi,
+  varName,
+  paletteName = "Viridis",
+}) {
+  const isCategorical = [
+    "kuadran",
+    "lisa_cluster_keputusan",
+    "lisa_cluster_ekonomi",
+  ].includes(varName);
+
+  const stats = !isCategorical ? getVariableStats(dataset, varName) : null;
+  const scopeBadge = isProvinsi
+    ? "38 Provinsi"
+    : `${dataset.length || 514} Kab/Kota`;
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
           <span>Panduan &amp; Legenda Peta Batas Poligon Tematik</span>
         </div>
-        <span className="viz-legend-badge">
-          {isProvinsi
-            ? "Tingkat Provinsi (38 Wilayah)"
-            : "Tingkat Kab/Kota (514 Wilayah)"}
-        </span>
+        <span className="viz-legend-badge">{scopeBadge}</span>
       </div>
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Menginspeksi sebaran spasial
@@ -228,32 +613,74 @@ function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
         administratif resmi tanpa distorsi, guna mendeteksi disparitas wilayah
         barat vs timur serta ketimpangan intra-provinsi.
       </div>
-      <div className="viz-legend-grid">
-        <div className="viz-legend-item">
-          <div style={{ width: "100%" }}>
-            <div className="viz-legend-item-title">
-              Skala Gradasi Warna ({paletteName})
+
+      {/* Bar Kontras Skala Gradasi Warna */}
+      {!isCategorical && stats ? (
+        <VizLegendContrastBar
+          title={`Skala Gradasi Warna: ${getVarLabel(varName)}`}
+          varName={varName}
+          min={stats.min}
+          mid={stats.median}
+          max={stats.max}
+          avg={stats.avg}
+          paletteName={paletteName}
+          scopeBadge={`Palet ${paletteName}`}
+        />
+      ) : varName === "kuadran" ? (
+        <div className="viz-legend-contrast-card">
+          <div className="viz-legend-contrast-header">
+            <div className="viz-legend-contrast-title">
+              <i className="fa-solid fa-shapes" style={{ color: "#1F5FCC" }}></i>
+              <span>Kategori Tipologi Kuadran</span>
             </div>
-            <div className="viz-legend-ramp-container">
-              <div
-                className="viz-legend-ramp-bar"
-                style={{
-                  background:
-                    "linear-gradient(to right, #440154, #31688e, #35b779, #fde725)",
-                }}
-              ></div>
-              <div className="viz-legend-ramp-labels">
-                <span>Nilai Terendah (Zona Defisit)</span>
-                <span>Nilai Tertinggi (Zona Maju)</span>
+            <span className="viz-legend-contrast-badge">
+              {dataset.length} Wilayah
+            </span>
+          </div>
+          <div
+            className="leaflet-map-legend-card"
+            style={{
+              boxShadow: "none",
+              border: "none",
+              padding: "4px 0",
+              maxWidth: "100%",
+            }}
+          >
+            <div className="leg-cat-list">
+              <div className="leg-cat-item">
+                <span
+                  className="leg-cat-swatch"
+                  style={{ background: "#16a34a" }}
+                ></span>
+                <span>Kuadran I: Maju &amp; Seimbang</span>
               </div>
-            </div>
-            <div className="viz-legend-item-desc">
-              Intensitas warna poligon mencerminkan capaian peubah{" "}
-              <strong>{varName?.toUpperCase()}</strong>. Skala warna ramah buta
-              warna (*colorblind-safe*).
+              <div className="leg-cat-item">
+                <span
+                  className="leg-cat-swatch"
+                  style={{ background: "#2563eb" }}
+                ></span>
+                <span>Kuadran II: Representasi Kuat</span>
+              </div>
+              <div className="leg-cat-item">
+                <span
+                  className="leg-cat-swatch"
+                  style={{ background: "#dc2626" }}
+                ></span>
+                <span>Kuadran III: Tertinggal Ganda</span>
+              </div>
+              <div className="leg-cat-item">
+                <span
+                  className="leg-cat-swatch"
+                  style={{ background: "#d97706" }}
+                ></span>
+                <span>Kuadran IV: Pekerja Tanpa Kuasa</span>
+              </div>
             </div>
           </div>
         </div>
+      ) : null}
+
+      <div className="viz-legend-grid">
         <div className="viz-legend-item">
           <div>
             <div className="viz-legend-item-title">
@@ -269,12 +696,23 @@ function VizLegendBoundaryMap({ isProvinsi, varName, paletteName }) {
             </div>
           </div>
         </div>
+        <div className="viz-legend-item">
+          <div>
+            <div className="viz-legend-item-title">Standar Palet Warna</div>
+            <div className="viz-legend-item-desc">
+              Gradasi warna ramah buta warna (*colorblind-safe*) memastikan
+              kontras optimal antara zona defisit (gelap) dan zona maju (terang).
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-function VizLegendHeatmap({ varName }) {
+function VizLegendHeatmap({ dataset = [], varName }) {
+  const stats = getVariableStats(dataset, varName);
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
@@ -283,39 +721,41 @@ function VizLegendHeatmap({ varName }) {
             Panduan &amp; Legenda Peta Heatmap Spasial (Kernel Density)
           </span>
         </div>
-        <span className="viz-legend-badge">Client-Side Density Surface</span>
+        <span className="viz-legend-badge">Density Surface KDE</span>
       </div>
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Mengestimasi kerapatan peubah{" "}
-        <strong>{varName?.toUpperCase()}</strong> secara spasial kontinu di
+        <strong>{getVarLabel(varName)}</strong> secara spasial kontinu di
         seluruh nusantara menggunakan algoritma Kernel Density Estimation (KDE)
         untuk memperlihatkan zona aglomerasi murni tanpa batasan batas wilayah
         artifisial.
       </div>
+
+      {/* Bar Kontras Spektrum Heatmap */}
+      <VizLegendContrastBar
+        title={`Spektrum Densitas: ${getVarLabel(varName)}`}
+        varName={varName}
+        min={stats.min}
+        mid={stats.median}
+        max={stats.max}
+        avg={stats.avg}
+        customGradient="linear-gradient(to right, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444)"
+        minLabel="Coldspot (Min)"
+        midLabel="Median"
+        maxLabel="Hotspot (Max)"
+        scopeBadge={`${dataset.length || 514} Titik`}
+      />
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div style={{ width: "100%" }}>
+          <div>
             <div className="viz-legend-item-title">
-              Gradien Spektrum Intensitas Panas
-            </div>
-            <div className="viz-legend-ramp-container">
-              <div
-                className="viz-legend-ramp-bar"
-                style={{
-                  background:
-                    "linear-gradient(to right, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444)",
-                }}
-              ></div>
-              <div className="viz-legend-ramp-labels">
-                <span>Biru: Coldspot Rendah</span>
-                <span>Hijau: Moderat</span>
-                <span>Merah: Hotspot Sangat Tinggi</span>
-              </div>
+              Interpretasi Zona Termal
             </div>
             <div className="viz-legend-item-desc">
-              Zona merah menunjukkan konsentrasi kepadatan capaian gender
-              tertinggi (aglomerasi perkotaan/metropolitan), sedangkan zona biru
-              menandakan defisit capaian spasial.
+              Zona merah pekat menandai klaster aglomerasi capaian gender
+              tertinggi di kawasan perkotaan/metropolitan, sedangkan zona biru
+              mencerminkan defisit capaian spasial.
             </div>
           </div>
         </div>
@@ -337,7 +777,15 @@ function VizLegendHeatmap({ varName }) {
   );
 }
 
-function VizLegendProportional({ sizeVar, colorVar }) {
+function VizLegendProportional({
+  dataset = [],
+  sizeVar,
+  colorVar,
+  paletteName = "Viridis",
+}) {
+  const statsSize = getVariableStats(dataset, sizeVar);
+  const statsColor = getVariableStats(dataset, colorVar);
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
@@ -356,30 +804,74 @@ function VizLegendProportional({ sizeVar, colorVar }) {
         timbal balik antara volume/besaran riil dengan persentase performa
         kualitas gender.
       </div>
+
+      {/* 1. Skala Ukuran Lingkaran Proporsional */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i
+              className="fa-regular fa-circle-dot"
+              style={{ color: "#1F5FCC" }}
+            ></i>
+            <span>Skala Ukuran Lingkaran (Volume: {getVarLabel(sizeVar)})</span>
+          </div>
+          <span className="viz-legend-contrast-badge">Proporsional</span>
+        </div>
+        <div className="viz-prop-size-legend">
+          <div className="viz-prop-size-item">
+            <div
+              className="viz-prop-circle"
+              style={{ width: "10px", height: "10px" }}
+            ></div>
+            <span className="viz-prop-circle-label">
+              {formatStatValue(statsSize.min, sizeVar)}
+            </span>
+            <span className="viz-prop-circle-sub">Min (Terkecil)</span>
+          </div>
+          <div className="viz-prop-size-item">
+            <div
+              className="viz-prop-circle"
+              style={{ width: "18px", height: "18px" }}
+            ></div>
+            <span className="viz-prop-circle-label">
+              {formatStatValue(statsSize.avg, sizeVar)}
+            </span>
+            <span className="viz-prop-circle-sub">Rata-rata</span>
+          </div>
+          <div className="viz-prop-size-item">
+            <div
+              className="viz-prop-circle"
+              style={{ width: "28px", height: "28px" }}
+            ></div>
+            <span className="viz-prop-circle-label">
+              {formatStatValue(statsSize.max, sizeVar)}
+            </span>
+            <span className="viz-prop-circle-sub">Max (Terbesar)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Bar Kontras Skala Warna Lingkaran */}
+      <VizLegendContrastBar
+        title={`Skala Warna Lingkaran (Kinerja: ${getVarLabel(colorVar)})`}
+        varName={colorVar}
+        min={statsColor.min}
+        mid={statsColor.median}
+        max={statsColor.max}
+        avg={statsColor.avg}
+        paletteName={paletteName}
+        scopeBadge={`Palet ${paletteName}`}
+      />
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
           <div>
-            <div className="viz-legend-item-title">
-              Ukuran Radius Lingkaran (Volume: {sizeVar?.toUpperCase()})
-            </div>
+            <div className="viz-legend-item-title">Interpretasi Bivariate</div>
             <div className="viz-legend-item-desc">
-              Besar kecilnya diameter lingkaran dihitung proporsional terhadap
-              besaran absolut peubah <strong>{sizeVar}</strong> (misal taraf
-              hidup pengeluaran atau tingkat partisipasi kerja). Semakin besar
-              lingkaran, semakin masif volumenya.
-            </div>
-          </div>
-        </div>
-        <div className="viz-legend-item">
-          <div>
-            <div className="viz-legend-item-title">
-              Warna Lingkaran (Kinerja: {colorVar?.toUpperCase()})
-            </div>
-            <div className="viz-legend-item-desc">
-              Gradasi warna lingkaran (dari gelap/ungu hingga terang/kuning)
-              mengkodekan tingkat pencapaian mutu peubah{" "}
-              <strong>{colorVar}</strong> (misal keterwakilan parlemen atau skor
-              keputusan).
+              Lingkaran <strong>besar dan berwarna terang</strong> mencerminkan
+              kawasan berkinerja unggul ganda (daya ungkit volume tinggi dan
+              kualitas prima). Lingkaran besar namun gelap menunjukkan paradoks
+              aktivitas tinggi tanpa capaian kualitas memadai.
             </div>
           </div>
         </div>
@@ -388,7 +880,13 @@ function VizLegendProportional({ sizeVar, colorVar }) {
   );
 }
 
-function VizLegendChoropleth({ varName }) {
+function VizLegendChoropleth({
+  dataset = [],
+  varName,
+  paletteName = "Viridis",
+}) {
+  const stats = getVariableStats(dataset, varName);
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
@@ -400,33 +898,35 @@ function VizLegendChoropleth({ varName }) {
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Membandingkan capaian agregat
         makro antar-provinsi pada indikator{" "}
-        <strong>{varName?.toUpperCase()}</strong> untuk melihat kesenjangan
+        <strong>{getVarLabel(varName)}</strong> untuk melihat kesenjangan
         regional tingkat pertama di Indonesia.
       </div>
+
+      {/* Bar Kontras Skala Gradasi Warna Provinsi */}
+      <VizLegendContrastBar
+        title={`Gradasi Tematik: ${getVarLabel(varName)}`}
+        varName={varName}
+        min={stats.min}
+        mid={stats.median}
+        max={stats.max}
+        avg={stats.avg}
+        paletteName={paletteName}
+        scopeBadge="38 Provinsi"
+        minLabel="Provinsi Terendah"
+        midLabel="Rata-rata 38 Prov"
+        maxLabel="Provinsi Tertinggi"
+      />
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div style={{ width: "100%" }}>
+          <div>
             <div className="viz-legend-item-title">
               Interpretasi Pewarnaan Tematik
             </div>
-            <div className="viz-legend-ramp-container">
-              <div
-                className="viz-legend-ramp-bar"
-                style={{
-                  background:
-                    "linear-gradient(to right, #440154, #31688e, #35b779, #fde725)",
-                }}
-              ></div>
-              <div className="viz-legend-ramp-labels">
-                <span>Nilai Rendah</span>
-                <span>Nilai Rata-rata</span>
-                <span>Nilai Tinggi</span>
-              </div>
-            </div>
             <div className="viz-legend-item-desc">
               Provinsi dengan rona warna terang mencatatkan performa terbaik
-              pada indikator {varName}. Arahkan kursor atau klik poligon untuk
-              rincian angka riil.
+              pada indikator {getVarLabel(varName)}. Arahkan kursor atau klik
+              poligon untuk rincian angka riil setiap provinsi.
             </div>
           </div>
         </div>
@@ -435,7 +935,35 @@ function VizLegendChoropleth({ varName }) {
   );
 }
 
-function VizLegendLISA({ clusterVar }) {
+function VizLegendLISA({ dataset = [], clusterVar }) {
+  const total = dataset.length || 1;
+  const countHH = dataset.filter(
+    (d) => d[clusterVar] === "High-High (Hotspot)",
+  ).length;
+  const countLL = dataset.filter(
+    (d) => d[clusterVar] === "Low-Low (Coldspot)",
+  ).length;
+  const countHL = dataset.filter(
+    (d) => d[clusterVar] === "High-Low (Spatial Outlier)",
+  ).length;
+  const countLH = dataset.filter(
+    (d) => d[clusterVar] === "Low-High (Spatial Outlier)",
+  ).length;
+  const countNS = dataset.filter(
+    (d) => !d[clusterVar] || d[clusterVar] === "Not Significant",
+  ).length;
+
+  const pctHH = ((countHH / total) * 100).toFixed(1);
+  const pctLL = ((countLL / total) * 100).toFixed(1);
+  const pctHL = ((countHL / total) * 100).toFixed(1);
+  const pctLH = ((countLH / total) * 100).toFixed(1);
+  const pctNS = ((countNS / total) * 100).toFixed(1);
+
+  const clusterTitle =
+    clusterVar === "lisa_cluster_keputusan"
+      ? "Skor Pengambilan Keputusan"
+      : "Skor Partisipasi Ekonomi";
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
@@ -450,15 +978,85 @@ function VizLegendLISA({ clusterVar }) {
       </div>
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Mengidentifikasi ketergantungan
-        dan autokorelasi spasial lokal pada{" "}
-        <strong>
-          {clusterVar === "lisa_cluster_keputusan"
-            ? "Skor Pengambilan Keputusan"
-            : "Skor Partisipasi Ekonomi"}
-        </strong>{" "}
-        guna membuktikan keberadaan aglomerasi geografis yang bukan kebetulan
-        acak.
+        dan autokorelasi spasial lokal pada <strong>{clusterTitle}</strong> guna
+        membuktikan keberadaan aglomerasi geografis yang bukan kebetulan acak.
       </div>
+
+      {/* Bar Kontras Klaster Spasial & Komposisi */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i
+              className="fa-solid fa-circle-nodes"
+              style={{ color: "#1F5FCC" }}
+            ></i>
+            <span>Distribusi Klaster Spasial Wilayah</span>
+          </div>
+          <span className="viz-legend-contrast-badge">
+            {dataset.length} Wilayah
+          </span>
+        </div>
+        {/* Multi-color Bar for Clusters */}
+        <div
+          style={{
+            width: "100%",
+            height: "12px",
+            borderRadius: "3px",
+            overflow: "hidden",
+            display: "flex",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.15)",
+            margin: "4px 0 8px 0",
+          }}
+        >
+          <div
+            style={{ width: `${pctHH}%`, background: "#dc2626" }}
+            title={`High-High: ${countHH} (${pctHH}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctLL}%`, background: "#2563eb" }}
+            title={`Low-Low: ${countLL} (${pctLL}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctHL}%`, background: "#f97316" }}
+            title={`High-Low: ${countHL} (${pctHL}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctLH}%`, background: "#10b981" }}
+            title={`Low-High: ${countLH} (${pctLH}%)`}
+          ></div>
+          <div
+            style={{ width: `${pctNS}%`, background: "#cbd5e1" }}
+            title={`Not Significant: ${countNS} (${pctNS}%)`}
+          ></div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "6px",
+            fontSize: "10px",
+            fontWeight: "700",
+          }}
+        >
+          <span style={{ color: "#dc2626" }}>
+            ● HH: {countHH} ({pctHH}%)
+          </span>
+          <span style={{ color: "#2563eb" }}>
+            ● LL: {countLL} ({pctLL}%)
+          </span>
+          <span style={{ color: "#ea580c" }}>
+            ● HL: {countHL} ({pctHL}%)
+          </span>
+          <span style={{ color: "#059669" }}>
+            ● LH: {countLH} ({pctLH}%)
+          </span>
+          <span style={{ color: "#64748b" }}>
+            ● Acak: {countNS} ({pctNS}%)
+          </span>
+        </div>
+      </div>
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
           <div
@@ -467,7 +1065,7 @@ function VizLegendLISA({ clusterVar }) {
           ></div>
           <div>
             <div className="viz-legend-item-title" style={{ color: "#dc2626" }}>
-              High-High (Hotspot)
+              High-High (Hotspot): {countHH} Wilayah ({pctHH}%)
             </div>
             <div className="viz-legend-item-desc">
               Daerah bernilai tinggi yang bertetangga dengan daerah-daerah
@@ -482,7 +1080,7 @@ function VizLegendLISA({ clusterVar }) {
           ></div>
           <div>
             <div className="viz-legend-item-title" style={{ color: "#2563eb" }}>
-              Low-Low (Coldspot)
+              Low-Low (Coldspot): {countLL} Wilayah ({pctLL}%)
             </div>
             <div className="viz-legend-item-desc">
               Daerah bernilai rendah yang bertetangga dengan daerah-daerah
@@ -494,11 +1092,11 @@ function VizLegendLISA({ clusterVar }) {
         <div className="viz-legend-item">
           <div
             className="viz-legend-color-box"
-            style={{ background: "#d97706" }}
+            style={{ background: "#f97316" }}
           ></div>
           <div>
-            <div className="viz-legend-item-title" style={{ color: "#d97706" }}>
-              High-Low (Spatial Outlier Positif)
+            <div className="viz-legend-item-title" style={{ color: "#ea580c" }}>
+              High-Low (Outlier Positif): {countHL} Wilayah ({pctHL}%)
             </div>
             <div className="viz-legend-item-desc">
               Daerah maju yang terisolasi di antara kawasan sekitar yang
@@ -509,11 +1107,11 @@ function VizLegendLISA({ clusterVar }) {
         <div className="viz-legend-item">
           <div
             className="viz-legend-color-box"
-            style={{ background: "#38bdf8" }}
+            style={{ background: "#10b981" }}
           ></div>
           <div>
-            <div className="viz-legend-item-title" style={{ color: "#0284c7" }}>
-              Low-High (Spatial Outlier Negatif)
+            <div className="viz-legend-item-title" style={{ color: "#059669" }}>
+              Low-High (Outlier Negatif): {countLH} Wilayah ({pctLH}%)
             </div>
             <div className="viz-legend-item-desc">
               Daerah tertinggal yang berada di tengah kawasan sekitar yang telah
@@ -524,11 +1122,11 @@ function VizLegendLISA({ clusterVar }) {
         <div className="viz-legend-item full-width">
           <div
             className="viz-legend-color-box"
-            style={{ background: "#94a3b8" }}
+            style={{ background: "#cbd5e1" }}
           ></div>
           <div>
             <div className="viz-legend-item-title" style={{ color: "#64748b" }}>
-              Not Significant (Abu-Abu)
+              Not Significant: {countNS} Wilayah ({pctNS}%)
             </div>
             <div className="viz-legend-item-desc">
               Daerah dengan sebaran nilai acak tanpa ketergantungan spasial yang
@@ -542,15 +1140,15 @@ function VizLegendLISA({ clusterVar }) {
 }
 
 function VizLegendPCA({ varPC1 = "42.4", varPC2 = "24.5" }) {
+  const totalVar = (+varPC1 + +varPC2).toFixed(1);
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
           <span>Panduan &amp; Legenda PCA Biplot (Reduksi 8 Dimensi)</span>
         </div>
-        <span className="viz-legend-badge">
-          Total Variansi: {(+varPC1 + +varPC2).toFixed(1)}%
-        </span>
+        <span className="viz-legend-badge">Total Variansi: {totalVar}%</span>
       </div>
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Merangkum 8 indikator gender BPS
@@ -558,6 +1156,64 @@ function VizLegendPCA({ varPC1 = "42.4", varPC2 = "24.5" }) {
         tanpa kehilangan banyak informasi, guna mengungkap struktur laten
         disparitas wilayah di Indonesia.
       </div>
+
+      {/* Bar Kontras Proporsi Variansi */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i
+              className="fa-solid fa-chart-pie"
+              style={{ color: "#1F5FCC" }}
+            ></i>
+            <span>Proporsi Variansi Komponen Utama</span>
+          </div>
+          <span className="viz-legend-contrast-badge">
+            {totalVar}% Tertangkap
+          </span>
+        </div>
+        <div
+          style={{
+            width: "100%",
+            height: "12px",
+            borderRadius: "3px",
+            overflow: "hidden",
+            display: "flex",
+            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.15)",
+            margin: "4px 0 6px 0",
+          }}
+        >
+          <div
+            style={{ width: `${varPC1}%`, background: "#1F5FCC" }}
+            title={`PC1: ${varPC1}%`}
+          ></div>
+          <div
+            style={{ width: `${varPC2}%`, background: "#06B6D4" }}
+            title={`PC2: ${varPC2}%`}
+          ></div>
+          <div
+            style={{
+              width: `${(100 - (+varPC1 + +varPC2)).toFixed(1)}%`,
+              background: "#E2E8F0",
+            }}
+            title="Komponen Lainnya"
+          ></div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontSize: "10px",
+            fontWeight: "700",
+          }}
+        >
+          <span style={{ color: "#1F5FCC" }}>PC1: {varPC1}% (Sumbu X)</span>
+          <span style={{ color: "#0891B2" }}>PC2: {varPC2}% (Sumbu Y)</span>
+          <span style={{ color: "#64748B" }}>
+            Sisa: {(100 - (+varPC1 + +varPC2)).toFixed(1)}%
+          </span>
+        </div>
+      </div>
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
           <div>
@@ -591,11 +1247,11 @@ function VizLegendPCA({ varPC1 = "42.4", varPC2 = "24.5" }) {
             </div>
             <div className="viz-legend-item-desc">
               Panjang panah mencerminkan kontribusi peubah terhadap pembentukan
-              komponen utama. <strong>Sudut lancip (&lt;90°)</strong> antar dua
-              panah menandakan korelasi positif kuat;{" "}
-              <strong>sudut tegak lurus (90°)</strong> menandakan peubah
-              independen; dan <strong>sudut berlawanan (&gt;90°)</strong>{" "}
-              menandakan korelasi negatif (*trade-off*).
+              komponen utama. <strong>Sudut lancip (&lt;90°)</strong> menandakan
+              korelasi positif kuat; <strong>sudut tegak lurus (90°)</strong>{" "}
+              menandakan peubah independen; dan{" "}
+              <strong>sudut tumpul (&gt;90°)</strong> menandakan korelasi
+              negatif (*trade-off*).
             </div>
           </div>
         </div>
@@ -604,7 +1260,9 @@ function VizLegendPCA({ varPC1 = "42.4", varPC2 = "24.5" }) {
   );
 }
 
-function VizLegendParcoords() {
+function VizLegendParcoords({ dataset = [], paletteName = "Viridis" }) {
+  const stats = getVariableStats(dataset, "skor_keputusan");
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
@@ -619,6 +1277,22 @@ function VizLegendParcoords() {
         serentak untuk mendeteksi anomali, klaster alami, serta kompromi
         struktural.
       </div>
+
+      {/* Bar Kontras Skala Warna Garis */}
+      <VizLegendContrastBar
+        title="Warna Garis: Skor Pengambilan Keputusan"
+        varName="skor_keputusan"
+        min={stats.min}
+        mid={stats.median}
+        max={stats.max}
+        avg={stats.avg}
+        paletteName={paletteName}
+        scopeBadge={`${dataset.length || 514} Garis Wilayah`}
+        minLabel="Skor Rendah"
+        midLabel="Skor Rata-rata"
+        maxLabel="Skor Tinggi"
+      />
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
           <div>
@@ -634,14 +1308,11 @@ function VizLegendParcoords() {
         </div>
         <div className="viz-legend-item">
           <div>
-            <div className="viz-legend-item-title">
-              Interaktivitas Brushing &amp; Warna Garis
-            </div>
+            <div className="viz-legend-item-title">Interaktivitas Brushing</div>
             <div className="viz-legend-item-desc">
-              Warna garis dikodekan berdasarkan Skor Pengambilan Keputusan
-              (Ungu: Rendah hingga Kuning: Tinggi). Klik dan tarik vertikal pada
-              sumbu manapun (*brushing*) untuk memfilter wilayah tertentu secara
-              interaktif.
+              Klik dan tarik vertikal pada sumbu manapun (*brushing*) untuk
+              memfilter dan mengisolasi wilayah yang memiliki kriteria tertentu
+              secara langsung di seluruh sumbu lainnya.
             </div>
           </div>
         </div>
@@ -666,51 +1337,90 @@ function VizLegendCorrHeatmap() {
         hubungan linear antara masing-masing pasangan indikator gender BPS guna
         membuktikan hipotesis kausalitas dan sinergi pembangunan manusia.
       </div>
+
+      {/* Bar Kontras Divergen Korelasi Pearson */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i
+              className="fa-solid fa-scale-balanced"
+              style={{ color: "#1F5FCC" }}
+            ></i>
+            <span>Skala Koefisien Korelasi Pearson (r)</span>
+          </div>
+          <span className="viz-legend-contrast-badge">-1.0 s.d. +1.0</span>
+        </div>
+        <div className="viz-legend-ramp-container">
+          <div
+            className="viz-legend-ramp-bar"
+            style={{
+              background:
+                "linear-gradient(to right, #2563eb, #93c5fd, #ffffff, #fca5a5, #dc2626)",
+            }}
+          ></div>
+          <div className="viz-legend-ramp-ticks">
+            <div className="viz-legend-tick">
+              <span className="viz-legend-tick-value">-1.00</span>
+              <span className="viz-legend-tick-label">
+                Korelasi Negatif Kuat
+              </span>
+            </div>
+            <div className="viz-legend-tick">
+              <span className="viz-legend-tick-value">0.00</span>
+              <span className="viz-legend-tick-label">Independen (Netral)</span>
+            </div>
+            <div className="viz-legend-tick">
+              <span className="viz-legend-tick-value">+1.00</span>
+              <span className="viz-legend-tick-label">
+                Korelasi Positif Kuat
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="viz-legend-stats-strip">
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Biru (-1.0 s.d. -0.5)</div>
+            <div className="viz-legend-stat-val" style={{ color: "#2563eb" }}>
+              Trade-Off Terbalik
+            </div>
+          </div>
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Putih (-0.2 s.d. +0.2)</div>
+            <div className="viz-legend-stat-val" style={{ color: "#64748b" }}>
+              Tidak Berkorelasi
+            </div>
+          </div>
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Merah (+0.5 s.d. +1.0)</div>
+            <div className="viz-legend-stat-val" style={{ color: "#dc2626" }}>
+              Sinergi Searah
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#b91c1c" }}
-          ></div>
           <div>
-            <div className="viz-legend-item-title" style={{ color: "#b91c1c" }}>
-              Merah (+0.50 s.d. +1.00): Korelasi Positif Kuat
+            <div className="viz-legend-item-title">
+              Contoh Sinergi Positif Signifikan
             </div>
             <div className="viz-legend-item-desc">
-              Peningkatan satu indikator berkaitan erat dengan kenaikan
-              indikator lainnya (misal: Rata-rata Lama Sekolah berkorelasi
-              positif kuat dengan Pengeluaran Riil).
+              Rata-rata Lama Sekolah (RLS) dan Harapan Lama Sekolah (HLS)
+              berkorelasi positif kuat (r &gt; 0.70) dengan Pengeluaran Riil dan
+              Tenaga Profesional Perempuan.
             </div>
           </div>
         </div>
         <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#f8fafc", border: "1px solid #cbd5e1" }}
-          ></div>
           <div>
-            <div className="viz-legend-item-title" style={{ color: "#475569" }}>
-              Putih / Terang (-0.20 s.d. +0.20): Hubungan Lemah
+            <div className="viz-legend-item-title">
+              Contoh Trade-Off Spasial Terbalik
             </div>
             <div className="viz-legend-item-desc">
-              Tidak terdapat korelasi linear yang signifikan antar dua indikator
-              (keduanya bergerak secara independen).
-            </div>
-          </div>
-        </div>
-        <div className="viz-legend-item">
-          <div
-            className="viz-legend-color-box"
-            style={{ background: "#1d4ed8" }}
-          ></div>
-          <div>
-            <div className="viz-legend-item-title" style={{ color: "#1d4ed8" }}>
-              Biru (-0.50 s.d. -1.00): Korelasi Negatif Kuat
-            </div>
-            <div className="viz-legend-item-desc">
-              Kedua indikator bergerak berlawanan arah (*trade-off* terbalik,
-              misal TPAK perempuan tinggi di sektor tradisional berkorelasi
-              negatif dengan tingkat pendidikan formal).
+              TPAK perempuan di sektor tradisional memiliki korelasi negatif (r
+              &lt; -0.30) terhadap pengeluaran dan pendidikan di wilayah
+              pedesaan.
             </div>
           </div>
         </div>
@@ -733,14 +1443,54 @@ function VizLegendRadar() {
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Menilai keseimbangan holistik
         profil pembangunan gender antar-wilayah kepulauan utama (Jawa, Sulawesi,
-        Papua) dengan membandingkan bentuk poligon jaring laba-laba.
+        Papua, dll.) dengan membandingkan bentuk poligon jaring laba-laba.
       </div>
+
+      {/* Skala Bar Kontras Normalisasi 0-100 */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i
+              className="fa-solid fa-chart-radar"
+              style={{ color: "#1F5FCC" }}
+            ></i>
+            <span>Rentang Normalisasi Min-Max Sumbu Radar</span>
+          </div>
+          <span className="viz-legend-contrast-badge">Skala 0 - 100</span>
+        </div>
+        <div className="viz-legend-ramp-container">
+          <div
+            className="viz-legend-ramp-bar"
+            style={{
+              background:
+                "linear-gradient(to right, #94a3b8, #3b82f6, #16a34a)",
+            }}
+          ></div>
+          <div className="viz-legend-ramp-ticks">
+            <div className="viz-legend-tick">
+              <span className="viz-legend-tick-value">0.0 (Min Nasional)</span>
+              <span className="viz-legend-tick-label">
+                Pusat Jaring (Defisit)
+              </span>
+            </div>
+            <div className="viz-legend-tick">
+              <span className="viz-legend-tick-value">50.0 (Median)</span>
+              <span className="viz-legend-tick-label">Tingkat Moderat</span>
+            </div>
+            <div className="viz-legend-tick">
+              <span className="viz-legend-tick-value">100.0 (Max Nasional)</span>
+              <span className="viz-legend-tick-label">
+                Tepi Terluar (Unggul)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
           <div>
-            <div className="viz-legend-item-title">
-              Bentuk &amp; Luas Poligon Spasial
-            </div>
+            <div className="viz-legend-item-title">Bentuk Poligon Spasial</div>
             <div className="viz-legend-item-desc">
               Poligon yang merekah keluar mendekati batas terluar (skor 100)
               mengindikasikan capaian pembangunan gender yang menyeluruh dan
@@ -754,17 +1504,26 @@ function VizLegendRadar() {
   );
 }
 
-function VizLegendTreemap({ isProvinsi, sizeVar, colorVar }) {
+function VizLegendTreemap({
+  dataset = [],
+  isProvinsi,
+  sizeVar,
+  colorVar,
+  paletteName = "Viridis",
+}) {
+  const statsSize = getVariableStats(dataset, sizeVar);
+  const statsColor = getVariableStats(dataset, colorVar);
+  const scopeBadge = isProvinsi
+    ? "Pulau -> Provinsi"
+    : "Pulau -> Provinsi -> Kab/Kota";
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
         <div className="viz-legend-title">
           <span>Panduan &amp; Legenda Interactive Treemap</span>
         </div>
-        <span className="viz-legend-badge">
-          Hirarki Bersarang:{" "}
-          {isProvinsi ? "Pulau -> Provinsi" : "Pulau -> Provinsi -> Kab/Kota"}
-        </span>
+        <span className="viz-legend-badge">Hirarki Bersarang: {scopeBadge}</span>
       </div>
       <div className="viz-legend-desc">
         <strong>Tujuan &amp; Fungsi:</strong> Menyajikan dekomposisi data
@@ -772,45 +1531,60 @@ function VizLegendTreemap({ isProvinsi, sizeVar, colorVar }) {
         bersarang dikelompokkan ke dalam kotak-kotak bertingkat untuk
         membandingkan kontribusi volume dan performa kualitas.
       </div>
+
+      {/* 1. Bar Ringkasan Volume Variabel Ukuran */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i className="fa-solid fa-cubes" style={{ color: "#1F5FCC" }}></i>
+            <span>Luas Kotak (Volume: {getVarLabel(sizeVar)})</span>
+          </div>
+          <span className="viz-legend-contrast-badge">
+            {dataset.length} Wilayah
+          </span>
+        </div>
+        <div
+          className="viz-legend-stats-strip"
+          style={{ marginTop: "2px", borderTop: "none" }}
+        >
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Min Volume</div>
+            <div className="viz-legend-stat-val">
+              {formatStatValue(statsSize.min, sizeVar)}
+            </div>
+          </div>
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Rata-rata</div>
+            <div className="viz-legend-stat-val">
+              {formatStatValue(statsSize.avg, sizeVar)}
+            </div>
+          </div>
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Max Volume</div>
+            <div className="viz-legend-stat-val">
+              {formatStatValue(statsSize.max, sizeVar)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Bar Kontras Gradasi Warna Capaian */}
+      <VizLegendContrastBar
+        title={`Warna Kotak (Kinerja: ${getVarLabel(colorVar)})`}
+        varName={colorVar}
+        min={statsColor.min}
+        mid={statsColor.median}
+        max={statsColor.max}
+        avg={statsColor.avg}
+        paletteName={paletteName}
+        scopeBadge={`Palet ${paletteName}`}
+        minLabel="Capaian Terendah"
+        midLabel="Rata-rata Capaian"
+        maxLabel="Capaian Tertinggi"
+      />
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div>
-            <div className="viz-legend-item-title">
-              Ukuran Luas Kotak (Volume: {sizeVar?.toUpperCase()})
-            </div>
-            <div className="viz-legend-item-desc">
-              Luas area kotak proporsional terhadap besaran peubah{" "}
-              <strong>{sizeVar}</strong> (misal Pengeluaran Riil atau TPAK).
-              Semakin besar kotak, semakin dominan kontribusi volume daerah
-              tersebut.
-            </div>
-          </div>
-        </div>
-        <div className="viz-legend-item">
-          <div style={{ width: "100%" }}>
-            <div className="viz-legend-item-title">
-              Warna Kotak (Kinerja: {colorVar?.toUpperCase()})
-            </div>
-            <div className="viz-legend-ramp-container">
-              <div
-                className="viz-legend-ramp-bar"
-                style={{
-                  background:
-                    "linear-gradient(to right, #440154, #31688e, #35b779, #fde725)",
-                }}
-              ></div>
-              <div className="viz-legend-ramp-labels">
-                <span>Rendah (Ungu Gelap)</span>
-                <span>Tinggi (Kuning Terang)</span>
-              </div>
-            </div>
-            <div className="viz-legend-item-desc">
-              Mengkodekan mutu capaian <strong>{colorVar}</strong> (misal %
-              Parlemen atau Skor Keputusan).
-            </div>
-          </div>
-        </div>
-        <div className="viz-legend-item full-width">
           <div>
             <div className="viz-legend-item-title">
               Cara Navigasi Hirarki (Drill-Down &amp; Zoom-Out)
@@ -829,7 +1603,16 @@ function VizLegendTreemap({ isProvinsi, sizeVar, colorVar }) {
   );
 }
 
-function VizLegendSunburst({ isProvinsi, sizeVar, colorVar }) {
+function VizLegendSunburst({
+  dataset = [],
+  isProvinsi,
+  sizeVar,
+  colorVar,
+  paletteName = "Viridis",
+}) {
+  const statsSize = getVariableStats(dataset, sizeVar);
+  const statsColor = getVariableStats(dataset, colorVar);
+
   return (
     <div className="viz-legend">
       <div className="viz-legend-header">
@@ -844,32 +1627,63 @@ function VizLegendSunburst({ isProvinsi, sizeVar, colorVar }) {
         proporsi pembagian dari tingkat nasional (pusat), pulau (cincin dalam),
         provinsi (cincin tengah), hingga kab/kota (cincin terluar).
       </div>
+
+      {/* 1. Bar Ringkasan Lebar Sudut Busur */}
+      <div className="viz-legend-contrast-card">
+        <div className="viz-legend-contrast-header">
+          <div className="viz-legend-contrast-title">
+            <i
+              className="fa-solid fa-chart-pie"
+              style={{ color: "#1F5FCC" }}
+            ></i>
+            <span>Lebar Sudut Busur (Volume: {getVarLabel(sizeVar)})</span>
+          </div>
+          <span className="viz-legend-contrast-badge">
+            {dataset.length} Wilayah
+          </span>
+        </div>
+        <div
+          className="viz-legend-stats-strip"
+          style={{ marginTop: "2px", borderTop: "none" }}
+        >
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Min Volume</div>
+            <div className="viz-legend-stat-val">
+              {formatStatValue(statsSize.min, sizeVar)}
+            </div>
+          </div>
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Rata-rata</div>
+            <div className="viz-legend-stat-val">
+              {formatStatValue(statsSize.avg, sizeVar)}
+            </div>
+          </div>
+          <div className="viz-legend-stat-box">
+            <div className="viz-legend-stat-label">Max Volume</div>
+            <div className="viz-legend-stat-val">
+              {formatStatValue(statsSize.max, sizeVar)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Bar Kontras Gradasi Warna Irisan */}
+      <VizLegendContrastBar
+        title={`Gradien Warna Irisan (Kinerja: ${getVarLabel(colorVar)})`}
+        varName={colorVar}
+        min={statsColor.min}
+        mid={statsColor.median}
+        max={statsColor.max}
+        avg={statsColor.avg}
+        paletteName={paletteName}
+        scopeBadge={`Palet ${paletteName}`}
+        minLabel="Capaian Terendah"
+        midLabel="Rata-rata Capaian"
+        maxLabel="Capaian Tertinggi"
+      />
+
       <div className="viz-legend-grid">
         <div className="viz-legend-item">
-          <div>
-            <div className="viz-legend-item-title">
-              Lebar Sudut Busur (Volume: {sizeVar?.toUpperCase()})
-            </div>
-            <div className="viz-legend-item-desc">
-              Sudut busur lingkaran proporsional terhadap besaran variabel
-              ukuran terpilih <strong>{sizeVar}</strong>. Semakin lebar irisan,
-              semakin besar proporsi wilayahnya.
-            </div>
-          </div>
-        </div>
-        <div className="viz-legend-item">
-          <div>
-            <div className="viz-legend-item-title">
-              Gradien Warna Irisan (Kinerja: {colorVar?.toUpperCase()})
-            </div>
-            <div className="viz-legend-item-desc">
-              Warna irisan lingkaran mengkodekan capaian peubah{" "}
-              <strong>{colorVar}</strong> dengan palet Viridis kontinu dari ungu
-              (rendah) ke kuning (tinggi).
-            </div>
-          </div>
-        </div>
-        <div className="viz-legend-item full-width">
           <div>
             <div className="viz-legend-item-title">
               Navigasi Radial Interaktif
@@ -1012,6 +1826,29 @@ export default function Home() {
   const choroplethMapRef = useRef(null);
   const lisaMapRef = useRef(null);
 
+  // Data cache refs to prevent stale closure traps in async map callbacks
+  const kabkotaGeojsonRef = useRef(null);
+  const geojsonDataRef = useRef(null);
+  const allKabkotaRef = useRef([]);
+  const allProvinsiRef = useRef([]);
+  const [leafletLoaded, setLeafletLoaded] = useState(false);
+
+  // Monitor Leaflet availability in browser window
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (window.L) {
+      setLeafletLoaded(true);
+      return;
+    }
+    const checkL = setInterval(() => {
+      if (typeof window !== "undefined" && window.L) {
+        setLeafletLoaded(true);
+        clearInterval(checkL);
+      }
+    }, 60);
+    return () => clearInterval(checkL);
+  }, []);
+
   // Load Data
   useEffect(() => {
     async function fetchData() {
@@ -1030,6 +1867,12 @@ export default function Home() {
               .then((r) => r.json())
               .catch(() => null),
           ]);
+
+        // Keep refs updated first
+        kabkotaGeojsonRef.current = resKabNat;
+        geojsonDataRef.current = resGeo;
+        allKabkotaRef.current = resKab;
+        allProvinsiRef.current = resProv;
 
         setAllKabkota(resKab);
         setAllProvinsi(resProv);
@@ -1260,25 +2103,17 @@ export default function Home() {
     ],
   };
 
-  // Render Charts on State Changes
+  // Effect 1: Render Geospatial Maps (Leaflet - completely decoupled from Plotly)
   useEffect(() => {
-    if (!dataLoaded || typeof window === "undefined" || !window.Plotly) return;
-
-    if (activeTab === "tab-overview") {
-      renderQuadrantScatter();
-    } else if (activeTab === "tab-geospatial") {
+    if (!dataLoaded || typeof window === "undefined" || !leafletLoaded) return;
+    if (activeTab === "tab-geospatial") {
       renderGeospatialTab();
-    } else if (activeTab === "tab-multivariate") {
-      renderMultivariateTab();
-    } else if (activeTab === "tab-hierarchical") {
-      renderHierarchicalTab();
     }
   }, [
     dataLoaded,
+    leafletLoaded,
     activeTab,
     activeGeoSubtab,
-    activeMultiSubtab,
-    activeHierSubtab,
     selectedPulau,
     selectedProv,
     selectedTipe,
@@ -1296,6 +2131,29 @@ export default function Home() {
     geojsonData,
     kabkotaGeojson,
     lisaClusterVar,
+  ]);
+
+  // Effect 2: Render Plotly Charts (Overview, Multivariate, Hierarchical)
+  useEffect(() => {
+    if (!dataLoaded || typeof window === "undefined" || !window.Plotly) return;
+
+    if (activeTab === "tab-overview") {
+      renderQuadrantScatter();
+    } else if (activeTab === "tab-multivariate") {
+      renderMultivariateTab();
+    } else if (activeTab === "tab-hierarchical") {
+      renderHierarchicalTab();
+    }
+  }, [
+    dataLoaded,
+    activeTab,
+    activeMultiSubtab,
+    activeHierSubtab,
+    selectedPulau,
+    selectedProv,
+    selectedTipe,
+    selectedKuadran,
+    selectedPalette,
     pcaColorBy,
     hierSizeVar,
     hierColorVar,
@@ -1412,10 +2270,51 @@ export default function Home() {
   }
 
   // 2. Geospatial Views (Leaflet)
+  const CLEAN_BASEMAP_URL =
+    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+  const CLEAN_BASEMAP_ATTR =
+    "&copy; Esri, HERE, Garmin, &copy; OpenStreetMap";
+  const OSM_BASEMAP_URL =
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+  const OSM_BASEMAP_ATTR =
+    "&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors";
+
+  function createSafeTileLayer(mapInstance) {
+    if (!window.L || !mapInstance) return null;
+    const tileLayer = window.L.tileLayer(CLEAN_BASEMAP_URL, {
+      attribution: CLEAN_BASEMAP_ATTR,
+      maxZoom: 18,
+    });
+    tileLayer.on("tileerror", function () {
+      if (!mapInstance._osmFallbackAdded) {
+        mapInstance._osmFallbackAdded = true;
+        try {
+          window.L.tileLayer(OSM_BASEMAP_URL, {
+            attribution: OSM_BASEMAP_ATTR,
+            maxZoom: 18,
+          }).addTo(mapInstance);
+        } catch (e) {}
+      }
+    });
+    tileLayer.addTo(mapInstance);
+    return tileLayer;
+  }
+
+  function getSafeActiveGeo(isProv) {
+    if (isProv) {
+      return (
+        geojsonDataRef.current ||
+        geojsonData ||
+        kabkotaGeojsonRef.current ||
+        kabkotaGeojson
+      );
+    }
+    return kabkotaGeojsonRef.current || kabkotaGeojson;
+  }
+
   function renderGeospatialTab() {
-    if (typeof window === "undefined") return;
-    if (!window.L) {
-      setTimeout(renderGeospatialTab, 150);
+    if (typeof window === "undefined" || !window.L) {
+      setTimeout(renderGeospatialTab, 100);
       return;
     }
     setTimeout(() => {
@@ -1430,25 +2329,28 @@ export default function Home() {
       } else if (activeGeoSubtab === "geo-subtab-lisa") {
         renderLeafletLISA();
       }
-    }, 100);
+    }, 60);
   }
-
-  const CLEAN_BASEMAP_URL =
-    "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
-  const CLEAN_BASEMAP_ATTR =
-    "&copy; Esri, HERE, Garmin, &copy; OpenStreetMap";
 
   // 2a. Peta Batas Wilayah (GeoJSON 38 Batas Murni Provinsi saat Provinsi, atau 514 Kab/Kota)
   function renderLeafletKabkotaBoundary() {
-    const el = document.getElementById("kabkota-boundary-map");
-    const activeGeo = isProvinsi
-      ? geojsonData || kabkotaGeojson
-      : kabkotaGeojson;
-    if (!el || !window.L) return;
-    if (!activeGeo) {
-      setTimeout(renderLeafletKabkotaBoundary, 200);
+    if (typeof window === "undefined" || !window.L) {
+      setTimeout(renderLeafletKabkotaBoundary, 100);
       return;
     }
+    const el = document.getElementById("kabkota-boundary-map");
+    if (!el) {
+      setTimeout(renderLeafletKabkotaBoundary, 100);
+      return;
+    }
+    const activeGeo = getSafeActiveGeo(isProvinsi);
+    if (!activeGeo || !activeGeo.features) {
+      setTimeout(renderLeafletKabkotaBoundary, 150);
+      return;
+    }
+
+    el.style.width = "100%";
+    el.style.height = "600px";
 
     if (!kabkotaBoundaryMapRef.current || kabkotaBoundaryMapRef.current.getContainer() !== el) {
       if (kabkotaBoundaryMapRef.current) {
@@ -1463,10 +2365,7 @@ export default function Home() {
         attributionControl: true,
       }).setView([-2.2, 118.0], 5);
 
-      window.L.tileLayer(CLEAN_BASEMAP_URL, {
-        attribution: CLEAN_BASEMAP_ATTR,
-        maxZoom: 16,
-      }).addTo(kabkotaBoundaryMapRef.current);
+      createSafeTileLayer(kabkotaBoundaryMapRef.current);
     } else {
       kabkotaBoundaryMapRef.current.eachLayer((layer) => {
         if (layer instanceof window.L.GeoJSON)
@@ -1487,7 +2386,7 @@ export default function Home() {
     if (!isCategorical) {
       const sourceList = isProvinsi
         ? enrichedProvinsi
-        : activeGeo.features.map((f) => f.properties);
+        : activeGeo.features.map((f) => f.properties).filter(Boolean);
       const vals = sourceList
         .map((f) => f[kabkotaChoroplethVar])
         .filter((v) => v !== undefined && v !== null && !isNaN(v));
@@ -1498,6 +2397,7 @@ export default function Home() {
     }
 
     function getPolygonColor(props) {
+      if (!props) return "#cbd5e1";
       let val = props[kabkotaChoroplethVar];
       if (isProvinsi) {
         const provItem = enrichedProvinsi.find(
@@ -1540,6 +2440,7 @@ export default function Home() {
 
     const geoLayer = window.L.geoJson(activeGeo, {
       filter: (feature) => {
+        if (!feature || !feature.properties) return false;
         if (
           selectedPulau !== "Semua Pulau" &&
           feature.properties.pulau !== selectedPulau
@@ -1548,7 +2449,7 @@ export default function Home() {
         return true;
       },
       style: (feature) => {
-        const p = feature.properties;
+        const p = feature.properties || {};
         const matchesFilter =
           selectedProv === "Semua Provinsi" || p.provinsi === selectedProv;
         return {
@@ -1561,7 +2462,7 @@ export default function Home() {
         };
       },
       onEachFeature: (feature, layer) => {
-        const p = feature.properties;
+        const p = feature.properties || {};
         const provItem = isProvinsi
           ? enrichedProvinsi.find((pr) => pr.provinsi === p.provinsi)
           : null;
@@ -1606,9 +2507,11 @@ export default function Home() {
           },
           click: (e) => {
             setSelectedKabDetail(activeItem);
-            kabkotaBoundaryMapRef.current.fitBounds(e.target.getBounds(), {
-              padding: [35, 35],
-            });
+            try {
+              kabkotaBoundaryMapRef.current.fitBounds(e.target.getBounds(), {
+                padding: [35, 35],
+              });
+            } catch (err) {}
           },
         });
       },
@@ -1616,51 +2519,105 @@ export default function Home() {
 
     if (selectedProv !== "Semua Provinsi") {
       const provFeatures = activeGeo.features.filter(
-        (f) => f.properties.provinsi === selectedProv,
+        (f) => f.properties && f.properties.provinsi === selectedProv,
       );
       if (provFeatures.length > 0) {
         const tempGroup = window.L.geoJson({
           type: "FeatureCollection",
           features: provFeatures,
         });
-        kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), {
-          padding: [30, 30],
-        });
+        try {
+          kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), {
+            padding: [30, 30],
+          });
+        } catch (e) {}
       }
     } else if (selectedPulau !== "Semua Pulau") {
       const pulauFeatures = activeGeo.features.filter(
-        (f) => f.properties.pulau === selectedPulau,
+        (f) => f.properties && f.properties.pulau === selectedPulau,
       );
       if (pulauFeatures.length > 0) {
         const tempGroup = window.L.geoJson({
           type: "FeatureCollection",
           features: pulauFeatures,
         });
-        kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), {
-          padding: [30, 30],
-        });
+        try {
+          kabkotaBoundaryMapRef.current.fitBounds(tempGroup.getBounds(), {
+            padding: [30, 30],
+          });
+        } catch (e) {}
       }
     } else {
       kabkotaBoundaryMapRef.current.setView([-2.2, 118.0], 5);
     }
 
+    // Floating On-Map Legend Control (Leaflet)
+    if (!isCategorical) {
+      const gradient =
+        PALETTE_GRADIENTS[selectedPalette] || PALETTE_GRADIENTS.Viridis;
+      const minStr = formatStatValue(minVal, kabkotaChoroplethVar);
+      const maxStr = formatStatValue(maxVal, kabkotaChoroplethVar);
+      const label = getVarLabel(kabkotaChoroplethVar);
+      updateMapLegendControl(
+        kabkotaBoundaryMapRef.current,
+        `<div class="leg-title">
+          <span>${label}</span>
+          <span class="leg-badge">${isProvinsi ? "38 Prov" : "514 Kab/Kota"}</span>
+        </div>
+        <div class="leg-ramp" style="background:${gradient}"></div>
+        <div class="leg-ticks">
+          <span>${minStr}</span>
+          <span>${maxStr}</span>
+        </div>
+        <div class="leg-subticks">
+          <span>Min (Rendah)</span>
+          <span>Max (Tinggi)</span>
+        </div>`
+      );
+    } else if (kabkotaChoroplethVar === "kuadran") {
+      updateMapLegendControl(
+        kabkotaBoundaryMapRef.current,
+        `<div class="leg-title">
+          <span>Tipologi 4 Kuadran</span>
+          <span class="leg-badge">Klasifikasi</span>
+        </div>
+        <div class="leg-cat-list">
+          <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#16a34a"></span><span>Q1: Maju &amp; Seimbang</span></div>
+          <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#2563eb"></span><span>Q2: Representasi Kuat</span></div>
+          <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#dc2626"></span><span>Q3: Tertinggal Ganda</span></div>
+          <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#d97706"></span><span>Q4: Pekerja Tanpa Kuasa</span></div>
+        </div>`
+      );
+    }
+
     kabkotaBoundaryMapRef.current.invalidateSize();
+    setTimeout(() => {
+      if (kabkotaBoundaryMapRef.current) kabkotaBoundaryMapRef.current.invalidateSize();
+    }, 150);
+    setTimeout(() => {
+      if (kabkotaBoundaryMapRef.current) kabkotaBoundaryMapRef.current.invalidateSize();
+    }, 400);
   }
 
   // 2b. Peta Heatmap Spasial Kab/Kota (Kernel Density Estimation)
   function renderLeafletHeatmap() {
-    const el = document.getElementById("heatmap-map");
-    if (!el || !window.L) return;
-
-    if (!window.L.heatLayer) {
-      const script = document.createElement("script");
-      script.src = "/leaflet-heat.js";
-      script.onload = () => {
-        if (activeGeoSubtab === "geo-subtab-heatmap") renderLeafletHeatmap();
-      };
-      document.body.appendChild(script);
+    if (typeof window === "undefined" || !window.L) {
+      setTimeout(renderLeafletHeatmap, 100);
       return;
     }
+    const el = document.getElementById("heatmap-map");
+    if (!el) {
+      setTimeout(renderLeafletHeatmap, 100);
+      return;
+    }
+
+    if (!window.L.heatLayer) {
+      setTimeout(renderLeafletHeatmap, 100);
+      return;
+    }
+
+    el.style.width = "100%";
+    el.style.height = "600px";
 
     if (!heatmapMapRef.current || heatmapMapRef.current.getContainer() !== el) {
       if (heatmapMapRef.current) {
@@ -1675,10 +2632,7 @@ export default function Home() {
         attributionControl: true,
       }).setView([-2.2, 118.0], 5);
 
-      window.L.tileLayer(CLEAN_BASEMAP_URL, {
-        attribution: CLEAN_BASEMAP_ATTR,
-        maxZoom: 16,
-      }).addTo(heatmapMapRef.current);
+      createSafeTileLayer(heatmapMapRef.current);
     } else {
       heatmapMapRef.current.eachLayer((layer) => {
         if (layer instanceof window.L.TileLayer) return;
@@ -1687,7 +2641,6 @@ export default function Home() {
     }
 
     const dataset = filteredKabkota;
-
     const validData = dataset.filter(
       (d) =>
         d.lat && d.lon && d[heatmapVar] !== undefined && d[heatmapVar] !== null,
@@ -1717,13 +2670,12 @@ export default function Home() {
       },
     }).addTo(heatmapMapRef.current);
 
-    const activeGeo = isProvinsi
-      ? geojsonData || kabkotaGeojson
-      : kabkotaGeojson;
+    const activeGeo = getSafeActiveGeo(isProvinsi);
 
-    if (heatmapShowBoundaries && activeGeo) {
+    if (heatmapShowBoundaries && activeGeo && activeGeo.features) {
       window.L.geoJson(activeGeo, {
         filter: (feature) => {
+          if (!feature || !feature.properties) return false;
           if (
             selectedPulau !== "Semua Pulau" &&
             feature.properties.pulau !== selectedPulau
@@ -1742,8 +2694,8 @@ export default function Home() {
         onEachFeature: (feature, layer) => {
           layer.bindTooltip(
             isProvinsi
-              ? `<b>Provinsi ${feature.properties.provinsi}</b>`
-              : `<b>${feature.properties.nama_resmi}</b> (${feature.properties.provinsi})`,
+              ? `<b>Provinsi ${feature.properties?.provinsi || ""}</b>`
+              : `<b>${feature.properties?.nama_resmi || ""}</b> (${feature.properties?.provinsi || ""})`,
             { sticky: true },
           );
         },
@@ -1773,6 +2725,7 @@ export default function Home() {
 
     if (selectedProv !== "Semua Provinsi" || selectedPulau !== "Semua Pulau") {
       const filteredGeo = activeGeo?.features?.filter((f) => {
+        if (!f || !f.properties) return false;
         if (
           selectedPulau !== "Semua Pulau" &&
           f.properties.pulau !== selectedPulau
@@ -1790,9 +2743,11 @@ export default function Home() {
           type: "FeatureCollection",
           features: filteredGeo,
         });
-        heatmapMapRef.current.fitBounds(tempGroup.getBounds(), {
-          padding: [30, 30],
-        });
+        try {
+          heatmapMapRef.current.fitBounds(tempGroup.getBounds(), {
+            padding: [30, 30],
+          });
+        } catch (e) {}
       } else {
         heatmapMapRef.current.setView([-2.2, 118.0], 5);
       }
@@ -1800,12 +2755,51 @@ export default function Home() {
       heatmapMapRef.current.setView([-2.2, 118.0], 5);
     }
 
+    // Floating On-Map Legend Control (Leaflet)
+    const heatGradient =
+      "linear-gradient(to right, #3b82f6, #06b6d4, #10b981, #f59e0b, #ef4444)";
+    const minHeatStr = formatStatValue(minV, heatmapVar);
+    const maxHeatStr = formatStatValue(maxV, heatmapVar);
+    const heatLabel = getVarLabel(heatmapVar);
+    updateMapLegendControl(
+      heatmapMapRef.current,
+      `<div class="leg-title">
+        <span>Heatmap: ${heatLabel}</span>
+        <span class="leg-badge">KDE Surface</span>
+      </div>
+      <div class="leg-ramp" style="background:${heatGradient}"></div>
+      <div class="leg-ticks">
+        <span>${minHeatStr}</span>
+        <span>${maxHeatStr}</span>
+      </div>
+      <div class="leg-subticks">
+        <span>Coldspot (Min)</span>
+        <span>Hotspot (Max)</span>
+      </div>`
+    );
+
     heatmapMapRef.current.invalidateSize();
+    setTimeout(() => {
+      if (heatmapMapRef.current) heatmapMapRef.current.invalidateSize();
+    }, 150);
+    setTimeout(() => {
+      if (heatmapMapRef.current) heatmapMapRef.current.invalidateSize();
+    }, 400);
   }
 
   function renderLeafletProportional() {
+    if (typeof window === "undefined" || !window.L) {
+      setTimeout(renderLeafletProportional, 100);
+      return;
+    }
     const el = document.getElementById("leaflet-map");
-    if (!el || !window.L) return;
+    if (!el) {
+      setTimeout(renderLeafletProportional, 100);
+      return;
+    }
+
+    el.style.width = "100%";
+    el.style.height = "600px";
 
     if (!leafletMapRef.current || leafletMapRef.current.getContainer() !== el) {
       if (leafletMapRef.current) {
@@ -1817,11 +2811,10 @@ export default function Home() {
       }
       leafletMapRef.current = window.L.map("leaflet-map", {
         scrollWheelZoom: false,
+        attributionControl: true,
       }).setView([-2.2, 118.0], 5);
-      window.L.tileLayer(CLEAN_BASEMAP_URL, {
-        attribution: CLEAN_BASEMAP_ATTR,
-        maxZoom: 16,
-      }).addTo(leafletMapRef.current);
+
+      createSafeTileLayer(leafletMapRef.current);
     } else {
       leafletMapRef.current.eachLayer((layer) => {
         if (layer instanceof window.L.CircleMarker)
@@ -1876,16 +2869,79 @@ export default function Home() {
       }
     });
 
+    // Floating On-Map Legend Control (Leaflet)
+    const propGradient =
+      PALETTE_GRADIENTS[selectedPalette] || PALETTE_GRADIENTS.Viridis;
+    const minColorStr = formatStatValue(minVal, geoColorVar);
+    const maxColorStr = formatStatValue(maxVal, geoColorVar);
+    const sizeVals = filteredKabkota
+      .map((d) => d[geoSizeVar])
+      .filter((v) => v !== undefined && v !== null && !isNaN(v));
+    const minSize = sizeVals.length ? Math.min(...sizeVals) : 0;
+    const maxSize = sizeVals.length ? Math.max(...sizeVals) : 100;
+    const minSizeStr = formatStatValue(minSize, geoSizeVar);
+    const maxSizeStr = formatStatValue(maxSize, geoSizeVar);
+
+    updateMapLegendControl(
+      leafletMapRef.current,
+      `<div class="leg-title">
+        <span>Simbol Dwipeubah</span>
+        <span class="leg-badge">Bivariate</span>
+      </div>
+      <div style="font-size:9.5px;font-weight:700;color:#475569;margin-bottom:3px;">
+        Warna: ${getVarLabel(geoColorVar)}
+      </div>
+      <div class="leg-ramp" style="background:${propGradient}"></div>
+      <div class="leg-ticks">
+        <span>${minColorStr}</span>
+        <span>${maxColorStr}</span>
+      </div>
+      <div class="leg-subticks" style="margin-bottom:6px;">
+        <span>Min</span>
+        <span>Max</span>
+      </div>
+      <div style="font-size:9.5px;font-weight:700;color:#475569;margin-bottom:4px;border-top:1px dashed #cbd5e1;padding-top:4px;">
+        Ukuran: ${getVarLabel(geoSizeVar)}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 2px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#1F5FCC;border:1px solid #0B2F63;"></span>
+          <span style="font-size:9.5px;font-weight:700;">${minSizeStr}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:#1F5FCC;border:1px solid #0B2F63;"></span>
+          <span style="font-size:9.5px;font-weight:700;">${maxSizeStr}</span>
+        </div>
+      </div>`
+    );
+
     leafletMapRef.current.invalidateSize();
+    setTimeout(() => {
+      if (leafletMapRef.current) leafletMapRef.current.invalidateSize();
+    }, 150);
+    setTimeout(() => {
+      if (leafletMapRef.current) leafletMapRef.current.invalidateSize();
+    }, 400);
   }
 
   function renderLeafletChoropleth() {
-    const el = document.getElementById("choropleth-map");
-    if (!el || !window.L) return;
-    if (!geojsonData) {
-      setTimeout(renderLeafletChoropleth, 200);
+    if (typeof window === "undefined" || !window.L) {
+      setTimeout(renderLeafletChoropleth, 100);
       return;
     }
+    const el = document.getElementById("choropleth-map");
+    if (!el) {
+      setTimeout(renderLeafletChoropleth, 100);
+      return;
+    }
+    const activeGeo = getSafeActiveGeo(true);
+    if (!activeGeo || !activeGeo.features) {
+      setTimeout(renderLeafletChoropleth, 150);
+      return;
+    }
+
+    el.style.width = "100%";
+    el.style.height = "600px";
 
     if (!choroplethMapRef.current || choroplethMapRef.current.getContainer() !== el) {
       if (choroplethMapRef.current) {
@@ -1897,11 +2953,10 @@ export default function Home() {
       }
       choroplethMapRef.current = window.L.map("choropleth-map", {
         scrollWheelZoom: false,
+        attributionControl: true,
       }).setView([-2.2, 118.0], 5);
-      window.L.tileLayer(CLEAN_BASEMAP_URL, {
-        attribution: CLEAN_BASEMAP_ATTR,
-        maxZoom: 16,
-      }).addTo(choroplethMapRef.current);
+
+      createSafeTileLayer(choroplethMapRef.current);
     } else {
       choroplethMapRef.current.eachLayer((layer) => {
         if (layer instanceof window.L.GeoJSON)
@@ -1929,12 +2984,12 @@ export default function Home() {
       return palette[idx];
     }
 
-    window.L.geoJson(geojsonData, {
+    window.L.geoJson(activeGeo, {
       style: (feature) => {
         const name = (
-          feature.properties.provinsi ||
-          feature.properties.Propinsi ||
-          feature.properties.name ||
+          feature.properties?.provinsi ||
+          feature.properties?.Propinsi ||
+          feature.properties?.name ||
           ""
         ).toUpperCase();
         const val =
@@ -1951,9 +3006,10 @@ export default function Home() {
       },
       onEachFeature: (feature, layer) => {
         const name =
-          feature.properties.provinsi ||
-          feature.properties.Propinsi ||
-          feature.properties.name;
+          feature.properties?.provinsi ||
+          feature.properties?.Propinsi ||
+          feature.properties?.name ||
+          "";
         const val = provMap[(name || "").toUpperCase()] || "N/A";
         layer.bindTooltip(
           `<b>Provinsi ${name}</b><br>${choroplethVar.toUpperCase()}: ${val}`,
@@ -1961,12 +3017,51 @@ export default function Home() {
       },
     }).addTo(choroplethMapRef.current);
 
+    // Floating On-Map Legend Control (Leaflet)
+    const choroGradient =
+      PALETTE_GRADIENTS[selectedPalette] || PALETTE_GRADIENTS.Viridis;
+    const minChoroStr = formatStatValue(minVal, choroplethVar);
+    const maxChoroStr = formatStatValue(maxVal, choroplethVar);
+    const choroLabel = getVarLabel(choroplethVar);
+    updateMapLegendControl(
+      choroplethMapRef.current,
+      `<div class="leg-title">
+        <span>Choropleth: ${choroLabel}</span>
+        <span class="leg-badge">38 Provinsi</span>
+      </div>
+      <div class="leg-ramp" style="background:${choroGradient}"></div>
+      <div class="leg-ticks">
+        <span>${minChoroStr}</span>
+        <span>${maxChoroStr}</span>
+      </div>
+      <div class="leg-subticks">
+        <span>Terendah (Min)</span>
+        <span>Tertinggi (Max)</span>
+      </div>`
+    );
+
     choroplethMapRef.current.invalidateSize();
+    setTimeout(() => {
+      if (choroplethMapRef.current) choroplethMapRef.current.invalidateSize();
+    }, 150);
+    setTimeout(() => {
+      if (choroplethMapRef.current) choroplethMapRef.current.invalidateSize();
+    }, 400);
   }
 
   function renderLeafletLISA() {
+    if (typeof window === "undefined" || !window.L) {
+      setTimeout(renderLeafletLISA, 100);
+      return;
+    }
     const el = document.getElementById("lisa-map");
-    if (!el || !window.L) return;
+    if (!el) {
+      setTimeout(renderLeafletLISA, 100);
+      return;
+    }
+
+    el.style.width = "100%";
+    el.style.height = "600px";
 
     if (!lisaMapRef.current || lisaMapRef.current.getContainer() !== el) {
       if (lisaMapRef.current) {
@@ -1978,11 +3073,10 @@ export default function Home() {
       }
       lisaMapRef.current = window.L.map("lisa-map", {
         scrollWheelZoom: false,
+        attributionControl: true,
       }).setView([-2.2, 118.0], 5);
-      window.L.tileLayer(CLEAN_BASEMAP_URL, {
-        attribution: CLEAN_BASEMAP_ATTR,
-        maxZoom: 16,
-      }).addTo(lisaMapRef.current);
+
+      createSafeTileLayer(lisaMapRef.current);
     } else {
       lisaMapRef.current.eachLayer((layer) => {
         if (layer instanceof window.L.CircleMarker)
@@ -2023,7 +3117,33 @@ export default function Home() {
       }
     });
 
+    // Floating On-Map Legend Control (Leaflet)
+    const lisaLabel =
+      lisaClusterVar === "lisa_cluster_keputusan"
+        ? "LISA Keputusan"
+        : "LISA Ekonomi";
+    updateMapLegendControl(
+      lisaMapRef.current,
+      `<div class="leg-title">
+        <span>Klaster ${lisaLabel}</span>
+        <span class="leg-badge">p &lt; 0.05</span>
+      </div>
+      <div class="leg-cat-list">
+        <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#dc2626"></span><span>High-High (Hotspot)</span></div>
+        <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#2563eb"></span><span>Low-Low (Coldspot)</span></div>
+        <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#f97316"></span><span>High-Low (Outlier Positif)</span></div>
+        <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#10b981"></span><span>Low-High (Outlier Negatif)</span></div>
+        <div class="leg-cat-item"><span class="leg-cat-swatch" style="background:#cbd5e1"></span><span>Tidak Signifikan</span></div>
+      </div>`
+    );
+
     lisaMapRef.current.invalidateSize();
+    setTimeout(() => {
+      if (lisaMapRef.current) lisaMapRef.current.invalidateSize();
+    }, 150);
+    setTimeout(() => {
+      if (lisaMapRef.current) lisaMapRef.current.invalidateSize();
+    }, 400);
   }
 
   // 3. Multivariate Views
@@ -3194,6 +4314,7 @@ export default function Home() {
         {/* Tab 2: Geospatial */}
         <section
           className={`tab-pane ${activeTab === "tab-geospatial" ? "active" : ""}`}
+          style={{ display: activeTab === "tab-geospatial" ? "flex" : "none" }}
         >
           <div className="subtabs-nav">
             <button
@@ -3336,6 +4457,7 @@ export default function Home() {
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendBoundaryMap
+                    dataset={isProvinsi ? enrichedProvinsi : filteredKabkota}
                     isProvinsi={isProvinsi}
                     varName={kabkotaChoroplethVar}
                     paletteName={selectedPalette}
@@ -3673,7 +4795,10 @@ export default function Home() {
                   <div id="heatmap-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
-                  <VizLegendHeatmap varName={heatmapVar} />
+                  <VizLegendHeatmap
+                    dataset={filteredKabkota}
+                    varName={heatmapVar}
+                  />
                 </div>
               </div>
 
@@ -3774,8 +4899,10 @@ export default function Home() {
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendProportional
+                    dataset={isProvinsi ? enrichedProvinsi : filteredKabkota}
                     sizeVar={geoSizeVar}
                     colorVar={geoColorVar}
+                    paletteName={selectedPalette}
                   />
                 </div>
               </div>
@@ -3830,7 +4957,11 @@ export default function Home() {
                   <div id="choropleth-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
-                  <VizLegendChoropleth varName={choroplethVar} />
+                  <VizLegendChoropleth
+                    dataset={allProvinsi}
+                    varName={choroplethVar}
+                    paletteName={selectedPalette}
+                  />
                 </div>
               </div>
               <DataSourceBadge vars={[choroplethVar]} />
@@ -3875,7 +5006,10 @@ export default function Home() {
                   <div id="lisa-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
-                  <VizLegendLISA clusterVar={lisaClusterVar} />
+                  <VizLegendLISA
+                    dataset={filteredKabkota}
+                    clusterVar={lisaClusterVar}
+                  />
                 </div>
               </div>
               <DataSourceBadge vars={[lisaClusterVar]} />
@@ -3949,6 +5083,7 @@ export default function Home() {
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendPCA
+                    dataset={filteredKabkota}
                     varPC1={pcaMeta?.var_exp_pc1 || "42.4"}
                     varPC2={pcaMeta?.var_exp_pc2 || "24.5"}
                   />
@@ -3981,7 +5116,10 @@ export default function Home() {
                   <div id="parallel-coords-chart" className="chart-box"></div>
                 </div>
                 <div className="viz-layout-sidebar">
-                  <VizLegendParcoords />
+                  <VizLegendParcoords
+                    dataset={filteredKabkota}
+                    paletteName={selectedPalette}
+                  />
                 </div>
               </div>
               <DataSourceBadge
@@ -4153,9 +5291,11 @@ export default function Home() {
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendTreemap
+                    dataset={isProvinsi ? enrichedProvinsi : filteredKabkota}
                     isProvinsi={isProvinsi}
                     sizeVar={hierSizeVar}
                     colorVar={hierColorVar}
+                    paletteName={selectedPalette}
                   />
                 </div>
               </div>
@@ -4171,9 +5311,11 @@ export default function Home() {
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendSunburst
+                    dataset={isProvinsi ? enrichedProvinsi : filteredKabkota}
                     isProvinsi={isProvinsi}
                     sizeVar={hierSizeVar}
                     colorVar={hierColorVar}
+                    paletteName={selectedPalette}
                   />
                 </div>
               </div>

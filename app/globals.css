@@ -1533,6 +1533,263 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
   line-height: 1.35;
 }
 
+/* ==========================================================================
+   Bilah Kontras Warna & Bilah Skala Min-Max (Color Contrast Scale Bar)
+   ========================================================================== */
+.viz-legend-contrast-card {
+  background: #FFFFFF;
+  border: 1px solid #DDE4EE;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 3px rgba(11, 47, 99, 0.04);
+}
+
+.viz-legend-contrast-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.viz-legend-contrast-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--navy-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viz-legend-contrast-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--blue-primary);
+  background: #EEF4FD;
+  border: 1px solid #D5E3FA;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.viz-legend-ramp-container {
+  width: 100%;
+  margin: 6px 0 8px 0;
+}
+
+.viz-legend-ramp-bar {
+  height: 14px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+  position: relative;
+}
+
+.viz-legend-ramp-ticks {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
+  padding: 0 1px;
+}
+
+.viz-legend-tick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.viz-legend-tick:first-child {
+  align-items: flex-start;
+}
+
+.viz-legend-tick:last-child {
+  align-items: flex-end;
+}
+
+.viz-legend-tick-value {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--navy-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.viz-legend-tick-label {
+  font-size: 9.5px;
+  color: #64748B;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-top: 1px;
+}
+
+.viz-legend-stats-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed #E2E8F0;
+}
+
+.viz-legend-stat-box {
+  background: #F8FAFC;
+  border: 1px solid #EDF2F7;
+  border-radius: 4px;
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.viz-legend-stat-label {
+  font-size: 9px;
+  color: #64748B;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.viz-legend-stat-val {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--navy-primary);
+  margin-top: 1px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lingkaran Simbol Proporsional Skala */
+.viz-prop-size-legend {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 10px 4px 6px 4px;
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 4px;
+  margin-top: 6px;
+}
+
+.viz-prop-size-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.viz-prop-circle {
+  border-radius: 50%;
+  background: #1F5FCC;
+  opacity: 0.85;
+  border: 1px solid #0B2F63;
+}
+
+.viz-prop-circle-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #1E293B;
+  font-variant-numeric: tabular-nums;
+}
+
+.viz-prop-circle-sub {
+  font-size: 9px;
+  color: #64748B;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Floating On-Map Legend Control (Leaflet) */
+.leaflet-map-legend-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid #CBD5E1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 14px rgba(11, 47, 99, 0.12);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #0F172A;
+  min-width: 210px;
+  max-width: 280px;
+  pointer-events: auto;
+  z-index: 999;
+}
+
+.leaflet-map-legend-card .leg-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #0B2F63;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.leaflet-map-legend-card .leg-badge {
+  font-size: 9px;
+  font-weight: 600;
+  color: #1F5FCC;
+  background: #EEF4FD;
+  border: 1px solid #D5E3FA;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.leaflet-map-legend-card .leg-ramp {
+  height: 11px;
+  width: 100%;
+  border-radius: 3px;
+  border: 1px solid rgba(15, 23, 42, 0.2);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  margin-bottom: 3px;
+}
+
+.leaflet-map-legend-card .leg-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-weight: 700;
+  color: #0F172A;
+  font-variant-numeric: tabular-nums;
+}
+
+.leaflet-map-legend-card .leg-subticks {
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.5px;
+  color: #64748B;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+}
+
+.leaflet-map-legend-card .leg-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.leaflet-map-legend-card .leg-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #1E293B;
+}
+
+.leaflet-map-legend-card .leg-cat-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
 .table-controls {
   display: flex;
   align-items: center;

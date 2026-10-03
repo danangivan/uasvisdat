@@ -31,14 +31,14 @@ export default function RootLayout({ children }) {
         />
         <link
           rel="stylesheet"
-          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          href="/leaflet/leaflet.css"
         />
       </head>
       <body>
         {children}
-        {/* Scripts for Plotly & Leaflet */}
+        {/* Local Leaflet & Plotly Scripts */}
         <Script
-          src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          src="/leaflet/leaflet.js"
           strategy="beforeInteractive"
         />
         <Script
