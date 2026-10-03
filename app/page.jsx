@@ -1413,7 +1413,11 @@ export default function Home() {
 
   // 2. Geospatial Views (Leaflet)
   function renderGeospatialTab() {
-    if (!window.L) return;
+    if (typeof window === "undefined") return;
+    if (!window.L) {
+      setTimeout(renderGeospatialTab, 150);
+      return;
+    }
     setTimeout(() => {
       if (activeGeoSubtab === "geo-subtab-kabkota-boundary") {
         renderLeafletKabkotaBoundary();
@@ -1426,7 +1430,7 @@ export default function Home() {
       } else if (activeGeoSubtab === "geo-subtab-lisa") {
         renderLeafletLISA();
       }
-    }, 150);
+    }, 100);
   }
 
   const CLEAN_BASEMAP_URL =
@@ -1440,9 +1444,20 @@ export default function Home() {
     const activeGeo = isProvinsi
       ? geojsonData || kabkotaGeojson
       : kabkotaGeojson;
-    if (!el || !activeGeo || !window.L) return;
+    if (!el || !window.L) return;
+    if (!activeGeo) {
+      setTimeout(renderLeafletKabkotaBoundary, 200);
+      return;
+    }
 
-    if (!kabkotaBoundaryMapRef.current) {
+    if (!kabkotaBoundaryMapRef.current || kabkotaBoundaryMapRef.current.getContainer() !== el) {
+      if (kabkotaBoundaryMapRef.current) {
+        try { kabkotaBoundaryMapRef.current.remove(); } catch (e) {}
+        kabkotaBoundaryMapRef.current = null;
+      }
+      if (el._leaflet_id) {
+        el._leaflet_id = null;
+      }
       kabkotaBoundaryMapRef.current = window.L.map("kabkota-boundary-map", {
         scrollWheelZoom: false,
         attributionControl: true,
@@ -1647,7 +1662,14 @@ export default function Home() {
       return;
     }
 
-    if (!heatmapMapRef.current) {
+    if (!heatmapMapRef.current || heatmapMapRef.current.getContainer() !== el) {
+      if (heatmapMapRef.current) {
+        try { heatmapMapRef.current.remove(); } catch (e) {}
+        heatmapMapRef.current = null;
+      }
+      if (el._leaflet_id) {
+        el._leaflet_id = null;
+      }
       heatmapMapRef.current = window.L.map("heatmap-map", {
         scrollWheelZoom: false,
         attributionControl: true,
@@ -1783,9 +1805,16 @@ export default function Home() {
 
   function renderLeafletProportional() {
     const el = document.getElementById("leaflet-map");
-    if (!el) return;
+    if (!el || !window.L) return;
 
-    if (!leafletMapRef.current) {
+    if (!leafletMapRef.current || leafletMapRef.current.getContainer() !== el) {
+      if (leafletMapRef.current) {
+        try { leafletMapRef.current.remove(); } catch (e) {}
+        leafletMapRef.current = null;
+      }
+      if (el._leaflet_id) {
+        el._leaflet_id = null;
+      }
       leafletMapRef.current = window.L.map("leaflet-map", {
         scrollWheelZoom: false,
       }).setView([-2.2, 118.0], 5);
@@ -1852,9 +1881,20 @@ export default function Home() {
 
   function renderLeafletChoropleth() {
     const el = document.getElementById("choropleth-map");
-    if (!el || !geojsonData) return;
+    if (!el || !window.L) return;
+    if (!geojsonData) {
+      setTimeout(renderLeafletChoropleth, 200);
+      return;
+    }
 
-    if (!choroplethMapRef.current) {
+    if (!choroplethMapRef.current || choroplethMapRef.current.getContainer() !== el) {
+      if (choroplethMapRef.current) {
+        try { choroplethMapRef.current.remove(); } catch (e) {}
+        choroplethMapRef.current = null;
+      }
+      if (el._leaflet_id) {
+        el._leaflet_id = null;
+      }
       choroplethMapRef.current = window.L.map("choropleth-map", {
         scrollWheelZoom: false,
       }).setView([-2.2, 118.0], 5);
@@ -1926,9 +1966,16 @@ export default function Home() {
 
   function renderLeafletLISA() {
     const el = document.getElementById("lisa-map");
-    if (!el) return;
+    if (!el || !window.L) return;
 
-    if (!lisaMapRef.current) {
+    if (!lisaMapRef.current || lisaMapRef.current.getContainer() !== el) {
+      if (lisaMapRef.current) {
+        try { lisaMapRef.current.remove(); } catch (e) {}
+        lisaMapRef.current = null;
+      }
+      if (el._leaflet_id) {
+        el._leaflet_id = null;
+      }
       lisaMapRef.current = window.L.map("lisa-map", {
         scrollWheelZoom: false,
       }).setView([-2.2, 118.0], 5);
@@ -3285,7 +3332,7 @@ export default function Home() {
 
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
-                  <div id="kabkota-boundary-map"></div>
+                  <div id="kabkota-boundary-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendBoundaryMap
@@ -3623,7 +3670,7 @@ export default function Home() {
 
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
-                  <div id="heatmap-map"></div>
+                  <div id="heatmap-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendHeatmap varName={heatmapVar} />
@@ -3723,7 +3770,7 @@ export default function Home() {
               </div>
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
-                  <div id="leaflet-map"></div>
+                  <div id="leaflet-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendProportional
@@ -3780,7 +3827,7 @@ export default function Home() {
               </div>
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
-                  <div id="choropleth-map"></div>
+                  <div id="choropleth-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendChoropleth varName={choroplethVar} />
@@ -3825,7 +3872,7 @@ export default function Home() {
               </div>
               <div className="viz-layout-row">
                 <div className="viz-layout-main">
-                  <div id="lisa-map"></div>
+                  <div id="lisa-map" className="map-container" style={{ width: "100%", height: "600px" }}></div>
                 </div>
                 <div className="viz-layout-sidebar">
                   <VizLegendLISA clusterVar={lisaClusterVar} />

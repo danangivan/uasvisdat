@@ -935,15 +935,25 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 /* ==========================================================================
    Geospatial View & Map Container
    ========================================================================== */
+#kabkota-boundary-map,
+#heatmap-map,
+#leaflet-map,
+#choropleth-map,
+#lisa-map,
 .map-container {
   width: 100%;
-  height: 620px;
+  height: 600px;
   min-height: 520px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border-color);
   background-color: #E2E8F0;
   position: relative;
   z-index: 1;
+}
+
+.viz-layout-main {
+  width: 100%;
+  min-height: 520px;
 }
 
 /* Toolbar for Subtabs & Map Controls */
