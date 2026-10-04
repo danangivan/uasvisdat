@@ -1732,7 +1732,7 @@ function VizLegendIslandSummary({ isProvinsi }) {
 export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mobileFilterOpen, setMobileFilterOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [allKabkota, setAllKabkota] = useState([]);
   const [allProvinsi, setAllProvinsi] = useState([]);
   const [nasionalStats, setNasionalStats] = useState({});
@@ -1751,7 +1751,7 @@ export default function Home() {
 
   // Institutional UI States
   const [helpModalOpen, setHelpModalOpen] = useState(false);
-  const [advancedFilterOpen, setAdvancedFilterOpen] = useState(false);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [fullscreenId, setFullscreenId] = useState(null);
 
   // Fullscreen Handler
@@ -3900,7 +3900,7 @@ export default function Home() {
       />
 
       {/* Persistent Left Sidebar (~260px wide) */}
-      <aside className={`sidebar ${mobileMenuOpen ? "open" : ""}`}>
+      <aside className={`sidebar ${sidebarCollapsed ? "collapsed" : ""} ${mobileMenuOpen ? "open" : ""}`}>
         <div className="sidebar-brand-box">
           <img
             src="/logo_stis.webp"
@@ -3969,13 +3969,29 @@ export default function Home() {
         {/* Global Header */}
         <header className="global-header">
           <div className="header-top-row">
-            <div className="header-breadcrumb">
-              <i className="fa-solid fa-house" style={{ fontSize: "11px" }}></i>
-              <span className="breadcrumb-extra">Portal Analitik STIS</span>
-              <span className="breadcrumb-separator breadcrumb-extra">/</span>
-              <span className="breadcrumb-extra">Disparitas Gender 2024</span>
-              <span className="breadcrumb-separator breadcrumb-extra">/</span>
-              <span className="breadcrumb-active">{currentModule.label}</span>
+            <div className="header-left-nav">
+              <button
+                className="header-icon-btn header-hamburger-btn"
+                onClick={() => {
+                  if (typeof window !== "undefined" && window.innerWidth <= 900) {
+                    setMobileMenuOpen(!mobileMenuOpen);
+                  } else {
+                    setSidebarCollapsed(!sidebarCollapsed);
+                  }
+                }}
+                aria-label="Toggle Menu Navigasi"
+                title={sidebarCollapsed ? "Buka Sidebar Navigasi" : "Sembunyikan Sidebar Navigasi"}
+              >
+                <i className="fa-solid fa-bars"></i>
+              </button>
+              <div className="header-breadcrumb">
+                <i className="fa-solid fa-house" style={{ fontSize: "11px" }}></i>
+                <span className="breadcrumb-extra">Portal Analitik STIS</span>
+                <span className="breadcrumb-separator breadcrumb-extra">/</span>
+                <span className="breadcrumb-extra">Disparitas Gender 2024</span>
+                <span className="breadcrumb-separator breadcrumb-extra">/</span>
+                <span className="breadcrumb-active">{currentModule.label}</span>
+              </div>
             </div>
 
             <div className="header-right-meta">
@@ -3998,13 +4014,6 @@ export default function Home() {
                 >
                   <i className="fa-solid fa-circle-question"></i>
                 </button>
-                <button
-                  className="header-icon-btn mobile-only"
-                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  aria-label="Buka Menu"
-                >
-                  <i className="fa-solid fa-bars"></i>
-                </button>
               </div>
             </div>
           </div>
@@ -4019,162 +4028,112 @@ export default function Home() {
           </div>
         </header>
 
-        {/* Sticky Horizontal Filter Bar */}
-        <div className={`filter-bar-sticky ${mobileFilterOpen ? "mobile-expanded" : "mobile-collapsed"}`}>
-          {/* Mobile Filter Toggle Header */}
-          <div className="filter-bar-mobile-header mobile-only">
-            <div className="filter-mobile-summary">
-              <i className="fa-solid fa-sliders" style={{ color: "#1F5FCC", fontSize: "12px" }}></i>
-              <span className="filter-mobile-title">Filter &amp; Wilayah</span>
-              <span className="filter-mobile-pill">
-                {selectedPulau !== "Semua Pulau"
-                  ? selectedPulau
-                  : selectedTipe === "Kab/Kota"
-                  ? "514 Kab/Kota"
-                  : "38 Provinsi"}
-              </span>
-              {hasActiveFilter && (
-                <span className="filter-badge-counter">Aktif</span>
-              )}
-            </div>
+        {/* Compact 1-Button Filter Bar */}
+        <div className="filter-bar-compact">
+          <div className="filter-bar-compact-left">
             <button
-              className="btn-filter-toggle"
-              onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+              className={`btn-filter-trigger ${hasActiveFilter ? "has-active" : ""}`}
+              onClick={() => setFilterModalOpen(true)}
               type="button"
-              aria-label="Toggle Filter Panel"
+              title="Buka pop up filter untuk mengatur Pulau, Provinsi, Tingkat Wilayah, Kuadran, dan Palet Warna"
             >
-              <span>{mobileFilterOpen ? "Sembunyikan" : "Sesuaikan"}</span>
-              <i
-                className={`fa-solid ${
-                  mobileFilterOpen ? "fa-chevron-up" : "fa-chevron-down"
-                }`}
-                style={{ fontSize: "10px" }}
-              ></i>
-            </button>
-          </div>
-
-          <div className="filter-bar-inner">
-            <div className="filter-bar-left">
-              {/* Filter Pulau */}
-              <div className="filter-item">
-                <span className="filter-label">Pulau:</span>
-                <select
-                  className="filter-select"
-                  value={selectedPulau}
-                  onChange={(e) => {
-                    setSelectedPulau(e.target.value);
-                    setSelectedProv("Semua Provinsi");
-                  }}
-                >
-                  <option value="Semua Pulau">Semua Pulau</option>
-                  {[...new Set(allKabkota.map((d) => d.pulau))].map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Filter Provinsi */}
-              <div className="filter-item">
-                <span className="filter-label">Provinsi:</span>
-                <select
-                  className="filter-select"
-                  value={selectedProv}
-                  onChange={(e) => setSelectedProv(e.target.value)}
-                >
-                  {availableProvs.map((p) => (
-                    <option key={p} value={p}>
-                      {p}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Segmented Control Tingkat Wilayah */}
-              {activeTab !== "tab-hierarchical" && (
-                <div className="filter-item filter-item-full">
-                  <span className="filter-label">Tingkat Wilayah:</span>
-                  <div className="segmented-control">
-                    <button
-                      className={`segmented-btn ${selectedTipe === "Kab/Kota" ? "active" : ""}`}
-                      onClick={() => setSelectedTipe("Kab/Kota")}
-                    >
-                      Kab/Kota (514)
-                    </button>
-                    <button
-                      className={`segmented-btn ${selectedTipe === "Provinsi" ? "active" : ""}`}
-                      onClick={() => setSelectedTipe("Provinsi")}
-                    >
-                      Provinsi (38)
-                    </button>
-                  </div>
-                </div>
+              <i className="fa-solid fa-sliders"></i>
+              <span className="btn-filter-trigger-text">
+                Filter Wilayah &amp; Indikator
+              </span>
+              {hasActiveFilter ? (
+                <span className="filter-badge-counter">
+                  {(selectedPulau !== "Semua Pulau" ? 1 : 0) +
+                   (selectedProv !== "Semua Provinsi" ? 1 : 0) +
+                   (selectedKuadran !== "Semua Kuadran" ? 1 : 0) +
+                   (selectedPalette !== "Viridis" ? 1 : 0)} Aktif
+                </span>
+              ) : (
+                <span className="filter-badge-default">Semua Data</span>
               )}
+              <i className="fa-solid fa-chevron-down filter-chevron-icon"></i>
+            </button>
 
-              {/* Filter Kuadran Tipologi */}
-              <div className="filter-item">
-                <span className="filter-label">Kuadran:</span>
-                <select
-                  className="filter-select"
-                  value={selectedKuadran}
-                  onChange={(e) => setSelectedKuadran(e.target.value)}
-                >
-                  <option value="Semua Kuadran">Semua Kuadran</option>
-                  <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">
-                    Kuadran I (Maju &amp; Seimbang)
-                  </option>
-                  <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">
-                    Kuadran II (Representasi Kuat)
-                  </option>
-                  <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">
-                    Kuadran III (Tertinggal Ganda)
-                  </option>
-                  <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">
-                    Kuadran IV (Pekerja Tanpa Kuasa)
-                  </option>
-                </select>
-              </div>
+            {/* Quick Filter Status Pills */}
+            <div className="filter-status-pills">
+              <span className="filter-pill-tag">
+                <i className="fa-solid fa-layer-group"></i>
+                <span>{selectedTipe === "Kab/Kota" ? "514 Kab/Kota" : "38 Provinsi"}</span>
+              </span>
 
-              {/* Palet Warna */}
-              <div className="filter-item">
-                <span className="filter-label">Palet:</span>
-                <select
-                  className="filter-select"
-                  value={selectedPalette}
-                  onChange={(e) => setSelectedPalette(e.target.value)}
-                >
-                  <option value="Viridis">Viridis (Perseptual)</option>
-                  <option value="Cividis">Cividis (Colorblind-Safe)</option>
-                  <option value="Plasma">Plasma (Kontras)</option>
-                  <option value="Turbo">Turbo (Spektrum)</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="filter-bar-right">
-              {hasActiveFilter && (
-                <span className="filter-badge-counter desktop-only">
-                  Filter Aktif
+              {selectedPulau !== "Semua Pulau" && (
+                <span className="filter-pill-tag active">
+                  <span>Pulau: {selectedPulau}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPulau("Semua Pulau");
+                      setSelectedProv("Semua Provinsi");
+                    }}
+                    title="Hapus filter pulau"
+                    className="pill-remove-btn"
+                  >
+                    &times;
+                  </button>
                 </span>
               )}
+
+              {selectedProv !== "Semua Provinsi" && (
+                <span className="filter-pill-tag active">
+                  <span>Prov: {selectedProv}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedProv("Semua Provinsi");
+                    }}
+                    title="Hapus filter provinsi"
+                    className="pill-remove-btn"
+                  >
+                    &times;
+                  </button>
+                </span>
+              )}
+
+              {selectedKuadran !== "Semua Kuadran" && (
+                <span className="filter-pill-tag active">
+                  <span>{selectedKuadran.split("(")[0].trim()}</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedKuadran("Semua Kuadran");
+                    }}
+                    title="Hapus filter kuadran"
+                    className="pill-remove-btn"
+                  >
+                    &times;
+                  </button>
+                </span>
+              )}
+
+              {selectedPalette !== "Viridis" && (
+                <span className="filter-pill-tag">
+                  <i className="fa-solid fa-palette"></i>
+                  <span>{selectedPalette}</span>
+                </span>
+              )}
+            </div>
+          </div>
+
+          <div className="filter-bar-compact-right">
+            {hasActiveFilter && (
               <button
-                className="btn-secondary"
-                onClick={() => setAdvancedFilterOpen(true)}
-                title="Lihat status dan kriteria filter lengkap"
-              >
-                <i className="fa-solid fa-sliders"></i>
-                <span>Filter Lanjutan</span>
-              </button>
-              <button
-                className="btn-secondary"
+                className="btn-reset-compact"
                 onClick={resetFilters}
                 title="Reset semua filter ke kondisi awal"
+                type="button"
               >
-                <i className="fa-solid fa-arrow-rotate-left"></i>
+                <i className="fa-solid fa-rotate-left"></i>
                 <span>Reset</span>
               </button>
-            </div>
+            )}
           </div>
         </div>
 
@@ -6534,50 +6493,177 @@ export default function Home() {
           </div>
         )}
 
-        {/* Advanced Filter Modal */}
-        {advancedFilterOpen && (
-          <div className="modal-backdrop" onClick={() => setAdvancedFilterOpen(false)}>
-            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+        {/* Filter Popup Modal */}
+        {filterModalOpen && (
+          <div className="modal-backdrop" onClick={() => setFilterModalOpen(false)}>
+            <div className="modal-dialog filter-modal-dialog" onClick={(e) => e.stopPropagation()}>
               <div className="modal-header">
                 <div className="modal-title">
-                  <i className="fa-solid fa-sliders" style={{ marginRight: "8px" }}></i>
-                  Pengaturan Filter Lanjutan
+                  <i className="fa-solid fa-sliders" style={{ marginRight: "8px", color: "#60A5FA" }}></i>
+                  Pengaturan Filter &amp; Parameter Analisis
                 </div>
-                <button className="modal-close-btn" onClick={() => setAdvancedFilterOpen(false)}>
+                <button
+                  className="modal-close-btn"
+                  onClick={() => setFilterModalOpen(false)}
+                  aria-label="Tutup Pop Up Filter"
+                >
                   &times;
                 </button>
               </div>
-              <div className="modal-body">
-                <div>
-                  <div style={{ fontSize: "12.5px", fontWeight: "700", color: "#0B2F63", marginBottom: "8px" }}>
-                    Status Filter Saat Ini:
+
+              <div className="modal-body filter-modal-body">
+                {/* Tingkat Wilayah */}
+                {activeTab !== "tab-hierarchical" && (
+                  <div className="filter-modal-group">
+                    <label className="filter-modal-label">
+                      <i className="fa-solid fa-map-location-dot" style={{ color: "#1F5FCC", marginRight: "6px" }}></i>
+                      Tingkat Agregasi Wilayah:
+                    </label>
+                    <div className="segmented-control" style={{ width: "100%", height: "38px" }}>
+                      <button
+                        className={`segmented-btn ${selectedTipe === "Kab/Kota" ? "active" : ""}`}
+                        onClick={() => setSelectedTipe("Kab/Kota")}
+                        type="button"
+                      >
+                        <span className="desktop-only">Kabupaten / Kota (514 Wilayah)</span>
+                        <span className="mobile-only">Kab/Kota (514)</span>
+                      </button>
+                      <button
+                        className={`segmented-btn ${selectedTipe === "Provinsi" ? "active" : ""}`}
+                        onClick={() => setSelectedTipe("Provinsi")}
+                        type="button"
+                      >
+                        <span className="desktop-only">Provinsi (38 Wilayah)</span>
+                        <span className="mobile-only">Provinsi (38)</span>
+                      </button>
+                    </div>
                   </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "12px", background: "#F8FAFC", padding: "12px", borderRadius: "6px", border: "1px solid #DDE4EE" }}>
-                    <div>Tingkat Wilayah: <strong>{selectedTipe}</strong></div>
-                    <div>Gugus Pulau: <strong>{selectedPulau}</strong></div>
-                    <div>Provinsi: <strong>{selectedProv}</strong></div>
-                    <div>Kuadran: <strong>{selectedKuadran}</strong></div>
-                    <div>Palet Warna: <strong>{selectedPalette}</strong></div>
-                    <div>Data Terpilih: <strong>{filteredKabkota.length} dari {isProvinsi ? "38" : "514"} Wilayah</strong></div>
+                )}
+
+                {/* Grid 2 Kolom: Pulau & Provinsi */}
+                <div className="filter-modal-grid-2">
+                  <div className="filter-modal-group">
+                    <label className="filter-modal-label">
+                      <i className="fa-solid fa-earth-asia" style={{ color: "#1F5FCC", marginRight: "6px" }}></i>
+                      Gugus Pulau:
+                    </label>
+                    <select
+                      className="filter-select"
+                      value={selectedPulau}
+                      onChange={(e) => {
+                        setSelectedPulau(e.target.value);
+                        setSelectedProv("Semua Provinsi");
+                      }}
+                      style={{ width: "100%", height: "38px" }}
+                    >
+                      <option value="Semua Pulau">Semua Pulau (Nasional)</option>
+                      {[...new Set(allKabkota.map((d) => d.pulau))].map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="filter-modal-group">
+                    <label className="filter-modal-label">
+                      <i className="fa-solid fa-landmark" style={{ color: "#1F5FCC", marginRight: "6px" }}></i>
+                      Provinsi:
+                    </label>
+                    <select
+                      className="filter-select"
+                      value={selectedProv}
+                      onChange={(e) => setSelectedProv(e.target.value)}
+                      style={{ width: "100%", height: "38px" }}
+                    >
+                      {availableProvs.map((p) => (
+                        <option key={p} value={p}>
+                          {p}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
-                <div style={{ display: "flex", gap: "10px", marginTop: "10px", justifyContent: "flex-end" }}>
-                  <button
-                    className="btn-secondary"
-                    onClick={resetFilters}
+                {/* Kuadran Tipologi */}
+                <div className="filter-modal-group">
+                  <label className="filter-modal-label">
+                    <i className="fa-solid fa-chart-pie" style={{ color: "#1F5FCC", marginRight: "6px" }}></i>
+                    Tipologi Kuadran Gender (Ekonomi vs Keputusan):
+                  </label>
+                  <select
+                    className="filter-select"
+                    value={selectedKuadran}
+                    onChange={(e) => setSelectedKuadran(e.target.value)}
+                    style={{ width: "100%", height: "38px" }}
                   >
-                    <i className="fa-solid fa-rotate-left"></i>
-                    <span>Reset Filter ke Default</span>
-                  </button>
-                  <button
-                    className="btn-export"
-                    onClick={() => setAdvancedFilterOpen(false)}
-                  >
-                    <i className="fa-solid fa-check"></i>
-                    <span>Tutup &amp; Terapkan</span>
-                  </button>
+                    <option value="Semua Kuadran">Semua Kuadran (Tanpa Filter Tipologi)</option>
+                    <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">
+                      Kuadran I — Maju &amp; Seimbang (Ekonomi Tinggi, Keputusan Tinggi)
+                    </option>
+                    <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">
+                      Kuadran II — Representasi Kuat (Ekonomi Rendah, Keputusan Tinggi)
+                    </option>
+                    <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">
+                      Kuadran III — Tertinggal Ganda (Ekonomi Rendah, Keputusan Rendah)
+                    </option>
+                    <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">
+                      Kuadran IV — Pekerja Tanpa Kuasa (Ekonomi Tinggi, Keputusan Rendah)
+                    </option>
+                  </select>
                 </div>
+
+                {/* Palet Warna */}
+                <div className="filter-modal-group">
+                  <label className="filter-modal-label">
+                    <i className="fa-solid fa-palette" style={{ color: "#1F5FCC", marginRight: "6px" }}></i>
+                    Skema Palet Warna (Peta &amp; Heatmap):
+                  </label>
+                  <select
+                    className="filter-select"
+                    value={selectedPalette}
+                    onChange={(e) => setSelectedPalette(e.target.value)}
+                    style={{ width: "100%", height: "38px" }}
+                  >
+                    <option value="Viridis">Viridis — Perseptual Standar BPS (Aman &amp; Akurat)</option>
+                    <option value="Cividis">Cividis — Colorblind-Safe (Ramah Buta Warna)</option>
+                    <option value="Plasma">Plasma — Kontras Hangat (Ungu ke Kuning Terang)</option>
+                    <option value="Turbo">Turbo — Spektrum Pelangi Penuh</option>
+                  </select>
+                </div>
+
+                {/* Dynamic Summary Box */}
+                <div className="filter-modal-summary-box">
+                  <div className="filter-summary-title">
+                    <i className="fa-solid fa-circle-info" style={{ color: "#1F5FCC" }}></i>
+                    <span>Ringkasan Data Terpilih:</span>
+                  </div>
+                  <div className="filter-summary-stats">
+                    <div>Cakupan: <strong>{filteredKabkota.length} dari {isProvinsi ? "38" : "514"} Wilayah</strong></div>
+                    <div>Gugus Pulau: <strong>{selectedPulau}</strong></div>
+                    <div>Provinsi: <strong>{selectedProv}</strong></div>
+                    <div>Tipologi: <strong>{selectedKuadran.split("(")[0].trim()}</strong></div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer filter-modal-footer">
+                <button
+                  className="btn-secondary"
+                  onClick={resetFilters}
+                  type="button"
+                >
+                  <i className="fa-solid fa-rotate-left"></i>
+                  <span>Reset Default</span>
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={() => setFilterModalOpen(false)}
+                  type="button"
+                >
+                  <i className="fa-solid fa-check"></i>
+                  <span>Terapkan Filter ({filteredKabkota.length} Wilayah)</span>
+                </button>
               </div>
             </div>
           </div>

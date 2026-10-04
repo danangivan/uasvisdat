@@ -108,6 +108,10 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
   outline-offset: 2px;
 }
 
+.mobile-only {
+  display: none !important;
+}
+
 /* ==========================================================================
    Main App Layout: Persistent Left Sidebar + Main Viewport
    ========================================================================== */
@@ -137,7 +141,18 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
   user-select: none;
   overflow-y: auto;
   overflow-x: hidden;
-  transition: transform 0.25s ease, width 0.25s ease;
+  transition: transform 0.25s ease, width 0.25s ease, min-width 0.25s ease;
+}
+
+.sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  border-right: none !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -324,6 +339,37 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
   gap: 16px;
 }
 
+.header-left-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.header-hamburger-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-color);
+  background: #FFFFFF;
+  color: var(--navy-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+  transition: var(--transition-fast);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.header-hamburger-btn:hover {
+  background: var(--blue-surface);
+  color: var(--blue-primary);
+  border-color: var(--blue-border);
+}
+
 /* Breadcrumb */
 .header-breadcrumb {
   display: flex;
@@ -432,9 +478,9 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 }
 
 /* ==========================================================================
-   Sticky Horizontal Filter Bar
+   Compact 1-Button Filter Bar (Sticky)
    ========================================================================== */
-.filter-bar-sticky {
+.filter-bar-compact {
   position: sticky;
   top: 0;
   z-index: 800;
@@ -443,30 +489,170 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
   box-shadow: 0 2px 4px rgba(16, 24, 40, 0.03);
   padding: 10px 28px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.filter-bar-mobile-header {
-  display: none;
-}
-
-.filter-bar-inner {
-  display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  width: 100%;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.filter-bar-left {
+.filter-bar-compact-left {
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
   flex: 1;
+  min-width: 0;
 }
 
+.filter-bar-compact-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Single Filter Trigger Button */
+.btn-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px;
+  background: #FFFFFF;
+  border: 1.5px solid var(--blue-primary);
+  border-radius: var(--radius-sm);
+  color: var(--navy-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(31, 95, 204, 0.12);
+  flex-shrink: 0;
+}
+
+.btn-filter-trigger:hover {
+  background: var(--blue-surface);
+  border-color: var(--blue-hover);
+  color: var(--blue-hover);
+  box-shadow: 0 2px 6px rgba(31, 95, 204, 0.2);
+}
+
+.btn-filter-trigger.has-active {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border-color: #2563EB;
+  color: #1D4ED8;
+}
+
+.btn-filter-trigger i.fa-sliders {
+  font-size: 13px;
+  color: var(--blue-primary);
+}
+
+.filter-chevron-icon {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: 2px;
+  transition: transform 0.2s ease;
+}
+
+.btn-filter-trigger:hover .filter-chevron-icon {
+  transform: translateY(1px);
+  color: var(--blue-primary);
+}
+
+.filter-badge-counter {
+  background: #2563EB;
+  color: #FFFFFF;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  letter-spacing: 0.2px;
+}
+
+.filter-badge-default {
+  background: #F1F5F9;
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+/* Quick Filter Status Pills */
+.filter-status-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.filter-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.filter-pill-tag.active {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  color: #1E40AF;
+  font-weight: 600;
+}
+
+.pill-remove-btn {
+  border: none;
+  background: transparent;
+  color: #64748B;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.pill-remove-btn:hover {
+  color: #EF4444;
+}
+
+.btn-reset-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  border-radius: var(--radius-sm);
+  color: #DC2626;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.btn-reset-compact:hover {
+  background: #FEE2E2;
+  border-color: #F87171;
+}
+
+/* Keep .filter-item and .filter-label for backward compat / modals */
 .filter-item {
   display: flex;
   align-items: center;
@@ -1250,6 +1436,98 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
   gap: 14px;
 }
 
+/* Filter Pop-up Modal Styling */
+.filter-modal-dialog {
+  max-width: 620px;
+  width: 95%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 20px 40px -8px rgba(10, 25, 47, 0.3);
+  animation: modalScaleIn 0.18s ease-out;
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.filter-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 24px;
+  max-height: 72vh;
+  overflow-y: auto;
+}
+
+.filter-modal-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-modal-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #334155;
+  display: flex;
+  align-items: center;
+}
+
+.filter-modal-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.filter-modal-summary-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.filter-summary-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--navy-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  font-size: 11.5px;
+  color: #64748B;
+}
+
+.filter-summary-stats strong {
+  color: #0F172A;
+}
+
+.filter-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 24px;
+  background: #F8FAFC;
+  border-top: 1px solid var(--border-color);
+}
+
 /* ==========================================================================
    Responsive Adaptations
    ========================================================================== */
@@ -1310,20 +1588,33 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
 
   /* Header Mobile Optimization */
   .global-header {
-    padding: 12px 14px 10px 14px;
+    padding: 10px 14px 10px 14px;
     gap: 8px;
   }
   .header-top-row {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 12px;
+    gap: 10px;
+    width: 100%;
+  }
+  .header-left-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+  }
+  .header-hamburger-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 15px;
+    flex-shrink: 0;
   }
   .header-breadcrumb {
     flex: 1;
     min-width: 0;
-    font-size: 12px;
+    font-size: 11.5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1332,160 +1623,113 @@ button:focus-visible, select:focus-visible, input:focus-visible, a:focus-visible
     display: none;
   }
   .header-right-meta {
-    display: contents;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
   .header-actions-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    order: 2;
+    gap: 6px;
   }
   .header-chips-row {
-    order: 3;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-  .meta-chip {
-    font-size: 10px;
-    padding: 3px 8px;
+    display: none;
   }
 
   /* Compact Title Block */
   .header-title-block {
     margin-top: 2px;
-    gap: 4px;
+    gap: 3px;
   }
   .header-title-main {
-    font-size: 15.5px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1.35;
     letter-spacing: -0.2px;
   }
   .header-title-sub {
-    font-size: 11.5px;
-    line-height: 1.45;
+    font-size: 11px;
+    line-height: 1.4;
   }
 
-  /* Filter Bar Mobile */
-  .filter-bar-sticky {
+  /* Compact 1-Button Filter Bar Mobile */
+  .filter-bar-compact {
     padding: 8px 14px;
     gap: 8px;
   }
-  .filter-bar-mobile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+  .filter-bar-compact-left {
     width: 100%;
-  }
-  .filter-mobile-summary {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    min-width: 0;
-  }
-  .filter-mobile-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-primary);
-  }
-  .filter-mobile-pill {
-    font-size: 10.5px;
-    font-weight: 600;
-    color: #1F5FCC;
-    background: #EFF6FF;
-    border: 1px solid #BFDBFE;
-    padding: 1px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 130px;
-  }
-  .btn-filter-toggle {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 8px;
-    background-color: var(--bg-card-subtle);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--navy-primary);
-    cursor: pointer;
-    flex-shrink: 0;
-  }
-  .filter-bar-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    padding-top: 4px;
-  }
-  .filter-bar-sticky.mobile-collapsed .filter-bar-inner {
-    display: none;
-  }
-  .filter-bar-left {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 10px;
-    width: 100%;
-  }
-  .filter-item {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 3px;
-    width: 100%;
-    min-width: 0;
-  }
-  .filter-item.filter-item-full {
-    grid-column: 1 / -1;
-  }
-  .filter-label {
-    font-size: 10.5px;
-    font-weight: 600;
-    color: #64748B;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-  .filter-select {
-    width: 100%;
-    height: 36px;
-    font-size: 12px;
-    padding: 0 24px 0 8px;
-    border-radius: 6px;
-    text-overflow: ellipsis;
-  }
-  .segmented-control {
-    width: 100%;
-    display: flex;
-    height: 36px;
-  }
-  .segmented-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 6px;
-    font-size: 11.5px;
-  }
-  .filter-bar-right {
-    width: 100%;
-    display: flex;
     gap: 8px;
   }
-  .filter-bar-right .btn-secondary {
-    flex: 1;
-    height: 34px;
+  .btn-filter-trigger {
+    width: 100%;
+    height: 38px;
+    justify-content: space-between;
+    padding: 0 12px;
+    font-size: 12.5px;
+  }
+  .filter-status-pills {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+  .filter-pill-tag {
+    font-size: 11px;
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+  .filter-bar-compact-right {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .btn-reset-compact {
+    width: 100%;
     justify-content: center;
-    font-size: 11.5px;
+  }
+
+  /* Filter Modal Responsive */
+  .filter-modal-dialog {
+    max-width: 95vw;
+    width: 95vw;
+    margin: 10px auto;
+    max-height: 88vh;
+  }
+  .filter-modal-body {
+    padding: 14px 16px;
+    gap: 14px;
+    max-height: 65vh;
+  }
+  .filter-modal-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .filter-summary-stats {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+  .filter-modal-footer {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .filter-modal-footer button {
+    width: 100%;
+    justify-content: center;
   }
   .desktop-only {
     display: none !important;
+  }
+  .mobile-only {
+    display: inline !important;
   }
 
   /* Subtabs Navigation Touch Friendly */
