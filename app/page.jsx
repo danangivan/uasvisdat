@@ -1732,6 +1732,7 @@ function VizLegendIslandSummary({ isProvinsi }) {
 export default function Home() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(true);
   const [allKabkota, setAllKabkota] = useState([]);
   const [allProvinsi, setAllProvinsi] = useState([]);
   const [nasionalStats, setNasionalStats] = useState({});
@@ -3970,37 +3971,41 @@ export default function Home() {
           <div className="header-top-row">
             <div className="header-breadcrumb">
               <i className="fa-solid fa-house" style={{ fontSize: "11px" }}></i>
-              <span>Portal Analitik STIS</span>
-              <span className="breadcrumb-separator">/</span>
-              <span>Disparitas Gender 2024</span>
-              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-extra">Portal Analitik STIS</span>
+              <span className="breadcrumb-separator breadcrumb-extra">/</span>
+              <span className="breadcrumb-extra">Disparitas Gender 2024</span>
+              <span className="breadcrumb-separator breadcrumb-extra">/</span>
               <span className="breadcrumb-active">{currentModule.label}</span>
             </div>
 
             <div className="header-right-meta">
-              <span className="meta-chip primary">
-                <i className="fa-regular fa-calendar" style={{ fontSize: "11px" }}></i>
-                Tahun Data: 2024
-              </span>
-              <span className="meta-chip">
-                <i className="fa-solid fa-map-pin" style={{ fontSize: "11px" }}></i>
-                514 Kab/Kota &bull; 38 Provinsi
-              </span>
-              <button
-                className="header-icon-btn"
-                title="Panduan &amp; Bantuan"
-                onClick={() => setHelpModalOpen(true)}
-                aria-label="Buka Panduan"
-              >
-                <i className="fa-solid fa-circle-question"></i>
-              </button>
-              <button
-                className="header-icon-btn mobile-only"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                aria-label="Buka Menu"
-              >
-                <i className="fa-solid fa-bars"></i>
-              </button>
+              <div className="header-chips-row">
+                <span className="meta-chip primary">
+                  <i className="fa-regular fa-calendar" style={{ fontSize: "11px" }}></i>
+                  Tahun Data: 2024
+                </span>
+                <span className="meta-chip">
+                  <i className="fa-solid fa-map-pin" style={{ fontSize: "11px" }}></i>
+                  514 Kab/Kota &bull; 38 Provinsi
+                </span>
+              </div>
+              <div className="header-actions-row">
+                <button
+                  className="header-icon-btn"
+                  title="Panduan &amp; Bantuan"
+                  onClick={() => setHelpModalOpen(true)}
+                  aria-label="Buka Panduan"
+                >
+                  <i className="fa-solid fa-circle-question"></i>
+                </button>
+                <button
+                  className="header-icon-btn mobile-only"
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  aria-label="Buka Menu"
+                >
+                  <i className="fa-solid fa-bars"></i>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -4015,127 +4020,161 @@ export default function Home() {
         </header>
 
         {/* Sticky Horizontal Filter Bar */}
-        <div className="filter-bar-sticky">
-          <div className="filter-bar-left">
-            {/* Filter Pulau */}
-            <div className="filter-item">
-              <span className="filter-label">Pulau:</span>
-              <select
-                className="filter-select"
-                value={selectedPulau}
-                onChange={(e) => {
-                  setSelectedPulau(e.target.value);
-                  setSelectedProv("Semua Provinsi");
-                }}
-              >
-                <option value="Semua Pulau">Semua Pulau</option>
-                {[...new Set(allKabkota.map((d) => d.pulau))].map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
+        <div className={`filter-bar-sticky ${mobileFilterOpen ? "mobile-expanded" : "mobile-collapsed"}`}>
+          {/* Mobile Filter Toggle Header */}
+          <div className="filter-bar-mobile-header mobile-only">
+            <div className="filter-mobile-summary">
+              <i className="fa-solid fa-sliders" style={{ color: "#1F5FCC", fontSize: "12px" }}></i>
+              <span className="filter-mobile-title">Filter &amp; Wilayah</span>
+              <span className="filter-mobile-pill">
+                {selectedPulau !== "Semua Pulau"
+                  ? selectedPulau
+                  : selectedTipe === "Kab/Kota"
+                  ? "514 Kab/Kota"
+                  : "38 Provinsi"}
+              </span>
+              {hasActiveFilter && (
+                <span className="filter-badge-counter">Aktif</span>
+              )}
             </div>
-
-            {/* Filter Provinsi */}
-            <div className="filter-item">
-              <span className="filter-label">Provinsi:</span>
-              <select
-                className="filter-select"
-                value={selectedProv}
-                onChange={(e) => setSelectedProv(e.target.value)}
-              >
-                {availableProvs.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Segmented Control Tingkat Wilayah */}
-            {activeTab !== "tab-hierarchical" && (
-              <div className="filter-item">
-                <span className="filter-label">Tingkat:</span>
-                <div className="segmented-control">
-                  <button
-                    className={`segmented-btn ${selectedTipe === "Kab/Kota" ? "active" : ""}`}
-                    onClick={() => setSelectedTipe("Kab/Kota")}
-                  >
-                    Kab/Kota (514)
-                  </button>
-                  <button
-                    className={`segmented-btn ${selectedTipe === "Provinsi" ? "active" : ""}`}
-                    onClick={() => setSelectedTipe("Provinsi")}
-                  >
-                    Provinsi (38)
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Filter Kuadran Tipologi */}
-            <div className="filter-item">
-              <span className="filter-label">Kuadran:</span>
-              <select
-                className="filter-select"
-                value={selectedKuadran}
-                onChange={(e) => setSelectedKuadran(e.target.value)}
-              >
-                <option value="Semua Kuadran">Semua Kuadran</option>
-                <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">
-                  Kuadran I (Maju &amp; Seimbang)
-                </option>
-                <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">
-                  Kuadran II (Representasi Kuat)
-                </option>
-                <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">
-                  Kuadran III (Tertinggal Ganda)
-                </option>
-                <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">
-                  Kuadran IV (Pekerja Tanpa Kuasa)
-                </option>
-              </select>
-            </div>
-
-            {/* Palet Warna */}
-            <div className="filter-item">
-              <span className="filter-label">Palet:</span>
-              <select
-                className="filter-select"
-                value={selectedPalette}
-                onChange={(e) => setSelectedPalette(e.target.value)}
-              >
-                <option value="Viridis">Viridis (Perseptual)</option>
-                <option value="Cividis">Cividis (Colorblind-Safe)</option>
-                <option value="Plasma">Plasma (Kontras)</option>
-                <option value="Turbo">Turbo (Spektrum)</option>
-              </select>
-            </div>
+            <button
+              className="btn-filter-toggle"
+              onClick={() => setMobileFilterOpen(!mobileFilterOpen)}
+              type="button"
+              aria-label="Toggle Filter Panel"
+            >
+              <span>{mobileFilterOpen ? "Sembunyikan" : "Sesuaikan"}</span>
+              <i
+                className={`fa-solid ${
+                  mobileFilterOpen ? "fa-chevron-up" : "fa-chevron-down"
+                }`}
+                style={{ fontSize: "10px" }}
+              ></i>
+            </button>
           </div>
 
-          <div className="filter-bar-right">
-            {hasActiveFilter && (
-              <span className="filter-badge-counter">
-                Filter Aktif
-              </span>
-            )}
-            <button
-              className="btn-secondary"
-              onClick={() => setAdvancedFilterOpen(true)}
-              title="Lihat status dan kriteria filter lengkap"
-            >
-              <i className="fa-solid fa-sliders"></i>
-              <span>Filter Lanjutan</span>
-            </button>
-            <button
-              className="btn-secondary"
-              onClick={resetFilters}
-              title="Reset semua filter ke kondisi awal"
-            >
-              <i className="fa-solid fa-arrow-rotate-left"></i>
-              <span>Reset</span>
-            </button>
+          <div className="filter-bar-inner">
+            <div className="filter-bar-left">
+              {/* Filter Pulau */}
+              <div className="filter-item">
+                <span className="filter-label">Pulau:</span>
+                <select
+                  className="filter-select"
+                  value={selectedPulau}
+                  onChange={(e) => {
+                    setSelectedPulau(e.target.value);
+                    setSelectedProv("Semua Provinsi");
+                  }}
+                >
+                  <option value="Semua Pulau">Semua Pulau</option>
+                  {[...new Set(allKabkota.map((d) => d.pulau))].map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Filter Provinsi */}
+              <div className="filter-item">
+                <span className="filter-label">Provinsi:</span>
+                <select
+                  className="filter-select"
+                  value={selectedProv}
+                  onChange={(e) => setSelectedProv(e.target.value)}
+                >
+                  {availableProvs.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Segmented Control Tingkat Wilayah */}
+              {activeTab !== "tab-hierarchical" && (
+                <div className="filter-item filter-item-full">
+                  <span className="filter-label">Tingkat Wilayah:</span>
+                  <div className="segmented-control">
+                    <button
+                      className={`segmented-btn ${selectedTipe === "Kab/Kota" ? "active" : ""}`}
+                      onClick={() => setSelectedTipe("Kab/Kota")}
+                    >
+                      Kab/Kota (514)
+                    </button>
+                    <button
+                      className={`segmented-btn ${selectedTipe === "Provinsi" ? "active" : ""}`}
+                      onClick={() => setSelectedTipe("Provinsi")}
+                    >
+                      Provinsi (38)
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Filter Kuadran Tipologi */}
+              <div className="filter-item">
+                <span className="filter-label">Kuadran:</span>
+                <select
+                  className="filter-select"
+                  value={selectedKuadran}
+                  onChange={(e) => setSelectedKuadran(e.target.value)}
+                >
+                  <option value="Semua Kuadran">Semua Kuadran</option>
+                  <option value="Kuadran I (Ekonomi Tinggi, Keputusan Tinggi)">
+                    Kuadran I (Maju &amp; Seimbang)
+                  </option>
+                  <option value="Kuadran II (Ekonomi Rendah, Keputusan Tinggi)">
+                    Kuadran II (Representasi Kuat)
+                  </option>
+                  <option value="Kuadran III (Ekonomi Rendah, Keputusan Rendah)">
+                    Kuadran III (Tertinggal Ganda)
+                  </option>
+                  <option value="Kuadran IV (Ekonomi Tinggi, Keputusan Rendah)">
+                    Kuadran IV (Pekerja Tanpa Kuasa)
+                  </option>
+                </select>
+              </div>
+
+              {/* Palet Warna */}
+              <div className="filter-item">
+                <span className="filter-label">Palet:</span>
+                <select
+                  className="filter-select"
+                  value={selectedPalette}
+                  onChange={(e) => setSelectedPalette(e.target.value)}
+                >
+                  <option value="Viridis">Viridis (Perseptual)</option>
+                  <option value="Cividis">Cividis (Colorblind-Safe)</option>
+                  <option value="Plasma">Plasma (Kontras)</option>
+                  <option value="Turbo">Turbo (Spektrum)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="filter-bar-right">
+              {hasActiveFilter && (
+                <span className="filter-badge-counter desktop-only">
+                  Filter Aktif
+                </span>
+              )}
+              <button
+                className="btn-secondary"
+                onClick={() => setAdvancedFilterOpen(true)}
+                title="Lihat status dan kriteria filter lengkap"
+              >
+                <i className="fa-solid fa-sliders"></i>
+                <span>Filter Lanjutan</span>
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={resetFilters}
+                title="Reset semua filter ke kondisi awal"
+              >
+                <i className="fa-solid fa-arrow-rotate-left"></i>
+                <span>Reset</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -4327,31 +4366,36 @@ export default function Home() {
               className={`subtab-btn ${activeGeoSubtab === "geo-subtab-kabkota-boundary" ? "active" : ""}`}
               onClick={() => setActiveGeoSubtab("geo-subtab-kabkota-boundary")}
             >
-              Peta Batas Kab/Kota (Shapefile GeoJSON)
+              <i className="fa-solid fa-draw-polygon" style={{ marginRight: "6px" }}></i>
+              Peta Batas Kab/Kota
             </button>
             <button
               className={`subtab-btn ${activeGeoSubtab === "geo-subtab-heatmap" ? "active" : ""}`}
               onClick={() => setActiveGeoSubtab("geo-subtab-heatmap")}
             >
-              Peta Heatmap Spasial
+              <i className="fa-solid fa-fire" style={{ marginRight: "6px" }}></i>
+              Heatmap Spasial
             </button>
             <button
               className={`subtab-btn ${activeGeoSubtab === "geo-subtab-choropleth" ? "active" : ""}`}
               onClick={() => setActiveGeoSubtab("geo-subtab-choropleth")}
             >
-              Peta Choropleth Provinsi (34/38 Prov)
+              <i className="fa-solid fa-layer-group" style={{ marginRight: "6px" }}></i>
+              Choropleth Provinsi
             </button>
             <button
               className={`subtab-btn ${activeGeoSubtab === "geo-subtab-proportional" ? "active" : ""}`}
               onClick={() => setActiveGeoSubtab("geo-subtab-proportional")}
             >
-              Peta Simbol Proporsional (514 Kab/Kota)
+              <i className="fa-solid fa-circle-dot" style={{ marginRight: "6px" }}></i>
+              Simbol Proporsional
             </button>
             <button
               className={`subtab-btn ${activeGeoSubtab === "geo-subtab-lisa" ? "active" : ""}`}
               onClick={() => setActiveGeoSubtab("geo-subtab-lisa")}
             >
-              Peta Klaster Spasial LISA (Moran&apos;s I)
+              <i className="fa-solid fa-chart-area" style={{ marginRight: "6px" }}></i>
+              Klaster LISA
             </button>
           </div>
 
@@ -5032,25 +5076,29 @@ export default function Home() {
               className={`subtab-btn ${activeMultiSubtab === "multi-subtab-pca" ? "active" : ""}`}
               onClick={() => setActiveMultiSubtab("multi-subtab-pca")}
             >
-              PCA Biplot (Reduksi Dimensi)
+              <i className="fa-solid fa-diagram-project" style={{ marginRight: "6px" }}></i>
+              PCA Biplot
             </button>
             <button
               className={`subtab-btn ${activeMultiSubtab === "multi-subtab-parcoords" ? "active" : ""}`}
               onClick={() => setActiveMultiSubtab("multi-subtab-parcoords")}
             >
-              Parallel Coordinates (Brushing)
+              <i className="fa-solid fa-bars-staggered" style={{ marginRight: "6px" }}></i>
+              Parallel Coordinates
             </button>
             <button
               className={`subtab-btn ${activeMultiSubtab === "multi-subtab-heatmap" ? "active" : ""}`}
               onClick={() => setActiveMultiSubtab("multi-subtab-heatmap")}
             >
-              Clustered Correlation Heatmap
+              <i className="fa-solid fa-table-cells" style={{ marginRight: "6px" }}></i>
+              Korelasi Heatmap
             </button>
             <button
               className={`subtab-btn ${activeMultiSubtab === "multi-subtab-radar" ? "active" : ""}`}
               onClick={() => setActiveMultiSubtab("multi-subtab-radar")}
             >
-              Radar Profile Chart
+              <i className="fa-solid fa-compass-drafting" style={{ marginRight: "6px" }}></i>
+              Profil Radar
             </button>
           </div>
 
@@ -5210,19 +5258,22 @@ export default function Home() {
               className={`subtab-btn ${activeHierSubtab === "hier-subtab-treemap" ? "active" : ""}`}
               onClick={() => setActiveHierSubtab("hier-subtab-treemap")}
             >
+              <i className="fa-solid fa-chart-pie" style={{ marginRight: "6px" }}></i>
               Treemap Interaktif
             </button>
             <button
               className={`subtab-btn ${activeHierSubtab === "hier-subtab-sunburst" ? "active" : ""}`}
               onClick={() => setActiveHierSubtab("hier-subtab-sunburst")}
             >
+              <i className="fa-solid fa-circle-notch" style={{ marginRight: "6px" }}></i>
               Sunburst Chart
             </button>
             <button
               className={`subtab-btn ${activeHierSubtab === "hier-subtab-summary" ? "active" : ""}`}
               onClick={() => setActiveHierSubtab("hier-subtab-summary")}
             >
-              Rangkuman Hierarki per Pulau
+              <i className="fa-solid fa-list-check" style={{ marginRight: "6px" }}></i>
+              Rangkuman Pulau
             </button>
           </div>
 
