@@ -3898,17 +3898,23 @@ export default function Home() {
         aria-hidden="true"
       />
 
-      {/* Persistent Left Sidebar (240px wide) */}
+      {/* Persistent Left Sidebar (~260px wide) */}
       <aside className={`sidebar ${mobileMenuOpen ? "open" : ""}`}>
         <div className="sidebar-brand-box">
           <img
             src="/logo_stis.webp"
             alt="Logo Politeknik Statistika STIS"
             className="sidebar-logo"
+            width={38}
+            height={38}
           />
           <div className="sidebar-brand-text">
-            <span className="sidebar-brand-title">Politeknik Statistika STIS</span>
-            <span className="sidebar-brand-sub">Visualisasi Data &amp; Informasi</span>
+            <span className="sidebar-brand-title" title="Politeknik Statistika STIS">
+              Politeknik Statistika STIS
+            </span>
+            <span className="sidebar-brand-sub" title="Visualisasi Data & Informasi">
+              Visualisasi Data &amp; Informasi
+            </span>
           </div>
         </div>
 
