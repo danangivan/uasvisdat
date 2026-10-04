@@ -37,3 +37,11 @@ Desktop.ini
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Makalah & dokumen lokal (tidak diunggah ke GitHub)
+makalah/
+public/makalah/
+Jurnal/
+*.pdf
+*.docx
+
