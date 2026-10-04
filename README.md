@@ -9,7 +9,7 @@
 
 Repositori ini memuat kode sumber, aset visualisasi, arsitektur data terolah (GeoJSON dan JSON), serta dokumentasi komprehensif dari platform visualisasi analitik interaktif berbasis web untuk mengeksplorasi disparitas spasial keterlibatan perempuan di 514 kabupaten/kota dan 38 provinsi di Indonesia. Proyek ini dikembangkan untuk Ujian Akhir Semester (UAS) mata kuliah Visualisasi Data dan Informasi, Program Studi Komputasi Statistik, Politeknik Statistika STIS, Tahun Akademik 2025/2026.
 
-* **Penyusun:** Danang Ivan Pangestu (NIM: 222313036 / Kelas: 3SI1)
+* **Penyusun:** Danang Ivan Pangestu (NIM: 222313036 / Kelas: 3SD2)
 * **Program Studi:** D-IV Komputasi Statistik, Politeknik Statistika STIS
 * **Dosen Pengampu:** Siti Mariyah, Ph.D. & Farid Ridho, M.T.
 * **Tautan Aplikasi Publik (Vercel):** [https://disparitasperempuan.vercel.app](https://disparitasperempuan.vercel.app)
